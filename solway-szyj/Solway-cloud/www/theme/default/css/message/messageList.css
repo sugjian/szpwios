@@ -1,0 +1,23 @@
+@CHARSET "UTF-8";
+#systems{
+	        -webkit-appearance: none;height: 50px;appearance:none;
+    margin: 0;
+    background: #1c2b36 url(../../img/realStatistics/select-down.png) no-repeat;
+    display: inline-block;
+    background-position: right center;
+    background-size: 8px;
+    padding-right: 10px;
+}
+.fault-name{font-size:17px;}
+.fault-status{font-size:12px;}
+.fault-description{font-size:13px;    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;}
+.noteSearchPage{display:none;}
+.noteDetailPage{display:none;}
+.detail-total{
+    position: fixed;
+    z-index: 99;
+    background: rgb(242,246,249);
+    width: 100%;}

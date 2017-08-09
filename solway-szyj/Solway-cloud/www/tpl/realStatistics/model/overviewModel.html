@@ -1,0 +1,553 @@
+<link rel="stylesheet" href="theme/default/css/realStatistics/overviewModel.css">
+<div ng-controller="overviewModelCtrl" class="overflow-auto">
+	<h3 class="h-title">报警统计</h3>
+	
+	<div class="statistics clearfix">
+		<div class="pull-left circle-con">
+			<div ng-show="allNormal" class="all-normal">
+				全部正常运行
+			</div>
+			<div ng-show="allNormal == false" class="alarm-circle">
+				<div>报警变电站</div>
+				<div class="alarm-color">{{alarmNum|dataNullFilter}}</div>
+				<hr></hr>
+				<div>{{totalSubstationsNum|dataNullFilter}}</div>
+				<div>变电站总数</div>
+			</div>
+		</div>
+		<div class="pull-left station-num"  ng-show="allNormal">
+			<p class="num normal-color">{{totalSubstationsNum|dataNullFilter}}</p>
+			<p class="num-tip">变电站总数</p>
+		</div>
+		<div class="pull-left station-num clearfix"  ng-show="allNormal == false">
+			<div class="pull-left">
+				<p class="num alarm-color">{{shortcircuitNum}}</p>
+				<p class="num-tip">短路故障</p>
+			</div>
+			<div class="pull-left">
+				<p class="num alarm-color">{{groundFaultNum}}</p>
+				<p class="num-tip">接地故障</p>
+			</div>
+		</div>
+		<div class="loader" id="loadFlagOver" ng-show="allNormal == undefined" style="top:110px;">
+		    <div class="loader-inner ball-beat overview-load">
+		      <div></div>
+		      <div></div>
+		      <div></div>
+		    </div>
+	 	 </div>
+	</div>
+	<h3 class="h-title">报警列表</h3>
+	<div class="alarm-list">
+		<div class="no-list" ng-show="allNormal">
+			<div><img src="theme/default/img/realStatistics/no-alert.png"></div>
+			<p>目前没有未处理报警</p>
+		</div>
+		<div class="has-list" ng-hide="allNormal">
+			<div class="alarm clearfix" ng-repeat="item in alertListData" ng-click="toDetailPage(item.systemId,item.id)">
+				<div class="col-xs-12 tr1" >
+					<div class="col-xs-10 no-padder">
+          				{{returnStationName(item.systemId,item.dcuId)}}
+			        </div>
+				</div>
+				<div class="col-xs-12 tr2 no-padder" >
+					<div class="col-xs-2 no-padder" style="line-height: 50px;text-align:center;">
+          				<img src="theme/default/img/realStatistics/warn-35-100.png" ng-show="item.alarmType==100">
+          				<img src="theme/default/img/realStatistics/warn-35-101.png" ng-show="item.alarmType==101">
+			        </div>
+			        <div class="col-xs-10 no-padder">
+				        <div class="col-xs-12 no-padder">
+				         	<p class="col-xs-6 no-padder">{{map[item.alarmType]}}</p>
+				          	<p class="col-xs-6 no-padder" style="font-size:12px;">{{replaceTime(item.time) | date:'yyyy-MM-dd hh:mm:ss'}}</p>
+				        </div>
+			        	<p class="col-xs-12 no-padder remark">{{item.remark}}</p>
+			        </div>
+			        
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<toaster-container toaster-options="{'position-class': 'toast-top-right', 'close-button':true}"></toaster-container>
+<script>
+
+	app.controller('overviewModelCtrl',function($scope,$q, $http, $state,$rootScope,toaster) {
+			var windowH = $(window).height();
+			var windowW= $(window).width();
+			
+			$(".overflow-auto").height(windowH-165);
+			
+			$rootScope.refreshShow = true;
+			
+			//监听刷新事件
+			$scope.$on('loadData', function(event, data) {
+				$scope.getAlarmDetail();
+				init();
+			});
+			
+			//故障map对照表
+			$scope.map = {};
+			
+			$scope.getAlarmDetail = function(){
+				$http({
+					method : "GET",
+					url : ctx+"solway/getAlarmConfig"
+				}).success(function(msg) {
+					var map = msg.data;
+					alarmConfig = msg.data;
+					for(var i = 0;i<map.length;i++){
+						$scope.map[map[i].alarmType] = map[i].alarmDetail;
+						alarmConfigMap[map[i].alarmType] = map[i];
+					} 
+				});
+			}
+			$scope.getAlarmDetail();
+			
+			//报警详情页
+			$scope.toDetailPage = function(sysId,id){
+				storage["active"] = "alarm";
+				$state.go("noteList",{sysId:sysId,alarmId:id});
+			}
+			var dataIsSuccess = true;
+			function parseOverViewData(resolve) { 
+				var powerSupplys = JSON.parse(storage["powerSupplys"]);
+				if(powerSupplys && powerSupplys.length>0){
+					var msgAll = [];
+					var num = 0;
+					for(var i=0;i<powerSupplys.length;i++){
+						(function(i){
+							var address = powerSupplys[i].address;
+							var gdjId = powerSupplys[i].gdjId;
+							var userId = powerSupplys[i].userId;
+							$http({
+								type: "GET",
+								url: address+"api/v1/area/allForApp",
+								timeout : 20000,
+								params : {
+									'userId':userId,
+									'gdjId':gdjId,
+								}
+								})
+								.success(function (result) {
+									msgAll[i] = result;
+									num++;
+									if(num == powerSupplys.length){
+										for(var j=0;j<msgAll.length;j++){
+											//遍历
+											var msg = msgAll[j];
+											if(!msg || msg.code != '0'){
+												dataIsSuccess = false;
+												continue;
+											}
+											var nodes = msg.data.nodes;
+											var nodesMapFirst = {};
+											//该供电局下所有节点的信息,key存deviceid
+											var nodesMapAll = {};
+											//该供电局下所有节点的信息,key存id
+											var nodesIdMapAll = {};
+											//该供电局下所有电力线的信息
+											var powerLinesMapAll = {};
+											//该供电局下所有节点type=2的数据,key存bdzid
+											var nodesMapAllBDZ = {};
+											if(nodes){
+												for(var sNum=0;sNum<nodes.length;sNum++){
+													var node = {};
+													node["name"] = nodes[sNum].dxgNo;
+													node["id"] = nodes[sNum].id;
+													node["type"] = nodes[sNum].type;
+													node["deviceId"] = nodes[sNum].deviceId;
+													node["mxId"] = nodes[sNum].mxId;
+													node["nodeNo"] = nodes[sNum].nodeNo;
+													//列表显示时只取节点类型等于3的电流测量节点,暂时取消
+													//if(nodes[sNum].type == 3){
+														var pId = nodes[sNum].dlxId;
+														if(nodesMapFirst[pId]){
+															nodesMapFirst[pId].push(node);
+														}else{
+															nodesMapFirst[pId] = [node];
+														}
+													//}
+													
+													var node2 = {};
+													node2["name"] = nodes[sNum].dxgNo;
+													node2["id"] = nodes[sNum].id;
+													node2["bdzId"] = nodes[sNum].bdzId;
+													node2["dlxId"] = nodes[sNum].dlxId;
+													node2["mxId"] = nodes[sNum].mxId;
+													node2["type"] = nodes[sNum].type;
+													node2["positionX"] = nodes[sNum].positionX;
+													node2["positionY"] = nodes[sNum].positionY;
+													node2["dxgNo"] = nodes[sNum].dxgNo;
+													//nextNodes中存的是 为nodeNo，即该电力线中的no
+													node2["nextNodes"] = nodes[sNum].nextNodes;
+													node2["nextDcuId"] = nodes[sNum].nextDcuId;
+													node2["nodeNo"] = nodes[sNum].nodeNo;
+													node2["deviceId"] = nodes[sNum].deviceId;
+													node2["textPosition"] = nodes[sNum].textPosition;
+													node2["latitude"] = nodes[sNum].latitude;
+													node2["longitude"] = nodes[sNum].longitude;
+													
+													//多个node的id可能同一个deviceId,防止重复放node
+													if(nodes[sNum].type == 2){
+														if(!nodesMapAll[nodes[sNum].deviceId]){
+															if(nodesMapAllBDZ[nodes[sNum].bdzId]){
+																nodesMapAllBDZ[nodes[sNum].bdzId].push(node);
+															}else{
+																nodesMapAllBDZ[nodes[sNum].bdzId]= [node];
+															}
+														}
+													}
+													
+													if(nodes[sNum].deviceId != 0){
+														nodesMapAll[nodes[sNum].deviceId] = node2;
+													}
+													nodesIdMapAll[nodes[sNum].id] = node2;
+													
+												}
+											}
+											
+											//遍历母线,得到母线和变电站的关系
+											var parentPowerLines = msg.data.parentPowerLines;
+											var parentPowerLinesMapFirst = {};
+											var bdzAndPPLMap = {};
+											if(parentPowerLines){
+												for(var sNum=0;sNum<parentPowerLines.length;sNum++){
+													var bdzId = parentPowerLines[sNum].parentId;
+													var plId = parentPowerLines[sNum].id;
+													var node = {"id":plId,"name":parentPowerLines[sNum].name,"bdzId":bdzId};
+													parentPowerLinesMapFirst[plId] = node;
+													if(bdzAndPPLMap[bdzId]){
+														bdzAndPPLMap[bdzId].push({"id":plId,"name":parentPowerLines[sNum].name});
+													}else{
+														bdzAndPPLMap[bdzId] = [{"id":plId,"name":parentPowerLines[sNum].name}];
+													}
+												}
+											}
+											
+											//遍历
+											var powerLines = msg.data.powerLines;
+											var powerLinesMapFirst = {};
+											var powerLinesMapFirst = {};
+											//母线和线路的关系
+											var parentLineAndplListMap = {};
+											if(powerLines){
+												for(var sNum=0;sNum<powerLines.length;sNum++){
+													var node = {};
+													node["name"] = powerLines[sNum].name;
+													node["id"] = powerLines[sNum].id;
+													var pId = powerLines[sNum].parentId;
+													var ppId = parentPowerLinesMapFirst[pId].bdzId;
+													node["bdzId"] = ppId;
+													node["mxId"] = pId;
+													if(powerLinesMapFirst[ppId]){
+														powerLinesMapFirst[ppId].push(node);
+													}else{
+														powerLinesMapFirst[ppId] = [node];
+													}
+													
+													
+													//存母线和线路的关系
+													if(parentLineAndplListMap[pId]){
+														var node2 = {};
+														node2["name"] =powerLines[sNum].name;
+														node2["id"] = powerLines[sNum].id;
+														node2["bdzId"] = ppId;
+														parentLineAndplListMap[pId].powerLines.push(node2);
+													}else{
+														var node = {};
+														node["name"] = parentPowerLinesMapFirst[pId].name;
+														node["id"] = parentPowerLinesMapFirst[pId].id;
+														node["bdzId"] = ppId;
+														var node2 = {};
+														node2["name"] =powerLines[sNum].name;
+														node2["id"] = powerLines[sNum].id;
+														node["powerLines"] = [node2];
+														parentLineAndplListMap[pId] = node;
+													}
+													
+												}
+											}
+											
+											var substationsList = [];
+											var substationsMap = {};
+											
+											//遍历区域
+											var regionsMap = {};
+											
+											//遍历变电站
+											var substations = msg.data.substations;
+											var substationsList = [];
+											
+											if(substations){
+												for(var sNum=0;sNum<substations.length;sNum++){
+													var powerLinesList = [];
+													//var powerLinesMap = {};
+													var substationId = substations[sNum].id;
+													var powerLines = powerLinesMapFirst[substationId];
+													//if(!powerLines) continue;
+													if(powerLines){
+														for(var pNum=0;pNum<powerLines.length;pNum++){
+															
+															var powerLinesId = powerLines[pNum].id;
+															var nodes = nodesMapFirst[powerLinesId];
+															var nodesList = [];
+															//if(!nodes) continue;
+															if(nodes){
+																for(var nNum=0;nNum<nodes.length;nNum++){
+																	var node = {};
+																	node["name"] = nodes[nNum].name;
+																	node["id"] = nodes[nNum].id;
+																	node["type"] = nodes[nNum].type;
+																	node["deviceId"] = nodes[nNum].deviceId;
+																	node["nodeNo"] = nodes[nNum].nodeNo;
+																	nodesList.push(node);
+																}
+															}
+															var pl = {};
+															pl["id"] =  powerLines[pNum].id;
+															pl["name"] =  powerLines[pNum].name;
+															powerLinesList.push(pl);
+															
+															var pl2 = {};
+															pl2["id"] =  powerLines[pNum].id;
+															pl2["name"] =  powerLines[pNum].name;
+															pl2["nodes"] = nodesList;
+															pl2["bdzId"] = powerLines[pNum].bdzId;
+															pl2["mxId"] = powerLines[pNum].mxId;
+															powerLinesMapAll[powerLines[pNum].id] = pl2;
+														}	
+													}
+													//变电站列表中数据
+													var st = {};
+													st["id"] =  substationId;
+													st["name"] =  substations[sNum].name;
+													st["no"] =  substations[sNum].no;
+													st["longitude"] =  substations[sNum].longitude;
+													st["latitude"] =  substations[sNum].latitude;
+													st["parentId"] =  substations[sNum].parentId;
+													st["systemId"] =  powerSupplys[j].systemId;
+													
+													substationsList.push(st);
+													//电站map中数据
+													var st2 = {};
+													st2["id"] =  substationId;
+													st2["name"] =  substations[sNum].name;
+													st2["no"] =  substations[sNum].no;
+													st2["longitude"] =  substations[sNum].longitude;
+													st2["latitude"] =  substations[sNum].latitude;
+													st2["powerLines"] = powerLinesList;
+													st2["parentPowerLines"] = bdzAndPPLMap[substationId];
+													st2["zeroNodes"] = nodesMapAllBDZ[substationId];
+													st2["parentId"] =  substations[sNum].parentId;
+													
+													//st2["powerLinesMap"] = powerLinesMap;
+													substationsMap[substations[sNum].id] = st2;
+													
+													//区域与电站的关系
+													if(regionsMap[substations[sNum].parentId]){
+														regionsMap[substations[sNum].parentId].push(st);
+													}else{
+														var sList = [st];
+														regionsMap[substations[sNum].parentId] = sList;
+													}
+												}
+												
+											}
+											
+											//遍历区域
+											var regionsList = msg.data.regions;
+											var regins = [];
+											var reginsM = [];
+											for(var k=0;k<regionsList.length;k++){
+												var reg = {};
+												reg["id"] =  regionsList[k].id;
+												reg["name"] =  regionsList[k].name;
+												reg["parentId"] =  regionsList[k].parentId;
+												regins.push(reg);
+												
+												var reg2 = {};
+												reg2["id"] =  regionsList[k].id;
+												reg2["name"] =  regionsList[k].name;
+												reg2["parentId"] =  regionsList[k].parentId;
+												reg2["substations"] = regionsMap[regionsList[k].id];
+												reginsM[regionsList[k].id] = reg2;
+											}
+											
+											var gdj = {};
+											gdj["id"] =  powerSupplys[j].gdjId;
+											gdj["name"] =  msg.data.powerAuthority.name;
+											gdj["substations"] = substationsList;
+											gdj["substationsMap"] = substationsMap;
+											gdj["nodesMap"] = nodesMapAll;
+											gdj["nodesIdMap"] = nodesIdMapAll;
+											gdj["powerLinesMap"] = powerLinesMapAll;
+											gdj["parentPowerLinesMap"] = parentLineAndplListMap;
+											gdj["regions"] = regins;
+											gdj["regionsMap"] = reginsM;
+											
+											gdj["all"] = msg;
+											overViewData[powerSupplys[j].systemId] = gdj;
+											
+										}
+										console.log(overViewData);
+										resolve("");
+									}
+									
+									
+								}).error(function(msg){
+									dataIsSuccess = false;
+									resolve("");
+								});
+						})(i);
+						
+					
+					}
+				}
+				
+			}
+			init();
+			function init(){
+				var overviewResults = [],overviewNodes = [];
+				var overviewFlag = 0,alarmFlag = 0; //标志当前请求成功的序号
+				var powerSupplys = JSON.parse(storage["powerSupplys"]);
+				 $q.all([getOverViewData(), getAlarmData()]).then(function (results) {
+					 if(!dataIsSuccess){
+						 toaster.pop('error', '', '数据获取失败!');
+					 }
+					 $scope.totalSubstationsNum = 0;
+					 for(var key in overViewData){
+						 $scope.totalSubstationsNum += overViewData[key].substations.length;
+					 }
+					 alarmResults = results[1];
+					 if(alarmResults && alarmResults.length>0){//若有报警信息，则显示报警相关信息，渲染列表等
+						 $scope.allNormal = false;
+						 renderAlarm(alarmResults);
+					 }else{
+						 $scope.allNormal = true;
+					 }
+					 endLoad();
+					 //表示已经登录成功
+					 initLogin = 1;
+					 if(hasMessage){
+						 hasMessage = false;
+						 $('#confimModal').modal({backdrop: 'static', keyboard: false});
+					 }
+				 });
+			}
+			
+			
+			 
+			 var _getOverViewDataPromise;
+			 function getOverViewData(){
+				 _getOverViewDataPromise = $q(function (resolve, reject) {
+					 /*var isLogin = storage["isLogin"];
+					 //重新登录后再查询一遍概览数据
+					  if(isLogin == 1){
+						 console.log(111000111)
+						 parseOverViewData(resolve);
+						 storage["isLogin"] = 0;
+					 }else{
+						 resolve(""); 
+					 }*/
+					 parseOverViewData(resolve);
+			     });
+				 //
+			     return _getOverViewDataPromise;
+			 }
+			 
+			 var _getAlarmDataPromise;
+			 function getAlarmData(){
+				 _getAlarmDataPromise = $q(function (resolve, reject) {
+					 var alarmResults = [],alarmFlag = 0;
+					 var powerSupplys = JSON.parse(storage["powerSupplys"]);
+					 if(powerSupplys && powerSupplys.length>0){
+						//报警信息
+						for(var i = 0;i<powerSupplys.length;i++){
+							(function(i){
+								var date = new Date();
+								var currentD = date.getDate();
+								$http({
+									method : "GET",
+									url : powerSupplys[i].address+"api/v1/alarm/search_alarmlist",
+									params : {
+										'userId':powerSupplys[i].userId,
+										'gdjId':powerSupplys[i].gdjId,
+										'startTime':new Date(date.setDate(currentD-30)).format('yyyy-MM-dd HH:mm:ss'),
+										'alarmType':'100,101',
+										'status':0
+									},
+									timeout : 20000
+								}).success(function(msg) {
+									if(i==0){
+										//msg = {"data":[{"id":857790,"position":1,"dcuId":1,"rtc":1,"time":"2016-11-02T13:05:30Z","address":"11","alarmType":100,"millis":10,"status":0,"result":"三相短路","remark":"实验室变-实验线#1杆和#10杆之间","modifier":null,"sample":4400,"modifyDate":"2016-08-12T16:37:49Z"}],"start":0,"limit":20,"total":1,"code":"0","message":"ok"};
+									}
+									if(msg.code == '0'){//将有报警的数据拼接到一个数组
+										for(var k=0;k<msg.data.length;k++){
+											msg.data[k]["systemId"] = powerSupplys[i].systemId;
+										}
+										alarmResults = alarmResults.concat(msg.data);
+									}
+									
+									//
+									
+									alarmFlag += 1;
+									if(alarmFlag == powerSupplys.length){
+										resolve(alarmResults);
+									}
+								}).error(function(msg) {
+									resolve("");
+								});
+							})(i);
+						}
+						
+					  }
+			     });
+
+			     return _getAlarmDataPromise;
+			 }
+			
+			//渲染报警信息
+			function renderAlarm(alarmList){
+				console.log(alarmList)
+				//按时间排序
+				alarmList.sort(sortBy("time"));
+				$scope.alertListData = alarmList;
+				//获取有故障的变电站数量
+				var bdzMap ={};
+				for(var i=0;i<alarmList.length;i++){
+					var systemId = alarmList[i].systemId;
+					var dcuId = alarmList[i].dcuId;
+					var bdzId = overViewData[systemId].nodesMap[dcuId].bdzId;
+					bdzMap[systemId +"_" + bdzId] = "1";
+				}
+				$scope.alarmNum = Object.keys(bdzMap).length;
+				
+				$scope.shortcircuitNum = 0;
+				$scope.groundFaultNum = 0;
+				for(var i = 0;i<alarmList.length;i++){
+					if(alarmList[i].alarmType == 100){
+						$scope.shortcircuitNum += 1;
+					}
+					if(alarmList[i].alarmType == 101){
+						$scope.groundFaultNum += 1;
+					}
+				}
+			}
+			
+			//获取电站名称函数
+			$scope.returnStationName = function(systemId,dcuId){
+				
+				var bdzId = overViewData[systemId].nodesMap[dcuId].bdzId;
+				return overViewData[systemId].substationsMap[bdzId].name;
+				
+			}
+			
+			$scope.replaceTime = function(time){
+				
+				return time.replace("T"," ").replace("Z"," ");
+				
+			}
+	});
+	
+</script>
+		

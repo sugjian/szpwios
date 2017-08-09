@@ -1,0 +1,148 @@
+<!-- footer -->
+<div class="navbar col-xs-12 no-padder  navbar-fixed-bottom" style="z-index: 98;" ng-controller="footCtrl">
+	<ul class="nav col-xs-12 no-padder text-center bg-black"
+		style="height: 50px;background-color: rgb(41, 55, 66);border-top: 1px solid #2e3c46;">
+		
+		<li class="col-xs-3 no-padder"  ng-click="showActive('realSta')" ng-class="{'active':tabActive == 'realSta'}">
+            <a ui-sref="app.realStatistics">
+                <img src="./theme/default/img/icon/foot-antenna1@2x.png" class="v-middle"  style="width:20px;height: 20px"/>
+                <div class="text-1-2x">实时监控</div>
+            </a>
+		</li>
+		<li class="col-xs-3 no-padder"  ng-click="showActive('historySta')" ng-class="{'active':tabActive == 'historySta'}">
+			<a ui-sref="app.historySta">
+				<img src="./theme/default/img/icon/historical-statistics.png" class="v-middle"  style="width:20px;height: 20px"/>
+				<div class="text-1-2x">历史统计</div>
+			</a>
+		</li>
+		<li class="col-xs-3 no-padder"  ng-click="showActive('alarm')" ng-class="{'active':tabActive == 'alarm'}">
+			<a ui-sref="noteList">
+				<img src="./theme/default/img/icon/top-ringer@2x.png" class="v-middle"  style="width:14px;height: 20px"/>
+				<span class="badge badge-sm up bg-danger pull-right-xs" id="noticeCount1"></span>
+				<div class="text-1-2x">报警中心</div>
+			</a>
+		</li>
+		 <li class="col-xs-3 no-padder"  ng-click="showActive('personalCenter')" ng-class="{'active':tabActive == 'personalCenter'}">
+         	<a ui-sref="userList">
+        	  	<img src="./theme/default/img/icon/top-user@2x.png" class="v-middle"  style="width:16px;height: 20px">
+        	  	<div class="text-1-2x">个人中心</div>
+			</a>
+          </li>
+	</ul>
+</div>
+<script type="text/javascript">
+
+app.controller('footCtrl',function($scope, $http,$stateParams,$rootScope,$state) {
+	$scope.showActive = function(flag){
+		switch(flag){
+			case "realSta" : storage["active"] = "realSta"
+					break;
+			case "historySta" : storage["active"] = "historySta"
+				break;
+			case "alarm" : storage["active"] = "alarm"
+				break;
+			case "personalCenter" : storage["active"] = "personalCenter"
+				break;
+		}
+		init();
+	}
+	init();
+	function init(){
+		var flag = storage["active"];
+		switch(flag){
+			case "realSta" : $scope.tabActive = "realSta";
+					break;
+			case "historySta" :  $scope.tabActive = "historySta";
+				break;
+			case "alarm" : $scope.tabActive = "alarm";
+				break;
+			case "personalCenter" : $scope.tabActive = "personalCenter";
+				break;
+		}
+		if(!flag) {
+			$scope.tabActive = "realSta"; 
+			storage["active"] = "realSta";
+		}
+	}
+	
+	$scope.$on("refreshViewChild",
+	    function (event, msg) {
+		console.log(100000000000);
+			$scope.showActive(msg.view);
+	 	}
+	);
+	$scope.getNoteCount=function(){
+		 var alarmResults = [],alarmFlag = 0;
+		 var powerSupplys = JSON.parse(storage["powerSupplys"]);
+		 if(powerSupplys && powerSupplys.length>0){
+			//报警信息
+			for(var i = 0;i<powerSupplys.length;i++){
+				(function(i){
+					var date = new Date();
+					var currentD = date.getDate();
+					$http({
+						method : "GET",
+						url : powerSupplys[i].address+"api/v1/alarm/search_alarmlist",
+						params : {
+							'userId':powerSupplys[i].userId,
+							'gdjId':powerSupplys[i].gdjId,
+							'startTime':new Date(date.setDate(currentD-30)).format('yyyy-MM-dd HH:mm:ss'),
+							'alarmType':'100,101',
+							'status':0
+						},
+						timeout : 20000
+					}).success(function(msg) {
+						if(msg.code == '0'){//将有报警的数据拼接到一个数组
+							alarmResults[i]=msg.data.length;
+						}else{
+							alarmResults[i] = 0;
+						}
+						
+						alarmFlag += 1;
+						if(alarmFlag == powerSupplys.length){
+							var msg=0;
+							for(var k=0;k<alarmResults.length;k++){
+								msg +=alarmResults[k];
+							}
+							if(msg>0){
+			       				$("#noticeCount1").html(msg);
+			       			}else{
+			       				$("#noticeCount1").html("");
+			       			}
+						}
+					});
+				})(i);
+			}
+			
+		  }
+	}
+	
+	$scope.getNoteCount2=function(){
+		$http({
+			method : "GET",
+			url : ctx+"solway/selectNoReadMessage",
+			params : {
+				'userName':storage["userName"]
+			},
+			timeout : 20000
+		})
+		.success(function (msg) {
+			if(msg && msg.data>0){
+   				$("#noticeCount1").html(msg.data);
+   			}else{
+   				$("#noticeCount1").html("");
+   			}
+		});
+	}
+	
+	
+	var timeTicket = setInterval(function (){
+		$scope.getNoteCount2();
+	},5000);
+	$scope.getNoteCount2();
+	//离开当前界面
+	$scope.$on('$stateChangeStart', function(event) {
+		clearInterval(timeTicket);
+	})
+});
+</script>

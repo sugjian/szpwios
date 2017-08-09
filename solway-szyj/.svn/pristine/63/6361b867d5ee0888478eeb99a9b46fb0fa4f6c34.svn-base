@@ -1,0 +1,157 @@
+<link rel="stylesheet" href="./theme/default/css/mui.css" type="text/css" />
+<div class="col-xs-12 no-padder"ng-controller="stationGroupCtrl">
+<div class="navbar-header bg-black app-header navbar ng-scope"id="distUserNav">
+	<ul class="nav col-xs-12 no-padder nav-top"  >
+          <li class="col-xs-3 no-padder" ui-sref-active="active">
+          	<a ui-sref="userList">
+          		<img src="./theme/default/img/icon/top-back@2x.png" class="v-middle m-t-xs img_goBack">
+          	</a>
+           </li>
+          <li class="col-xs-6 no-padder text-center">
+          	<a href="" class="text-1-8x m-t-xs">
+          		电站组
+          	</a>
+           </li>
+          <li class="col-xs-3 no-padder">   
+        	  <a id='promptBtn' class="text-1-5x m-t-xs pull-right">
+          		<i class="glyphicon glyphicon-plus m-r-sm" ng-click="creStat()"></i>
+          		<i class="glyphicon glyphicon-trash" ng-click="removeStatGroup()"></i>
+          	  </a>
+          </li>
+        </ul>
+</div>
+		<center class="col-xs-12" ng-show="stationList.length=='0'" style="margin-top:25%">
+			<img src="./theme/default/img/nostation.png" style="width: 50%"/>
+			<div></div>
+			<button type="button" class="btn btn-success m-t-md" style="border-radius:5px; padding: 6px 25px;" ng-click="creStat()">创建组</button>
+		</center>
+		<div ng-show="stationList!=null" class="col-xs-12  list-div  m-b-1 bg-writer  col-d" ng-click="showDetail(station.id,station.groupName)" ng-class="{'m-t':{{$index}}=='0'}" ng-repeat="station in stationList">
+			<span class="text-1-5x " ng-bind="station.groupName">工程一期</span> 
+			<span class="pull-right ">
+               <span class="text-1-3x" ng-bind="station.powerStation.length"></span> 
+               <i class="text-1-5x m-l-xs m-r-xs fa fa-angle-right"></i>
+			</span>
+		</div>
+		
+	<!-- 模态框（Modal） -->
+	<div class="modal  fade" id="creStaModal" tabindex="-1" role="dialog"
+	   aria-labelledby="myModalLabel" aria-hidden="true">
+	   <div class="modal-dialog stationModal" >
+	      <div class="modal-content">
+	         <div class="modal-body col-3 text-center">
+	           	<p class="text-1-6x">添加组</p>
+	           	<p class="text-1-4x">请输入新建组名称</p>
+	           	<input type="text" class="form-control" placeholder="群名称" id="statName">
+	         </div>
+	         <div class="modal-footer no-padder">
+	         	<div class="col-xs-12 no-padder">
+	         		 <div class="col-xs-6 no-padder">
+	         			 <button type="button" class="btn btn-confirm col-xs-12 no-padder"  data-dismiss="modal">取消</button>
+	         		</div>
+	         		<div class="col-xs-6 no-padder text-center">
+		         		<button type="button" class="btn btn-confirm col-xs-12 no-padder btn-confirm-yes "  ng-click="saveStat()">保存
+			            </button>
+	         		</div>
+	         	</div>
+	         </div>
+	      </div><!-- /.modal-content -->
+	</div><!-- /.modal -->
+	</div>
+
+	<!-- 模态框 -->
+	</div>
+<toaster-container toaster-options="{'position-class': 'toast-top-right', 'close-button':true}"></toaster-container>
+<script>
+if(isAndroid){//判断安卓，修改顶部样式
+	$("#distUserNav").addClass("m-t-none");
+}
+
+app.controller('stationGroupCtrl', function ($scope, $http,$state,$stateParams,$rootScope,toaster) {
+	//获得电站列表
+	$scope.getStatList=function(){
+		$http({
+			method : "POST",
+			url : ctx+"/userGroup/listGroup.htm",
+			params : {
+				'roleId':storage["roleId"]
+			}
+			})
+			.success(function (msg) {
+				$scope.stationList=msg.data;				
+			}).error(function(msg){
+				
+			});
+		
+	}
+	$scope.getStatList()
+	$scope.saveStat=function(){
+		$.post(ctx+"/userGroup/updateGroup.htm", {
+			roleId:storage["roleId"],
+			groupName:$("#statName").val()
+		},function(msg){
+			if(msg.key=="0"){
+				toaster.pop("error", '', '网络错误');
+			}else if(msg.key=="1"){
+				toaster.pop("error", '', '没有当前角色');
+			}
+			else if(msg.key=="2"){
+				toaster.pop("error", '', '名称不能为空');
+			}
+			else if(msg.key=="3"){
+				toaster.pop("error", '', '新增失败');
+			}
+			else if(msg.key=="4"){
+				toaster.pop("success", '', '操作成功');
+			}
+			$("#statName").val("")
+			$scope.getStatList()
+			$('#creStaModal').modal('hide');
+		});
+		/* $http({
+			method : "POST",
+			contentType:'utf-8',
+			url : ctx+"/userGroup/updateGroup.htm",
+			params : {
+				roleId:storage["roleId"],
+				groupName:$("#statName").val()
+			}
+			})
+			.success(function (msg) {
+				if(msg.key=="0"){
+					toaster.pop("error", '', '网络错误');
+				}else if(msg.key=="1"){
+					toaster.pop("error", '', '没有当前角色');
+				}
+				else if(msg.key=="2"){
+					toaster.pop("error", '', '名称不能为空');
+				}
+				else if(msg.key=="3"){
+					toaster.pop("error", '', '新增失败');
+				}
+				else if(msg.key=="4"){
+					toaster.pop("success", '', '操作成功');
+				}
+				$("#statName").val("")
+				$scope.getStatList()
+				$('#creStaModal').modal('hide');
+				
+			}).error(function(msg){
+			}); */
+	}
+	$scope.creStat=function(){
+		$('#creStaModal').modal({backdrop: 'static', keyboard: false});
+	}
+	$scope.showDetail=function(id,name){
+		$state.go("stationGroupDetail", {
+			staId : id,
+			stateName:name
+		});
+	}
+	$scope.removeStatGroup=function(){
+		$state.go("removeStationGroup", {
+			staId :$stateParams.staId,
+			stateName:$stateParams.stateName
+		});
+	}
+
+});

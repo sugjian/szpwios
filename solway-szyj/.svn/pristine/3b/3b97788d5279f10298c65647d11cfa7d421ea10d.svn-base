@@ -1,0 +1,183 @@
+<script src="./js/mui.indexedlist.js"></script>
+<link href="./theme/default/css/mui.indexedlist.css" rel="stylesheet" />
+<style>
+	.form-control:focus {
+    border-color: transparent;
+}
+</style>
+<div class="col-xs-12 no-padder"ng-controller="addStationGroupCtrl">
+<div class="navbar-header bg-black app-header navbar ng-scope"id="distUserNav">
+	<ul class="nav col-xs-12 no-padder nav-top"  >
+          <li class="col-xs-3 no-padder" ui-sref-active="active">
+          	<a ng-click="goBack()" class="text-1-6x m-t-xs">
+          		取消
+          	</a>
+           </li>
+          <li class="col-xs-5 no-padder text-center">
+          	<a href="" class="text-1-8x m-t-xs">
+          		<span ng-bind="titleName"></span>
+          	</a>
+           </li>
+          <li class="col-xs-4 no-padder">   
+          	<a ng-show="statList.length>'0'" id='done'class="text-1-6x m-t-xs pull-right" ng-click="finishStita()">
+          		完成
+          	</a>
+          </li>
+        </ul>
+</div>
+		<header class="mui-bar mui-bar-nav hidden">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			
+		</header>
+		<div class="mui-content">
+			<div id='list' class="mui-indexed-list">
+			<!-- 这里是搜索 -->
+				<div class="mui-indexed-list-search mui-input-row mui-search hidden" >
+					<input type="search" class="mui-input-clear mui-indexed-list-search-input form-control" placeholder="搜索电站首字母或名称">
+				</div>
+				<!--<div class="col-xs-12">
+					<input type="search" class="form-control" placeholder="搜索电站首字母或名称">
+				</div>	-->
+				<center class="col-xs-12" ng-show="statList.length=='0'" style="margin-top:25%">
+					<img src="./theme/default/img/noGroup.png" style="width: 50%"/>
+				</center>
+				<div class="mui-indexed-list-bar hidden">
+					<a>A</a>
+					<a>B</a>
+					<a>C</a>
+					<a>D</a>
+					<a>E</a>
+					<a>F</a>
+					<a>G</a>
+					<a>H</a>
+					<a>I</a>
+					<a>J</a>
+					<a>K</a>
+					<a>L</a>
+					<a>M</a>
+					<a>N</a>
+					<a>O</a>
+					<a>P</a>
+					<a>Q</a>
+					<a>R</a>
+					<a>S</a>
+					<a>T</a>
+					<a>U</a>
+					<a>V</a>
+					<a>W</a>
+					<a>X</a>
+					<a>Y</a>
+					<a>Z</a>
+				</div>
+				<div class="mui-indexed-list-alert"></div>
+				<div class="mui-indexed-list-inner">
+					<div class="mui-indexed-list-empty-alert">暂无数据</div>
+					<ul class="mui-table-view">
+						<li data-group="A" class="mui-table-view-divider mui-indexed-list-group hidden" >A</li>
+						<li data-group="K" class="mui-table-view-divider mui-indexed-list-group hidden">K</li>
+						
+						<li ng-repeat="stat in statList" 
+							data-value="KHG" data-tags="KaShi" id="{{stat.id}}" class="mui-table-view-cell mui-indexed-list-item mui-checkbox mui-left">
+							<input type="checkbox"/><span ng-bind="stat.stationName"></span></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+<toaster-container toaster-options="{'position-class': 'toast-top-right', 'close-button':true}"></toaster-container>
+</div>
+<script>
+if(isAndroid){//判断安卓，修改顶部样式
+	$("#distUserNav").addClass("m-t-none");
+}
+app.controller('addStationGroupCtrl', function ($scope, $http,$state,$stateParams,$rootScope,toaster) {
+	
+	$scope.titleName=$stateParams.stateName
+	console.log($scope.titleName)
+	$http({
+		method : "POST",
+		url : ctx+"/userGroup/unGroupBPS.htm",
+		params : {
+			roleId:storage["roleId"]
+		}
+		}).success(function (msg) {
+			$scope.statList=msg.data;
+		}).error(function(msg){
+		});
+	$scope.goBack=function(){
+		$state.go("stationGroupDetail", {
+			staId : $stateParams.staId,
+			stateName:$stateParams.stateName
+		});
+	}
+	$scope.finishStita=function(){
+		
+		var checkboxArray = [].slice.call(list.querySelectorAll('input[type="checkbox"]'));
+		var checkedValues = [];
+		checkboxArray.forEach(function(box) {
+			console.log(box)
+			if (box.checked) {
+				checkedValues.push($(box).parent().attr("id"));
+			}
+		});
+		if(checkedValues.length<0){
+			return false
+		}
+		$http({
+			method : "POST",
+			url : ctx+"/userGroup/updateGroupRel.htm",
+			params : {
+				roleId:storage["roleId"],
+				groupId:$stateParams.staId,
+				pStatIds:checkedValues
+			}
+			})
+			.success(function (msg) {
+				console.log(msg)
+				if(msg.key=="0"){
+					toaster.pop("error", '', '网络错误');
+				}else if(msg.key=="1"){
+					toaster.pop("error", '', '不存在该组');
+				}
+				else if(msg.key=="2"){
+					toaster.pop("error", '', '用户当前无电站权限');
+				}
+				else if(msg.key=="3"){
+					toaster.pop("error", '', '新增失败');
+				}
+				else if(msg.key=="4"){
+					$state.go("stationGroupDetail", {
+						staId : $stateParams.staId,
+						stateName:$stateParams.stateName
+					});
+				}			
+			}).error(function(msg){
+				
+			});
+			}
+			mui.init();
+			mui.ready(function() {
+				var header = document.querySelector('header.mui-bar');
+				var list = document.getElementById('list');
+				var done = document.getElementById('done');
+				//calc hieght
+				list.style.height = (document.body.offsetHeight - header.offsetHeight) + 'px';
+				//create
+				window.indexedList = new mui.IndexedList(list);
+				mui('.mui-indexed-list-inner').on('change', 'input', function() {
+					var count = list.querySelectorAll('input[type="checkbox"]:checked').length;
+					var value = count ? "完成(" + count + ")" : "完成";
+					done.innerHTML = value;
+					if (count) {
+						if (done.classList.contains("mui-disabled")) {
+							done.classList.remove("mui-disabled");
+						}
+					} else {
+						if (!done.classList.contains("mui-disabled")) {
+							done.classList.add("mui-disabled");
+						}
+					}
+				});
+			});
+});
+
+		</script>

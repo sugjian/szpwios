@@ -1,0 +1,48 @@
+<div class="col-xs-12 no-padder" ng-controller="staRedtCtrl">
+<div class="navbar-header bg-black app-header navbar ng-scope"  id="distUserNav">
+	<ul class="nav col-xs-12 no-padder nav-top"  >
+          <li class="col-xs-1 no-padder">
+         	 <a	 data-dismiss="modal" ng-click="closeStatModal()" ><img src="./theme/default/img/icon/top-back@2x.png" class="v-middle m-t-xs img_goBack"></a>
+          </li>
+          <li class="col-xs-10 no-padder text-center">
+          	<a  data-dismiss="modal" ng-click="closeStatModal()" class="text-1-8x">
+          		<span ng-bind="todayTimeForTitle"></span>累计减排
+          	</a>
+           </li>
+          <li class="col-xs-1 no-padder hidden">
+          	<img src="./theme/default/img/share.png" style="width: 25px; margin-top: 12px;"/>
+          </li>
+        </ul>
+		</div>
+		<center class="col-xs-12 " style="margin-top: 25%;">
+				<h3><img src="./theme/default/img/jiangbeixx.png"class="m-t-n-xs" style="width: 20px;"> 减排大师</h3>
+				<img src="./theme/default/img/jiangbei1.png " class="m-t-md" style=" width: 50%;">
+		</center>
+		<div class="bottom-div col-xs-12" >
+			<div class="text-center col-xs-6" style="padding: 5% 0px;border-right: 1px solid #777;">
+				<div class="text-1-4x">碳累计减排</div>
+				<div class="text-3x m-t" style="color:#56a902">
+					<span ng-bind="emissionReduction"></span>
+					<span ng-bind="emissionReductionUnit"></span>
+				</div>
+			</div>
+			<div class="text-center col-xs-6" style="padding:5% 0px">
+				<div class="text-1-4x">植树</div>
+				<div class="text-3x m-t" style="color:#56a902">
+					<span ng-bind="plantedTree"></span>棵
+				</div>
+			</div>
+		</div>
+</div>
+<script>
+if(isAndroid){//判断安卓，修改顶部样式
+	$("#distUserNav").addClass("m-t-none");
+}
+app.controller('staRedtCtrl',function($scope, $http, $state,$rootScope,toaster) {
+	
+	$scope.plantedTree=$rootScope.plantedTree
+	$scope.emissionReduction=$rootScope.emissionReduction
+	$scope.emissionReductionUnit=$rootScope.emissionReductionUnit
+	
+})
+</script>

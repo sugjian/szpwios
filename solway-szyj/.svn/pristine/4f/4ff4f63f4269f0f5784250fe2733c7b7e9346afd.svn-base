@@ -1,0 +1,90 @@
+<div class="col-xs-12 no-padder"  ng-controller="staTodayCtrl" >
+	<div class="navbar-header bg-black app-header navbar ng-scope"  id="distUserNav">
+		<ul class="nav col-xs-12 no-padder nav-top"  >
+          <li class="col-xs-1 no-padder">
+         	 <a	 data-dismiss="modal" ng-click="closeStatModal()" ><img src="./theme/default/img/icon/top-back@2x.png" class="v-middle m-t-xs img_goBack"></a>
+          </li>
+          <li class="col-xs-10 no-padder text-center">
+          	<a class="text-1-8x">
+          		<span ng-bind="mapTimeDay| date:'yyyy/MM/dd'"></span>日发电量
+          	</a>
+           </li>
+          <li class="col-xs-1 no-padder">
+          	
+          </li>
+        </ul>
+	</div>
+<div class="col-xs-12 no-padder rollDiv"style="margin-top:50px;" id="powerList">
+	<center id="nodata" class="m-t-md hidden">暂无数据</center>
+	<div class="col-xs-12 no-padder bg-writer m-t-sm " ng-repeat="one in data.devList">
+		<div class="col-xs-12 wrapper wrapper-l-r-md text-1-4x b-b-5" ng-bind="one.name"></div>
+		<div class="col-xs-6 wrapper wrapper-l-r-md text-center col-d b-r-5">
+			<span class="text-1-2x">发电量</span>
+			<span class="white text-1-4x" ng-bind="one.dayGeneratingPower[0]">-</span>
+			<span class="white text-1-4x" ng-bind="one.dayGeneratingPower[1]">kWh</span>
+		</div>
+		<div class="col-xs-6 wrapper wrapper-l-r-md col-d text-center">
+			<span class="text-1-2x">日收入</span>
+			<span class="white text-1-4x" ng-bind="one.dayGeneratingPowerIncome[0]">-</span>
+			<span class="white text-1-4x" ng-bind="one.dayGeneratingPowerIncome[1]">￥</span>
+		</div>
+	</div>
+</div>
+</div>
+<script>
+	if(isAndroid){//判断安卓，修改顶部样式
+		$("#distUserNav").addClass("m-t-none");
+	}
+	$(".rollDiv").css("height",$(window).height()-50)
+
+	app.controller('staTodayCtrl',function($scope, $http, $state,$rootScope) {
+		//$scope.mapTimeDay   当前时间
+		$scope.powerStationId=JSON.parse(storage["powerStationId"]);//获取电站id 列表
+		
+		if($scope.powerStationId.length>1){
+			//请求组的信息
+			$http({
+				method : "POST",
+				url : ctx+"MobileHmDeviceMonitor/getDayGeneratingPower.htm",
+				params : {
+					'dateString':new Date($scope.mapTimeDay).Format("yyyy/MM/dd/"),
+					'ids':$scope.powerStationId,
+					'idsType':"station"
+					}
+				})
+			.success(function (msg) {
+				if(msg.devList==null|| msg.devList.length<=0){
+					$("#nodata").removeClass("hidden")
+					return
+				}
+				$scope.data=msg;
+			}).error(function(msg){
+				$("#nodata").show();
+				return
+			});
+		}else {
+			//请求电站的信息
+			$http({
+				method : "POST",
+				url : ctx+"MobileHmDeviceMonitor/getDayGeneratingPower.htm",
+				params : {
+					'dateString':$scope.mapTimeDay,
+					'ids':$scope.powerStationId,
+					'idsType':"station_one"
+					}
+				})
+			.success(function (msg) {
+				if(msg==null||msg.devList==null|| msg.devList.length<=0){
+					$("#nodata").removeClass("hidden")
+					return
+				}
+				$scope.data=msg;
+			}).error(function(msg){
+				$("#nodata").show();
+				return
+			});
+			
+		}
+	});
+</script>
+		

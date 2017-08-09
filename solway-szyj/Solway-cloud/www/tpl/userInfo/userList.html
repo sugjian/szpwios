@@ -1,0 +1,125 @@
+<style>
+	.app {
+	    background-color: rgb(40,54,64) !important;
+	}
+</style>
+<toaster-container toaster-options="{'position-class': 'toast-top-right', 'close-button':true}"></toaster-container>
+<div class="navbar-header bg-black app-header navbar ng-scope" id="distUserNav">
+	<ul class="nav col-xs-12 no-padder nav-top"  >
+          <li class="col-xs-3 no-padder">
+        
+          </li>
+          <li class="col-xs-6 no-padder text-center">
+          	<a href="" class="text-1-8x">
+          		个人中心
+          	</a>
+           </li>
+          <li class="col-xs-3 no-padder">
+          	
+          </li>
+        </ul>
+</div>
+<!-- / navbar header -->
+<div class="col-xs-12 no-padder overflow-auto" ng-controller="userListCtrl" >
+	<div class="col-xs-12 no-padder" >
+		<img src="./theme/default/img/bg-img.jpg"style="height: 156px;" class="col-xs-12 no-padder">	
+	</div>
+	<div class="text-center col-xs-12 bg-img" style="margin-top:-140px;">
+		<div class="img-logo"> </div>
+		<p class="m-t-xs m-b-xs text-1-6x" ><span ng-bind="name"></span>
+		<!-- <span ui-sref="userInfo"><i class="fa m-l-xs fa-edit" ></i></span> -->
+		</p>
+		<p class="m-t-xs m-b-xs text-1-4x" ng-bind="tel">13814591897</p>
+	</div>
+	<div class="col-xs-12  bg-writer m-b wrapper-l-r-20">
+		 <div class="col-xs-12  list-div b-w wrapper-l-r-sm " ui-sref="resNoteSet">
+			<span class="text-1-5x ">报警接收设置</span> 
+			<span class="pull-right" >
+				<span class="main-green text-1-3x hidden">接收不提醒</span>
+				<i class="text-1-5x m-l-xs m-r-xs col-d fa fa-angle-right"></i>
+			</span>
+		</div>
+		<div class="col-xs-12  list-div  wrapper-l-r-sm" ui-sref="upPpassword">
+			<span class="text-1-5x">修改密码</span> 
+			<span class="pull-right col-d">
+				<i class="text-1-5x  m-r-xs  fa fa-angle-right"></i>
+			</span>
+		</div>
+	</div> 
+	
+	<div class="col-xs-12  bg-writer m-b wrapper-l-r-20" style="margin-top: 15px;">
+		<div class="col-xs-12  list-div b-w wrapper-l-r-sm hidden">
+			<span class="text-1-5x">检查更新</span> 
+		</div>
+		<div class="col-xs-12  wrapper-l-r-sm " ui-sref="aboutNecloud" style="line-height:46px;">
+			<span class="text-1-5x " >关于APP</span> 
+			<span class="pull-right col-d">
+				<i class="text-1-5x  m-r-xs  fa fa-angle-right"></i>
+			</span>
+		</div>
+	</div>
+	<!-- <div class="navbar  navbar-fixed-bottom ng-scope" ui-view="footer">
+		<button class="col-xs-12 pull-in btn  btn-success padder-v"ui-sref="access.signin" onclick="logOut();">退出系统</button>
+	</div> -->
+	<div class="col-xs-12  m-b-md no-padder" style="margin: 20px 0;">
+  		 	<button class="col-xs-12 btn wrapper-sm bg-op2 btn-success" onclick="getOut();" style="background: rgb(30,91,98);border: transparent;">
+  		 		<span style="font-size:18px;">退出当前用户</span>
+  		 	</button>
+  	</div>
+  	<div id="aboutNecloud" class="mui-popover mui-popover-bottom mui-popover-action ">
+    <!-- 邀请好友 -->
+    <ul class="mui-table-view">
+      <li class="mui-table-view-cell">
+        <a class="text-1-2x">分享好友</a>
+      </li>
+    </ul>
+    <!-- 取消菜单 -->
+    <ul class="mui-table-view">
+      <li class="mui-table-view-cell">
+        <a class="text-1-2x main-green" onclick="aboutNecloud()"><b>取消</b></a>
+      </li>
+    </ul>
+</div> 
+</div>
+<div data-ng-include=" 'tpl/blocks/footer.html' "></div>
+
+<script>
+$(".modal-backdrop").css("display", "none")
+if(isAndroid){//判断安卓，修改顶部样式
+	$("#distUserNav").addClass("m-t-none");
+}
+function aboutNecloud(){
+	mui('#aboutNecloud').popover('toggle');
+}
+var windowH = $(window).height();
+$(".overflow-auto").height(windowH-120);
+
+app.controller('userListCtrl', function ($scope, $http,$state,$stateParams,$rootScope,toaster) {
+	$scope.name=storage["userName"];
+	if($stateParams.message && $stateParams.status){
+		toaster.pop($stateParams.status, '', $stateParams.message);
+	}
+	//$scope.url=storage["pageUrl"];
+});
+function getOut(){
+	//将账号关联的deviceId置空
+	cleanDeviceId();
+	var userList =  storage["userList"];
+	var isAutoLogin =  storage["isAutoLogin"];
+	localStorage.clear();
+	storage["userList"] = userList;
+	storage["isAutoLogin"] = isAutoLogin;
+	window.location.href = "./index.html#/login?deviceToken="
+		+ deviceToken;
+}
+
+function cleanDeviceId(){
+	var userName=storage["userName"];
+	$.ajax({
+		type:"get",
+		url:ctx+"/solway/updateDeviceIdForSolway",
+		data:{'userName' : userName,'deviceId' : null},
+		success:function(msg){}
+	});
+}
+</script>

@@ -1,0 +1,232 @@
+<!-- navbar header -->
+<div class="hbox hbox-auto-xs hbox-auto-sm"
+	ng-init="app.settings.asideFolded = false;app.settings.asideDock = false;">
+	<div ng-controller="basemessageListCtrl">
+		<div class="navbar-header bg-black app-header navbar ng-scope"
+			id="distNoteNav" style="border-bottom: 1px solid #16212a;">
+			<ul class="nav col-xs-12 no-padder nav-top">
+				<li class="col-xs-4" ui-sref-active="active">
+					<img src="./theme/default/img/icon/edit.png" style="width: 20px;"class="m-t" ng-click="creatFault()">
+				</li>
+				<li class="col-xs-4 no-padder text-center">
+					<span class="col-xs-12  no-padder text-2x m-t-sm" ng-init="falultTab.activeTab=1">
+						<a class="col-xs-12 no-padder"  href="javascript:;" class="text-1-2x">我的消息</a>
+					</span>
+				</li>
+				<!-- 搜索 -->
+				<li class="col-xs-4 ">
+					<div class="pull-right text-1-8x m-t" ng-click="searchNote()"><i class="iocn icon-magnifier"></i></div>
+				</li>
+			</ul> 
+		</div>
+		<!-- / navbar header -->
+
+		<div id="noteWrapper">
+			<div id="scroller">
+				<div id="scroller-pullDown">
+					<span id="pullDown-msg" class="pull-down-msg"> <img
+						src="./theme/default/img/loading.gif" style="width: 16px;" class="m-r-xs" />加载中..
+					</span>
+				</div>
+				<div id="scroller-content">
+					<div class="tab-content tab-bordered" id="noteList">
+						<div class="tab-panel" ng-show="falultTab.activeTab ==1">
+							<img src="./theme/default/img/nodata.png" class="tipImg hidden" id="tipImg">
+							<div class="col-xs-12 bg-writer no-padder">
+								<div  class="col-xs-12 "ng-repeat="note in basemessage"ng-click="showNoteList({{note.mid}})">
+									<div class="col-xs-12 padder-v padder-no b-w" style="min-height:100px;">
+										<div class="col-xs-5 no-padder " ng-show="tabIndex!=1">
+											<span ng-show="note.musid_real!=null">
+												<img src="./theme/default/img/icon/people.png" class="zoom-5 m-t-n m-r-xs">
+											</span>
+											<span class="text-1-7x opa-7"ng-show="note.musid_real==null">
+												<img src="./theme/default/img/icon/gear.png" class="zoom-5 m-t-n m-r-xs">
+											</span>
+											<span class="text-1-7x opa-7"ng-bind="note.musname"></span>
+										</div>
+										<div class="col-xs-7 no-padder">
+											<span class="pull-right opa-8 text-1-3x">
+												<span class="m-r-xs" ng-bind="note.ct|dateFilter"></span>
+												<small ng-if="note.mhs=='00'" class="handle1">
+													待确认
+												</small>
+												<small ng-if="note.mhs=='01'" class="handle1">
+													待受理
+												</small>
+												<small ng-if="note.mhs=='02'" class="handle2">
+													待处理
+												</small>
+												<small ng-if="note.mhs=='03'" class="handle3">
+													已关闭
+												</small>
+												<small ng-if="note.mhs=='04'" class="handle3">
+													被确认
+												</small>
+											</span>
+										</div>
+										<div class="col-xs-11 no-padder opa-5 text-1-5x">
+											<span data-ng-bind-html="note.mc|limitTo : 42"></span>
+											<span ng-if="note.mc.length >42">...</span>
+										</div>
+										<div class="col-xs-1 no-padder" ng-if="note.unread_num>0">
+											<!-- 这个数字是指有几个没有读取的数据 -->
+											<span class="pull-right badge bg-danger" ng-bind="note.unread_num">-</span>
+										</div>
+										<div class="col-xs-12 no-padder" >
+											<small ng-bind="note.lusname"></small>
+											<small ng-if="note.lusname!=null" class="m-r-xs">:</small>
+											<small data-ng-bind-html="note.lc|limitTo : 42"></small>
+											<small ng-if="note.lc.length >42">...</small>
+										</div>
+									</div>
+								</div>
+								<div id="flagDiv" class="col-xs-12 no-padder"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div data-ng-include=" 'tpl/blocks/footer.html' "></div>
+<!-- 页脚 -->
+<toaster-container
+	toaster-options="{'position-class': 'toast-top-full-width', 'close-button':true,'time-out':5000000}">
+</toaster-container>
+<script>
+	if (isAndroid) {//判断安卓，修改顶部样式
+		$("#distNoteNav").addClass("m-t-none");
+	}
+	app.controller('basemessageListCtrl',function($scope, $http, $state, $stateParams, toaster) {
+		$scope.url = storage["pageUrl"];
+		var userId;
+		var page = 0;
+		var totalPage = 0;
+		var li_index = 1;    //tab 切换
+		var messageUrl;
+		
+		//记录上次跳转的tab 切换页。
+		if ($stateParams.li_index) {
+			li_index = $stateParams.li_index;
+			if ($stateParams.li_index == "undefined") {
+				li_index = 1;
+			}
+			if (li_index == 1) {//我收的
+				readstatus = '';
+				handstatus = '0';
+			} else if (li_index == 2) {//我发的
+				readstatus = '0';
+				handstatus = '';
+			} 
+		}
+		
+		//下拉刷新
+		var myScroll
+		myScroll = new IScroll('#noteWrapper', {
+			probeType : 3,
+			mouseWheel : true,
+			click : true//是否屏蔽点击事件
+		});
+		
+		myScroll.on("slideDown", function() {
+			if (this.y > 60) {
+				$scope.basemessage = [];
+				page = 0;
+				totalPage = 0;
+				$scope.getNoteList(li_index);
+			}
+		});
+		
+		//上拉加载新数据
+		myScroll.on("slideUp", function() {
+			$scope.getNoteList(li_index);
+		});
+		
+		$scope.basemessage = [];
+		$scope.getNoteList = function(li_status) {
+			//获取关键词
+			var keyWord=""
+			//console.log($stateParams.keyWord)
+			if($stateParams.keyWord){
+				keyWord=$stateParams.keyWord
+			}
+			li_index = li_status;//改变上面tab 切换的选中状态
+			$("#li" + li_index).addClass("active");
+			$("#li" + li_index).siblings().removeClass("active");
+			
+			if(li_status=="2"){//模拟我发送的消息
+				$scope.basemessage = [];
+				page = 0;
+				//totalPage = 0;
+				messageUrl="BaseMessage/getBaseMessageList.htm"
+			}else if(li_status=="1"){
+				messageUrl="BaseMessage/getBaseMessageList.htm"
+			}
+			
+			if(page+1>totalPage&&totalPage!=0){
+				return false;
+			}
+			toaster.pop("wait", '', '正在加载...');
+			$.ajax({
+				type : "POST",
+				url : ctx + "Login/getLoginUser.htm",
+				success : function(msg) {
+					userId = msg.userId;
+					$http({
+						method : "POST",
+						url : ctx+messageUrl,
+						params : {
+							pageSize : 8,
+							pageIndex : page,
+							searchKey:keyWord,
+							listTab:0,//
+						//是否处理完成
+							}
+						}).success(function(result) {
+							if(result.data.length<=0){
+								$("#tipImg").removeClass("hidden")
+							}
+							page = result.pageIndex + 1;
+							totalPage = result.totalPage;
+							if (result.data) {
+								$scope.basemessage = $scope.basemessage.concat(result.data);
+								 if (document.body.offsetHeight - 92 > $scope.basemessage.length * 100 + 60) {
+									$("#noteList").height(document.body.offsetHeight - 92);
+								} else {
+									$("#noteList").height($scope.basemessage.length * 100 + 60);
+								} 
+							}
+							toaster.setBody("更新完成");
+							toaster.clear();
+							myScroll.refresh();
+						})
+							.error(
+								function() {
+									toaster.setBody("更新完成");
+									myScroll.refresh();
+									toaster.clear();
+							});
+						}
+					});
+		}
+
+		$scope.getNoteList(li_index); //第一次进入装载数据
+
+		$scope.showNoteList = function(id) {
+			$state.go("access.taskList", {
+				id : id,
+				li_index : li_index
+			});
+		}
+		$scope.creatFault = function() {
+			$state.go("access.faultTask", {
+				li_index : li_index
+			});
+		}
+		$scope.searchNote = function() {
+			$state.go("noteSerach");
+		}
+
+	});
+</script>

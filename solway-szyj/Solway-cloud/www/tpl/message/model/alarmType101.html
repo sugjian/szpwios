@@ -1,0 +1,491 @@
+<style>
+.curves{    border-top: 1px solid rgb(207,207,207);
+    margin-top: 10px;
+    padding-top: 10px;}
+    h4{text-indent:10px;
+    padding-bottom: 10px;}
+    p.nodeName{margin: 10px 15px ;}
+</style>
+<div ng-controller="alarmCurrentModelCtrl" >
+	<div class="clearfix" style="border-bottom: 1px solid rgb(207,207,207);">
+		<div class="pull-left">
+			<p style="padding-left: 10px;padding-top: 10px;"><span style="font-size:13px;">{{s_time|dataNullFilter}}</span></p>
+			<h4>{{result|dataNullFilter}}</h4>
+		</div>
+		<div class="pull-right" style="margin: 15px;">
+			<span ng-click="goBig()" class="bigger" ng-show="largestFlag == 2">
+				<img src="theme/default/img/realStatistics/larger.png">
+		    </span>
+			<span ng-click="goSmall()" class="smaller"  ng-show="largestFlag == 1">
+				<img src="theme/default/img/realStatistics/smaller.png">
+		    </span>
+		</div>
+	</div>
+	<p class="nodeName" style="font-size: 16px;color : rgb(255,187,29)">零序电压3U0波形</p>
+	<div style="position:relative;">
+		<div id="voltage" style="height:150px;" class="currentClass"></div>
+		<div class="loader" id="loadFlagOver1" ng-show="loading1 == true" style="top:65px;">
+		    <div class="loader-inner ball-beat overview-load">
+		      <div></div>
+		      <div></div>
+		      <div></div>
+		    </div>
+	 	</div>
+	</div>
+	
+	<p class="nodeName"  style="font-size: 16px;color :rgb(127,186,255)" ng-show="hasCurrentData">零序电流3I0波形</p>
+	<div ng-repeat="item in current" class="curves currentClass"  on-finish-render-filters >
+		<p class="nodeName">{{item.nodeName|dataNullFilter}}</p>
+		<div id="current{{$index}}" style="height:150px;"></div>
+	</div>
+	<div class="loader" id="loadFlagOver2" ng-show="loading2 == true" style="top:395px;;">
+	    <div class="loader-inner ball-beat overview-load">
+	      <div></div>
+	      <div></div>
+	      <div></div>
+	    </div>
+ 	</div>
+</div>
+
+<script>
+app.directive('onFinishRenderFilters', function ($timeout) {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attr) {
+            if (scope.$last === true) {
+                $timeout(function() {
+                    scope.$emit('ngRepeatFinished');
+                });
+            }
+        }
+    };
+});
+app.controller('alarmCurrentModelCtrl',function($scope, $http, $state,$rootScope) {
+	
+	 var maxNum = 1536;
+	 var minNum = 768;
+	 
+	
+	 var myChartVoltage;
+	 var voltageBiggerX;
+	 var voltageBiggerY;
+	 var voltageSmallerX;
+	 var voltageSmallerY;
+	 var currentEchartList = [];
+	 
+	 $scope.$on('currentAlarm', function(event, data) {
+		 
+		 //if($scope.s_alarmId == data.alarmId) return;
+		 $(".currentClass").html("");
+		 $scope.currentData = [];
+		 $scope.hasCurrentData = true;
+		 $scope.s_Address = data.address;
+		 $scope.s_dcu_ids = data.dcu_ids;
+		 $scope.s_time = data.time;
+		 $scope.s_sample = data.sample;
+		 $scope.s_alarmId = data.alarmId;
+		 $scope.s_sysId = data.sysId;
+		 $scope.result = data.result;
+		 
+		 currentEchartList = [];
+		 $scope.biggerCurrentData = [];
+		 $scope.current = [];
+		 
+		 init();
+     });
+	
+	function init(){
+		$scope.loading1 = true;
+		$scope.loading2 = true;
+		$scope.largestFlag = 4;
+		getVoltageData();
+		getCurrentData();
+		
+	}
+	
+	//曲线放大
+	$scope.goBig = function(){
+		$scope.largestFlag = 1;
+		var option = myChartVoltage.getOption();
+		option.series[0].data = voltageBiggerY;
+		option.xAxis[0].data = voltageBiggerX;
+		myChartVoltage.setOption(option);
+		
+		for(var i=0;i<currentEchartList.length;i++){
+			var option2 = currentEchartList[i].getOption();
+			option2.xAxis[0].data = $scope.biggerCurrentData[i].x;
+			option2.series[0].data = $scope.biggerCurrentData[i].y;
+			currentEchartList[i].setOption(option2);
+		}
+	}
+	
+	//曲线缩小
+	$scope.goSmall = function(){
+		$scope.largestFlag = 2;
+		
+		var option = myChartVoltage.getOption();
+		option.series[0].data = voltageSmallerY;
+		option.xAxis[0].data = voltageSmallerX;
+		myChartVoltage.setOption(option);
+		
+		for(var i=0;i<currentEchartList.length;i++){
+			var option2 = currentEchartList[i].getOption();
+			option2.xAxis[0].data = $scope.current[i].x;
+			option2.series[0].data = $scope.current[i].y;
+			currentEchartList[i].setOption(option2);
+		}
+	}
+	//电压数据
+	function getVoltageData(){
+		var powerSupplys = $scope.s_dcu_ids.split(",");
+		if(powerSupplys && powerSupplys.length >0){
+			$http({
+				type: "GET",
+				url: $scope.s_Address+"api/v1/dcu/short_alarmrecorder",
+				//timeout : 20000,
+				params : {
+					'dcuId':powerSupplys[0],
+					'time':$scope.s_time,
+					'sample':$scope.s_sample,
+					'alarmId': $scope.s_alarmId
+				}
+			}).success(function (result) {
+				$scope.loading1 = false;
+				if(result.code == '0'){
+					var x=[],y=[];
+					var stockList = result.data[0].recorderStockInfo[0].stockList;
+					for(var k=0;k<stockList.length;k++){
+						if(stockList[k].datas != null && stockList[k].datas != undefined){
+							y.push(stockList[k].datas);
+						}else{
+							y.push("-");
+						}
+						x.push(stockList[k].xindex);
+					}
+					voltageSmallerX = x;
+					voltageSmallerY = y;
+					voltageBiggerX = x.slice(minNum,maxNum);
+					voltageBiggerY = y.slice(minNum,maxNum)
+					drawVoltageCurve(x,y);
+				}
+				$scope.largestFlag--;
+			}).error(function(result){
+				$scope.loading1 = false;
+				drawVoltageCurve([],[]);
+			});
+		}else{
+			$scope.largestFlag--;
+		}
+		
+		
+	}
+	
+	//电流数据
+	function getCurrentData(){
+		var powerSupplys = $scope.s_dcu_ids.split(",");
+		if(powerSupplys && powerSupplys.length>1){
+			var msgAll = [];
+			msgAll[0] = null;
+			var num = 1;
+			for(var i=1;i<powerSupplys.length;i++){
+				(function(i){
+					$http({
+						type: "GET",
+						url: $scope.s_Address+"api/v1/dcu/short_alarmrecorder",
+						//timeout : 20000,
+						params : {
+							'dcuId':powerSupplys[i],
+							'time':$scope.s_time,
+							'sample':$scope.s_sample,
+							'alarmId': $scope.s_alarmId
+						}
+					}).success(function (result) {
+						msgAll[i] = result;
+						num++;
+						if(num == powerSupplys.length){
+							$scope.loading2 = false;
+							$scope.current = parseData(msgAll,powerSupplys);
+							var current = [];
+							for(var k = 0;k<$scope.current.length;k++){
+								var m = {};
+								m["x"] = $scope.current[k].x.slice(minNum,maxNum);
+								m["y"] = $scope.current[k].y.slice(minNum,maxNum);
+								current.push(m);
+							}
+							$scope.biggerCurrentData = current;
+							$scope.largestFlag--;
+						}
+							
+					}).error(function(msg){
+						msgAll[i] = null;
+						num++;
+						if(num == powerSupplys.length){
+							$scope.loading2 = false;
+							$scope.currentData = parseData(msgAll,powerSupplys);
+							var current = [];
+							for(var k = 0;k<$scope.current.length;k++){
+								var m = {};
+								m["x"] = $scope.current[k].x.slice(minNum,maxNum);
+								m["y"] = $scope.current[k].y.slice(minNum,maxNum);
+								current.push(m);
+							}
+							$scope.biggerCurrentData = current;
+							$scope.largestFlag--;
+						}
+						
+					});
+				})(i);
+				
+			
+			}
+		}else{
+			$scope.hasCurrentData = false;
+			$scope.currentData = [];
+			$scope.loading2 = false;
+			$scope.largestFlag--;
+		}
+	}
+	
+	function parseData(msgAll,nodeIds){
+		var list = [];
+		for(var i=0;i<msgAll.length;i++){
+			if(!msgAll[i]) continue;
+			var map = {};
+			var node = overViewData[$scope.s_sysId].nodesMap[nodeIds[i]];
+			var lineName = overViewData[$scope.s_sysId].powerLinesMap[node.dlxId].name;
+			map["nodeName"] = lineName + "-" + node.name;
+			var x=[],y=[];
+			var sflList = msgAll[i].data[0].recorderSFLInfo;
+			for(var k=0;k<sflList.length;k++){
+				if(sflList[k].sfl0 != null && sflList[k].sfl0 != undefined){
+					y.push(sflList[k].sfl0);
+				}else{
+					y.push("-");
+				}
+				x.push(sflList[k].xindex);
+			}
+			map['x'] = x;
+			map['y'] = y;
+			list.push(map);
+		}
+		return list;
+	}
+	$scope.$on('ngRepeatFinished', function (ngRepeatFinishedEvent) {
+		for(var i = 0;i<$scope.current.length;i++){
+			drawCurrentCurve(i,$scope.current[i].x,$scope.current[i].y);
+		}
+	});
+	
+	//电压波形
+	function drawVoltageCurve(xValue,yValue){
+		myChartVoltage = echarts.init(document.getElementById('voltage'));
+		option = {
+				title:{
+					text: '电压(V)',
+					x:'right',
+					y:'top' ,
+				    textStyle: {
+				        color: '#333',
+				        fontSize : 10,
+				        textAlign:'center'
+				    }
+				},
+				tooltip : {
+					 trigger: 'axis',
+					 zlevel:3,
+					 z:8,
+					 axisPointer:{
+						 type: 'line',
+						    lineStyle: {
+						        color: '#bbb',
+						        width: 1,
+						        type: 'solid'
+						    }
+					 } ,
+					 formatter: function (params,ticket,callback) {
+						 var res = params[0].name;
+				         res += '<br/>'+"零序电压3U0："+(Number(params[0].value)).toFixed(2)+"";
+				         return res;
+				      } 
+			    },
+				calculable : false,
+				grid : {
+					borderWidth : '0px',
+					x : '20px',
+					x2 : '70px',
+					y : "30px",
+					y2 : "25px"
+				},
+				xAxis : [ {
+					font : {
+						color : 'red'
+					},
+					axisTick : {
+						show : false
+					},
+					type : 'category',
+					axisLine : {
+						lineStyle : {
+							color : '#666'
+						}
+					},
+					splitLine : {
+						show : false,
+					},
+					
+					boundaryGap : false,
+					show: true,
+					data : xValue
+				} ],
+				yAxis : [{
+					axisLabel : {
+						textStyle : {
+							color : '#666',
+							fontSize : 12
+						}
+					},
+					
+					font : {
+						color : '#666'
+					},
+					position:"right",
+					axisLine : {
+						lineStyle : {
+							color : 'transparent',
+							width : 1
+						},
+						
+					},
+					type : 'value'
+				}],
+				series : [{
+					symbol : 'none',
+					type : 'line',
+					itemStyle : {
+						normal : {
+							color : 'rgb(255,187,29)',
+							areaStyle : {
+								color : 'transparent'
+							},
+							lineStyle : {
+								color : 'rgb(255,187,29)',
+								width : 1
+							}
+						}
+					},
+					data : yValue
+				}]
+		};
+		myChartVoltage.setOption(option);
+	}
+	
+	//电流波形
+	function drawCurrentCurve(i,xValue,yValue){
+		var myChartCurrent = echarts.init(document.getElementById('current'+i));
+		currentEchartList.push(myChartCurrent);
+		option = {
+				title:{
+					text: '电流(A)',
+					x:'right',
+					y:'top' ,
+				    textStyle: {
+				        color: '#333',
+				        fontSize : 10,
+				        textAlign:'center'
+				    }
+				},
+				tooltip : {
+					 trigger: 'axis',
+					 zlevel:3,
+					 z:8,
+					 axisPointer:{
+						 type: 'line',
+						    lineStyle: {
+						        color: '#bbb',
+						        width: 1,
+						        type: 'solid'
+						    }
+					 } ,
+					 formatter: function (params,ticket,callback) {
+				            var res = params[0].name;
+					        res += '<br/>'+"零序电流3I0："+(Number(params[0].value)).toFixed(2)+"";
+				            return res;
+				      } 
+			    },
+				calculable : false,
+				grid : {
+					borderWidth : '0px',
+					x : '20px',
+					x2 : '60px',
+					y : "30px",
+					y2 : "25px"
+				},
+				xAxis : [ {
+					font : {
+						color : 'red'
+					},
+					axisTick : {
+						show : false
+					},
+					type : 'category',
+					axisLine : {
+						lineStyle : {
+							color : '#666'
+						}
+					},
+					splitLine : {
+						show : false,
+					},
+					
+					boundaryGap : false,
+					show: true,
+					data : xValue
+				} ],
+				yAxis : [{
+					axisLabel : {
+						textStyle : {
+							color : '#666',
+							fontSize : 12
+						}
+					},
+					
+					font : {
+						color : '#666'
+					},
+					position:"right",
+					axisLine : {
+						lineStyle : {
+							color : 'transparent',
+							width : 1
+						},
+						
+					},
+					type : 'value'
+				}],
+				series : [{
+					symbol : 'none',
+					type : 'line',
+					itemStyle : {
+						normal : {
+							color : 'rgb(127,186,255)',
+							areaStyle : {
+								color : 'transparent'
+							},
+							lineStyle : {
+								color : 'rgb(127,186,255)',
+								width : 1
+							}
+						}
+					},
+					data : yValue
+				}]
+		};
+		myChartCurrent.setOption(option);
+	}
+	
+	
+	
+});
+	
+</script>
+		

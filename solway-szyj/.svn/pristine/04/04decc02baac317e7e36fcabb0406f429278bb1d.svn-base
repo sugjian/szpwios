@@ -1,0 +1,175 @@
+//
+//  BaseViewController.m
+//  HaiGouWang
+//
+//  Created by huangzengsong on 15/3/1.
+//  Copyright (c) 2015年 huangzengsong. All rights reserved.
+//
+
+#import "BaseViewController.h"
+#import "AppDelegate.h"
+@interface BaseViewController ()
+
+@end
+
+@implementation BaseViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // [NSThread setThreadPriority:3.0];
+    [self.navigationController.navigationBar setBarStyle:UIBarStyleBlack];
+
+    // Do any additional setup after loading the view.
+    [self makeWebView];
+    /* B-1 */
+    // NSString *path = [[NSBundle mainBundle] pathForResource:@"index.html" ofType:nil];
+    // [_webView loadRequest: [NSURLRequest requestWithURL:[NSURL fileURLWithPath:path]]];
+    /* B-1 */
+
+    /* B-2 */
+    // NSString *path=[[NSBundle mainBundle] resourcePath];
+    // NSString *filePath=[path stringByAppendingPathComponent:@"login.html"];
+    // NSString *string=[NSString stringWithContentsOfFile:filePath usedEncoding:nil error:nil];
+    // [_webView loadHTMLString:string baseURL:nil];
+    /* B-2 */
+
+    
+
+    
+    
+/*----------Main-----------*/
+    // mainBundle path
+    NSString *mainBundlePath = [[NSBundle mainBundle] bundlePath];
+    
+    // html base目录
+    NSString *basePath = [NSString stringWithFormat:@"%@/www",mainBundlePath];
+    NSURL *baseURL = [NSURL fileURLWithPath:basePath isDirectory:YES];
+    NSLog(@"baseURL: %@", baseURL);
+    
+    // index.html path
+    NSString *htmlPath = [NSString stringWithFormat:@"%@/index.html",basePath];
+    NSString *htmlString = [NSString stringWithContentsOfFile:htmlPath
+                                                     encoding:NSUTF8StringEncoding error:nil];
+    
+    // loading local content
+    [_webView loadHTMLString:htmlString baseURL:baseURL];
+    
+    
+    
+/*----------Test-----------*/
+    //[_webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://necloud.solway.cn/necloud-m"]]];
+    //[_webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://192.168.1.251:8080/Solway-m/"]]];
+    
+    
+    
+    
+    
+    
+    [NSHTTPCookieStorage sharedHTTPCookieStorage].cookieAcceptPolicy = NSHTTPCookieAcceptPolicyAlways;
+
+    
+    
+    
+//    self.bridge = [WebViewJavascriptBridge bridgeForWebView:_webView handler:^(id data, WVJBResponseCallback responseCallback) {
+//        NSLog(@"接收JS数据: %@", data);
+//        if ([data isEqualToString:@"getDeviceToken"]) {
+//            //responseCallback(AppDelegate.);
+//            responseCallback(@"deviceToken");
+//        }
+//    }];
+//    
+//    
+//    [self.bridge callHandler:@"setDeviceToken" data:@"没错我就是deviceToken" responseCallback:^(id response) {
+//        NSLog(@"testJavascriptHandler responded: %@", response);
+//    }];
+//    
+//    [self.bridge callHandler:@"gotoUrl" data:@"6" responseCallback:^(id response) {
+//        NSLog(@"testJavascriptHandler responded: %@", response);
+//    }];
+    
+    
+    
+//    self.bridge = [WebViewJavascriptBridge bridgeForWebView:_webView handler:^(id data, WVJBResponseCallback responseCallback) {
+//        NSLog(@"接收JS数据: %@", data);
+//        responseCallback(@"我是OC我又回来了");
+//    }];
+//
+//    [self.bridge send:@"你好我叫OC"];
+//    
+//    [self.bridge send:[NSDictionary dictionaryWithObject:@"唔" forKey:@"呃"]];
+//    
+//    [self.bridge send:@"我是O_C请回答？js同学" responseCallback:^(id responseData) {
+//        NSLog(@"oc收到js同学说： %@", responseData);
+//    }];
+}
+
+- (UIStatusBarStyle)preferredStatusBarStyle {
+    return UIStatusBarStyleLightContent;
+}
+
+#pragma mark makeWebView加载网页
+-(void)makeWebView {
+
+    _webView = [[UIWebView alloc] init];
+    
+
+    //版本信息
+    NSString *version = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
+    NSString *package = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleIdentifier"];
+    NSString *ext = [[package componentsSeparatedByString:@"."] lastObject];
+    NSString *myAgent = [NSString stringWithFormat:@" %@-%@", ext, version];
+    /*----------修改UserAgent----------*/
+    //get the original user-agent of webview
+    NSString *oldAgent = [_webView stringByEvaluatingJavaScriptFromString:@"navigator.userAgent"];
+    NSLog(@"+++++++++ old agent :%@", oldAgent);
+    _webView = [[UIWebView alloc] initWithFrame:CGRectZero];//    //add my info to the new agent
+    NSString *newAgent = [oldAgent stringByAppendingString:[NSString stringWithFormat:@" %@%@", @"[com.solway.agent]", myAgent]];
+    NSLog(@"+++++++++ new agent :%@", newAgent);
+
+    //regist the new agent
+    NSDictionary *dictionary = [[NSDictionary alloc] initWithObjectsAndKeys:newAgent, @"UserAgent", nil];
+    [[NSUserDefaults standardUserDefaults] registerDefaults:dictionary];
+
+//    NSDictionary *dictionary = [NSDictionary dictionaryWithObjectsAndKeys:@"Your user agent", @"UserAgent", nil];
+//    [[NSUserDefaults standardUserDefaults] registerDefaults:dictionary];
+    /*----------修改UserAgent----------*/
+    NSLog(@"----------version:%@", version);
+    NSLog(@"----------package:%@", package);
+    NSLog(@"----------ext:%@", ext);
+    NSLog(@"----------myAgent:%@", myAgent);
+
+       
+    
+    _webView.delegate = self;
+    _webView.backgroundColor = [UIColor whiteColor];
+    _webView.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height-0);
+    _webView.tag = 1111;
+    _webView.scalesPageToFit = YES;
+    _webView.scrollView.bounces = NO;
+    [self.view addSubview:_webView];
+}
+
+
+-(BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
+    return YES;
+}
+
+
+//网页加载完成
+-(void)webViewDidFinishLoad:(UIWebView *)webView {
+        
+    for(UIView *temp in _navBgImageView.subviews){
+        [temp removeFromSuperview];
+    }
+    
+    //去掉webView长按列表时的复制事件
+    /****************************************************************************/
+    //屏蔽长按事件出现的复制、粘贴、剪切
+    [webView stringByEvaluatingJavaScriptFromString: @"document.documentElement.style.webkitUserSelect='none';"];
+    [webView stringByEvaluatingJavaScriptFromString: @"document.body.style.webkitTouchCallout='none';"];
+    /****************************************************************************/
+    
+}
+
+
+@end

@@ -1,0 +1,202 @@
+<!-- 实时功率 -->
+<div id="ssglqxModal" style="height:650px;width:450px;"></div>
+<div class="modal  fade col-xs-12 no-padder" id="showRealPower" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+   <div class="modal-dialog col-xs-12 no-padder ">
+      <div class="modal-content col-xs-12 no-padder">
+          <div class="modal-header n-b col-3 col-xs-12 no-padder">
+            <button type="button" class="close close-img m-b-n-sm main-green" data-dismiss="modal" aria-hidden="true">
+                  <img src="theme/default/img/icon/close.png">
+            </button>
+         </div>
+         <div class="modal-body col-3 col-xs-12 no-padder">
+        	<div class="col-xs-12 no-padder">
+				
+			</div>
+     	 </div>
+	</div>
+</div>
+<script>
+function getPowerVModal(powerVstr,$http, $scope) {
+	var myChart = echarts.init(document.getElementById('ssglqxModal'));
+	window.addEventListener("resize", function() {
+		myChart.resize();
+	});
+	option = {
+			tooltip : {
+				 trigger: 'axis',
+				 axisPointer:{
+					 type: 'line',
+					    lineStyle: {
+					        color: '#bbb',
+					        width: 1,
+					        type: 'solid'
+					    }
+				 },
+				 formatter: function (params,ticket,callback) {
+			            var res = params[0].name;
+			            for (var i = 0, l = params.length; i < l; i++) {
+			            	if(params[i].value!=""&&!isNaN(params[i].value)){
+			                	res += '<br/>' + params[i].seriesName + ' : ' + params[i].value.toFixed(1);
+			                	if(i==1){
+			                		res += powerVstr.name2;
+			                	}else{
+			                		res += powerVstr.name1;
+			                	}
+			            	} else if(params[i].value==""){
+			                	res += '<br/>' + params[i].seriesName + ' : N/A';
+			            	}
+			            }
+			            return res;
+			      }
+		    },
+			calculable : true,
+			grid : {
+				borderWidth : '0px',
+				x : '15px',
+				x2 : '15px',
+				y : "30px",
+				y2 : "0px"
+			},
+			xAxis : [ {
+				font : {
+					color : '#fff'
+				},
+				position : 'top',//X 轴显示的方位
+				type : 'category',
+				axisLine : {
+					lineStyle : {
+						color : 'transparent'
+					}
+				},
+				axisLabel : {
+					interval:59,
+					axisLabel : 10,
+					textStyle : {
+						align : 'center',
+						color : '#666',
+						fontSize : 13
+					}
+				},
+				splitLine : {
+					show : true,
+					lineStyle : {
+						color : '#444'//分割线颜色
+					}
+				},
+				boundaryGap : false,
+				data : powerVstr.time
+			} ],
+			yAxis : [ {
+				show:false,
+				axisLabel : {
+					textStyle : {
+						color : '#666',
+						fontSize : 12
+					}
+				},
+				name : powerVstr.name1,
+				nameLocation:'start',
+				font : {
+					color : '#666'
+				},
+				axisLine : {
+					lineStyle : {
+						color : '#666',
+						width : 1
+					}
+				},
+				splitLine : {
+					show : false
+				},
+				type : 'value'
+			}, {
+				show:false,
+				name : powerVstr.name2,
+				nameLocation:'start',
+				font : {
+					color : '#666'
+				},
+				axisLine : {
+					lineStyle : {
+						color : '#666',
+						width : 1
+					}
+				},
+				splitLine : {
+					show : false
+				},
+				type : 'value',
+				axisLabel : {
+					textStyle : {
+						color : '#666',
+						fontSize : 12
+					},
+					formatter : function(v) {
+						return v;
+					}
+				}
+			} ],
+			series : [ {
+				name : '实时功率',
+				type : 'line',
+				z : 1,
+				itemStyle : {
+					normal : {
+						areaStyle : {
+							color : 'rgba(245,102,105,0.5)'
+						},
+						lineStyle : {
+							color : '#f56669',
+							width : 1
+						}
+					}
+				},
+				symbol : 'none',
+				data : powerVstr.powerV
+			}, {
+				name : '光照强度',
+				type : 'line',
+				yAxisIndex : 1,
+				z : 2,
+				itemStyle : {
+					normal : {
+						areaStyle : {
+							color : 'transparent'
+						},
+						lineStyle : {
+							type : 'dotted',
+							color : '#efb800',
+							width : 1
+						}
+					}
+				},
+				symbol : 'none',
+				data : powerVstr.lightV
+			}, {
+				symbol : 'none',
+				name : '应发功率',
+				type : 'line',
+				
+				z : 1,
+				itemStyle : {
+					normal : {
+						color : '#92aaff',
+						areaStyle : {
+							color : 'transparent'
+						},
+						lineStyle : {
+						/* 	type : 'none',
+							width:2, */
+							color : '#92aaff',
+							width : 2
+						}
+					}
+				},
+				data : powerVstr.theoryV
+			}
+			]
+		};
+	myChart.setOption(option);
+}
+</script>
+	

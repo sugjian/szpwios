@@ -1,0 +1,31 @@
+@CHARSET "UTF-8";
+body{color:black;}
+.overflow-auto{overflow:auto;}
+.select{height:45px;line-height:45px;background:rgb(51,64,74);    text-align: center;    font-size: 14px;color:white;}
+.select select{-webkit-appearance:none;appearance:none;margin:0;background:rgb(51,64,74) url("../../img/realStatistics/select-down.png") no-repeat;height: 44px;display: inline-block;
+background-position:right center;background-size: 8px; padding-right: 10px;}
+.detail-title{line-height:30px;border-bottom:1px solid rgb(179,179,179);padding-left:20px;font-size:12px;letter-spacing: 3px;}
+.svg{height:320px;}
+.curve-con{border-top:1px solid rgb(200,200,200);padding:5px 3px;    margin-bottom: 40px;}
+.curve-tip{margin:14px;}
+.curve-tip >span{    margin-right: 10px;font-size:16px;}
+.b{border:none;}
+.a >span{width:12px;height:12px;background:rgb(255,185,0);    display: inline-block;    vertical-align:baseline;margin-right: 6px;}
+.b >span{width:12px;height:12px;background:rgb(0,188,103);    display: inline-block;    vertical-align:baseline;margin-right: 6px;}
+.c >span{width:12px;height:12px;background:rgb(255,17,45);    display: inline-block;    vertical-align: baseline;margin-right: 6px;}
+.n >span{width:12px;height:12px;background:rgb(204,204,204);    display: inline-block;    vertical-align: text-bottom;margin-right: 6px;}
+#nodes{    background: rgb(242,246,249);
+    font-size: 12px;}
+.overview-load{text-align:center;}
+.overview-load > div {
+    background-color: rgb(255,59,42);
+}
+.line-detail{    border-bottom: 1px solid rgb(62,70,75);
+    line-height: 40px;
+    padding: 0 15px;}
+    .line-detail >.pull-left{font-size:12px;}
+.line-detail img{width: 20px;} 
+.line-detail span{display:inline-block;width: 40px;text-align: center;}
+.bg-black .nav > li > a:hover, .bg-black .nav > li > a:focus{
+    background:transparent;
+}

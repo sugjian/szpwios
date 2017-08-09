@@ -1,0 +1,62 @@
+<div class="mui-content">
+<!-- 撤回 -->
+<div id="recall" class="mui-popover mui-popover-bottom mui-popover-action ">
+    <!-- 可选择菜单 -->
+    <ul class="mui-table-view">
+      <li class="mui-table-view-cell">
+        <span class="col-6 text-1-4x">将撤回此任务，确认撤回吗？</span>
+      </li>
+      <li class="mui-table-view-cell">
+        <a class="red text-1-7x" ng-click="handle11_do();">撤回</a>
+      </li>
+    </ul>
+    <!-- 取消菜单 -->
+    <ul class="mui-table-view">
+      <li class="mui-table-view-cell">
+        <a class="col-6 text-1-7x" onclick="controlPopove('recall')"><b>取消</b></a>
+      </li>
+    </ul>
+</div>
+<!-- 撤回关闭 -->
+<!-- 拒绝 -->
+<div id="refuse" class="mui-popover mui-popover-bottom mui-popover-action ">
+    <!-- 可选择菜单 -->
+    <ul class="mui-table-view">
+      <li class="mui-table-view-cell">
+        <span class="col-6 text-1-4x">拒绝任务后将不能撤销操作,确认拒绝吗?</span>
+      </li>
+      <li class="mui-table-view-cell">
+        <a class="red text-1-3x" ng-click="handle112_save()">拒绝</a>
+      </li>
+    </ul>
+    <!-- 取消菜单 -->
+    <ul class="mui-table-view">
+      <li class="mui-table-view-cell">
+        <a class="col-6 text-1-3x" onclick="controlPopove('refuse')"><b>取消</b></a>
+      </li>
+    </ul>
+</div>
+<!-- 拒绝关闭 -->
+<!-- 去处理开始 -->
+<div id="doTask" class="mui-popover mui-popover-bottom mui-popover-action ">
+    <!-- 可选择菜单 -->
+    <ul class="mui-table-view">
+      <li class="mui-table-view-cell">
+        <a class="main-green text-1-3x" ng-click="handle01()">指派他人处理</a>
+      </li>
+      <li class="mui-table-view-cell">
+        <a class="main-green text-1-3x" ng-click="handle02()">指派自己处理</a>
+      </li>
+      <li class="mui-table-view-cell">
+        <a class="main-green text-1-3x" ng-click="handle03()">不处理</a>
+      </li>
+    </ul>
+    <!-- 取消菜单 -->
+    <ul class="mui-table-view">
+      <li class="mui-table-view-cell">
+        <a class="col-6 text-1-7x" onclick="controlPopove('doTask')"><b>取消</b></a>
+      </li>
+    </ul>
+</div>
+<!-- 去处理结束 -->
+</div>

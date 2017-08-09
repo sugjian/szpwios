@@ -1,0 +1,1061 @@
+<style>
+@media screen and (max-width: 320px) {
+	.common-curve{width:310px;}
+}
+@media (min-width: 321px) and (max-width: 360px) {
+	.common-curve{width:350px;}
+}
+@media (min-width: 361px) and (max-width: 375px) {
+	.common-curve{width:370px;}
+}
+@media (min-width: 376px) {
+	.common-curve{width:400px;}
+}
+@media (min-width:768px) {
+	.common-curve{width:765px;}
+}
+.curves{    border-top: 1px solid rgb(207,207,207);
+    padding-top: 10px;}
+h4{text-indent:10px;}
+p.nodeName{text-align: center;margin: 3px 15px 10px;padding-bottom: 10px;}
+p.nodeName2{margin: 10px 15px ;}
+.curve-tab{border-right:1px solid rgb(207,207,207);display:inline-block;padding:10px;color:rgb(159,159,159);}
+.curve-tab.tab-active{color:rgb(79,79,79);}
+.curve-tab:last-child{border:none;}
+.curve-tab2{border-right:0px}
+a:focus, a:hover {
+    color:  rgb(79,79,79);
+    text-decoration: none;
+}
+</style>
+<div ng-controller="alarm12ModelCtrl" >
+	<div class="clearfix">
+		<div class="pull-left" style="margin: 10px;">
+			<a class="curve-tab" ng-class="{'tab-active':curveTab == 'instant','curve-tab2' : s_type == 2}" ng-click="changeCurve('instant')" ng-show="s_type == 2 || s_type == 3">瞬时波形</a>
+			<a class="curve-tab" ng-class="{'tab-active':curveTab == 'sequence'}" ng-click="changeCurve('sequence')" ng-show="s_type == 3">序分量计算</a>
+			<a class="curve-tab" ng-class="{'tab-active':curveTab == 'harmonic'}" ng-click="changeCurve('harmonic')" ng-show="s_type == 3">谐波计算</a>
+		</div>
+		<div class="pull-right" style="margin: 15px;">
+			<span ng-click="goBig()" class="bigger" ng-show="largestFlag == 1">
+				<img src="theme/default/img/realStatistics/larger.png">
+		    </span>
+			<span ng-click="goSmall()" class="smaller"  ng-show="largestFlag == 2">
+				<img src="theme/default/img/realStatistics/smaller.png">
+		    </span>
+		</div>
+	</div>
+	<!-- 瞬时波形 -->
+	<div ng-repeat="item in instantNodes" class="curves disturbanceClass" ng-show="curveTab == 'instant'"  on-finish-render-filters >
+		<p class="nodeName2">{{item.nodeName|dataNullFilter}}</p>
+		<div id="instantLine{{$index}}" class="common-curve" style="height:150px;margin:0;"></div>
+	</div>
+	<!-- 序分量计算 -->
+	<div ng-repeat="item in sequenceNodes" class="curves disturbanceClass" ng-show="curveTab == 'sequence'"  on-finish-render-filters >
+		<p class="nodeName2">{{item.nodeName|dataNullFilter}}</p>
+		<div id="sequenceLine{{$index}}" class="common-curve" style="height:150px;margin:0;"></div>
+	</div>
+	<!-- 谐波计算 -->
+	<div ng-repeat="item in harmonicNodes" class="curves disturbanceClass" ng-show="curveTab == 'harmonic'"  on-finish-render-filters >
+		<p class="nodeName2">{{item.nodeName|dataNullFilter}}</p>
+		<div id="harmonicLine{{$index}}" class="common-curve" style="height:150px;margin:0;"></div>
+	</div>
+	<div class="loader" ng-show="loading == true" style="top:110px;">
+	    <div class="loader-inner ball-beat overview-load">
+	      <div></div>
+	      <div></div>
+	      <div></div>
+	    </div>
+ 	</div>
+ 	
+</div>
+
+<script>
+app.directive('onFinishRenderFilters', function ($timeout) {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attr) {
+            if (scope.$last === true) {
+                $timeout(function() {
+                    scope.$emit('ngRepeatFinished');
+                });
+            }
+        }
+    };
+});
+app.controller('alarm12ModelCtrl',function($scope, $http, $state,$rootScope) {
+	 var maxNum = 1536;
+	 var minNum = 768;
+	 
+	 var currentEchartList1 = [];//瞬时
+	 var currentEchartList2 = [];//序分量计算
+	//曲线放大
+	$scope.goBig = function(){
+		$scope.largestFlag = 2;
+		for(var i=0;i<currentEchartList1.length;i++){
+			var option2 = currentEchartList1[i].getOption();
+			option2.xAxis[0].data = $scope.biggerCurrentData1[i].x;
+			option2.series[0].data = $scope.biggerCurrentData1[i].a;
+			option2.series[1].data = $scope.biggerCurrentData1[i].b;
+			option2.series[2].data = $scope.biggerCurrentData1[i].c;
+			currentEchartList1[i].setOption(option2);
+		}
+		
+		for(var i=0;i<currentEchartList2.length;i++){
+			var option2 = currentEchartList2[i].getOption();
+			option2.xAxis[0].data = $scope.biggerCurrentData2[i].x;
+			option2.series[0].data = $scope.biggerCurrentData2[i].a;
+			option2.series[1].data = $scope.biggerCurrentData2[i].b;
+			option2.series[2].data = $scope.biggerCurrentData2[i].c;
+			currentEchartList2[i].setOption(option2);
+		}
+	}
+	
+	//曲线缩小
+	$scope.goSmall = function(){
+		$scope.largestFlag = 1;
+		
+		for(var i=0;i<currentEchartList1.length;i++){
+			var option2 = currentEchartList1[i].getOption();
+			option2.xAxis[0].data = $scope.instantNodes[i].x;
+			option2.series[0].data = $scope.instantNodes[i].a;
+			option2.series[1].data = $scope.instantNodes[i].b;
+			option2.series[2].data = $scope.instantNodes[i].c;
+			currentEchartList1[i].setOption(option2);
+		}
+		
+
+		for(var i=0;i<currentEchartList2.length;i++){
+			var option2 = currentEchartList2[i].getOption();
+			option2.xAxis[0].data = $scope.sequenceNodes[i].x;
+			option2.series[0].data = $scope.sequenceNodes[i].a;
+			option2.series[1].data = $scope.sequenceNodes[i].b;
+			option2.series[2].data = $scope.sequenceNodes[i].c;
+			currentEchartList2[i].setOption(option2);
+		}
+	}
+	
+	$scope.$on('currentAlarm', function(event, data) {
+		 //if($scope.s_alarmId == data.alarmId) return;
+		 $scope.largestFlag = 3;
+		 currentEchartList1 = [];
+		 currentEchartList2 = [];
+		 $scope.biggerCurrentData1 = [];
+		 $scope.biggerCurrentData2 = [];
+		 $scope.instantNodes = [];
+		 $scope.sequenceNodes = [];
+		 $scope.curveTab = "instant";
+		 $(".disturbanceClass").html("");
+		 $scope.instantNodes = [];
+		 $scope.sequenceNodes = [];
+		 $scope.harmonicNodes = [];
+		 $scope.s_Address = data.address;
+		 $scope.s_dcu_ids = data.dcu_ids;
+		 
+		 $scope.s_time = data.time;
+		 $scope.s_sample = data.sample;
+		 $scope.s_alarmId = data.alarmId;
+		 $scope.s_sysId = data.sysId;
+		 
+		 $scope.ngrepeatNum = 3;
+		 var powerSupplys = $scope.s_dcu_ids.split(",");
+		 var node = overViewData[$scope.s_sysId].nodesMap[powerSupplys[0]];
+		 if(node){
+			 $scope.s_type = node.type; 
+		 }else{
+			 $scope.s_type = 2;
+		 }
+		 $scope.loading = true;
+		 if(powerSupplys && powerSupplys.length>0){
+			var msgAll = [];
+			var num = 0;
+			for(var i=0;i<powerSupplys.length;i++){
+				(function(i){
+					$http({
+						type: "GET",
+						url: $scope.s_Address+"api/v1/dcu/alarmrecorder",
+						//timeout : 30000,
+						params : {
+							'dcuId':powerSupplys[i],
+							'time':$scope.s_time,
+							'sample':$scope.s_sample,
+							'alarmId': $scope.s_alarmId,
+							'type' : 'stock'
+						}
+					}).success(function (result) {
+							msgAll[i] = result;
+							num++;
+							if(num == powerSupplys.length){
+								var reList =  parseData(msgAll,powerSupplys);
+								
+								$scope.instantNodes = reList[0];
+								
+								var current1 = [];
+								for(var k = 0;k<$scope.instantNodes.length;k++){
+									var m = {};
+									m["x"] = $scope.instantNodes[k].x.slice(minNum,maxNum);
+									m["a"] = $scope.instantNodes[k].a.slice(minNum,maxNum);
+									m["b"] = $scope.instantNodes[k].b.slice(minNum,maxNum);
+									m["c"] = $scope.instantNodes[k].c.slice(minNum,maxNum);
+									current1.push(m);
+								}
+								$scope.biggerCurrentData1 = current1;
+								
+								$scope.sequenceNodes = reList[1];
+								
+								var current2 = [];
+								for(var k = 0;k<$scope.sequenceNodes.length;k++){
+									var m = {};
+									m["x"] = $scope.sequenceNodes[k].x.slice(minNum,maxNum);
+									m["a"] = $scope.sequenceNodes[k].a.slice(minNum,maxNum);
+									m["b"] = $scope.sequenceNodes[k].b.slice(minNum,maxNum);
+									m["c"] = $scope.sequenceNodes[k].c.slice(minNum,maxNum);
+									current2.push(m);
+								}
+								$scope.biggerCurrentData2 = current2;
+								
+								$scope.harmonicNodes = reList[2];
+								$scope.loading = false;
+								$scope.largestFlag = 1;
+							}
+							
+						}).error(function(result){
+							msgAll[i] = null;
+							num++;
+							
+							if(num == powerSupplys.length){
+								var reList =  parseData(msgAll,powerSupplys);
+								$scope.instantNodes = reList[0];
+								$scope.sequenceNodes = reList[1];
+								$scope.harmonicNodes = reList[2];
+								$scope.loading = false;
+								$scope.largestFlag = 1;
+							}
+						});
+				})(i);
+			
+			}
+		}else{
+			$scope.loading = false;
+		}
+			
+   });
+	
+	function parseData(msgAll,nodeIds){
+		var list = [];
+		var list2 = [];
+		var list3 = [];
+		for(var i=0;i<msgAll.length;i++){
+			if(!msgAll[i]) continue;
+			var map = {};
+			var node = overViewData[$scope.s_sysId].nodesMap[nodeIds[i]];
+			var lineName = overViewData[$scope.s_sysId].powerLinesMap[node.dlxId].name;
+            if(node.type != 2){
+               map["nodeName"] = lineName + "-" + node.name;
+               }else{
+               map["nodeName"] = node.name;
+               }
+			var x=[],a=[],b=[],c=[];
+			var stockLists = msgAll[i].data[0].recorderStockInfo;
+			if(stockLists && stockLists.length > 2){
+				var stockLista = stockLists[0].stockList;
+				for(var k=0;k<stockLista.length;k++){
+					if(stockLista[k].datas != null && stockLista[k].datas != undefined){
+						a.push(stockLista[k].datas);
+					}else{
+						a.push("-");
+					}
+					x.push(stockLista[k].xindex);
+				}
+				var isX = false;
+				if(x.length > 0){
+					isX = true;
+				}
+				
+				var stockListb = stockLists[1].stockList;
+				for(var k=0;k<stockListb.length;k++){
+					if(stockListb[k].datas != null && stockListb[k].datas != undefined){
+						b.push(stockListb[k].datas);
+					}else{
+						b.push("-");
+					}
+					if(!isX){
+						x.push(stockListb[k].xindex);
+					}
+				}
+				if(x.length > 0){
+					isX = true;
+				}
+				var stockListc = stockLists[2].stockList;
+				for(var k=0;k<stockListc.length;k++){
+					if(stockListc[k].datas != null && stockListc[k].datas != undefined){
+						c.push(stockListc[k].datas);
+					}else{
+						c.push("-");
+					}
+					if(!isX){
+						x.push(stockListc[k].xindex);
+					}
+				}
+			}
+			
+			map['x'] = x;
+			map['a'] = a;
+			map['b'] = b;
+			map['c'] = c;
+			list.push(map);
+			
+			var map2 = {};
+			map2["nodeName"] = lineName + "-" + node.name;
+			var x2=[],a2=[],b2=[],c2=[];
+			var sflLists = msgAll[i].data[0].recorderSFLInfo;
+			if(sflLists && sflLists.length > 2){
+				for(var k=0;k<sflLists.length;k++){
+					x2.push(sflLists[k].xindex);
+					if(sflLists[k].sfl0 != null && sflLists[k].sfl0 != undefined){
+						a2.push(sflLists[k].sfl0);
+					}else{
+						a2.push("-");
+					}
+					
+					if(sflLists[k].sflP != null && sflLists[k].sflP != undefined){
+						b2.push(sflLists[k].sflP);
+					}else{
+						b2.push("-");
+					}
+					
+					if(sflLists[k].sflN != null && sflLists[k].sflN != undefined){
+						c2.push(sflLists[k].sflN);
+					}else{
+						c2.push("-");
+					}
+					
+				}
+				
+			}
+			
+			map2['x'] = x2;
+			map2['a'] = a2;
+			map2['b'] = b2;
+			map2['c'] = c2;
+			list2.push(map2);
+			
+			var map3 = {};
+			map3["nodeName"] = lineName + "-" + node.name;
+			var x3=[],y1=[],y2=[],y3=[],y4=[],y5=[],y6=[],y7=[];
+			var fftLists = msgAll[i].data[0].recorderFFTInfo;
+			if(fftLists && fftLists.length > 1){
+				var fftList = fftLists[1].fftList;
+				for(var k=1;k<fftList.length;k++){
+					var data = fftList[k].data;
+					if(k==1 && data){
+						for(var j=0;j<data.length;j++){
+							x3.push(j+1);
+						}
+						map3['x'] = x3;
+					}
+					
+					if(data){
+						map3['y' + k] = data;
+					}else{
+						map3['y' + k] = [];
+					}
+				}
+				
+			}
+			
+			list3.push(map3);
+		}
+		return [list,list2,list3];
+	}
+	
+	
+	//三种波形tab切换
+	$scope.changeCurve = function(type){
+		if(type == "instant"){
+			$scope.curveTab = "instant";
+		}else if(type == "sequence"){
+			$scope.curveTab = "sequence";
+		}else if(type == "harmonic"){
+			$scope.curveTab = "harmonic";
+		}
+	}
+	
+	
+	//瞬时波形数据初始化
+	$scope.$on('ngRepeatFinished', function (ngRepeatFinishedEvent) {
+		//第3次完成时才开始渲染图形
+		if($scope.ngrepeatNum-- > 1 ) return;
+		var instant = $scope.instantNodes;
+		var sequence = $scope.sequenceNodes;
+		var harmonic = $scope.harmonicNodes;
+		console.log($scope.s_type +"==$scope.s_type");
+		if($scope.s_type==2){
+			for(var i = 0;i<instant.length;i++){
+				drawInstantCurve2(i,instant[i].x,instant[i].a,instant[i].b,instant[i].c);
+			}
+		}else{
+			for(var i = 0;i<instant.length;i++){
+				drawInstantCurve(i,instant[i].x,instant[i].a,instant[i].b,instant[i].c);
+			}
+			for(var i = 0;i<sequence.length;i++){
+				console.log(sequence[i].x);
+				drawSequenceCurve(i,sequence[i].x,sequence[i].a,sequence[i].b,sequence[i].c);
+			}
+			for(var i = 0;i<harmonic.length;i++){
+				drawHarmonicCurve(i,harmonic[i].x,harmonic[i].y1,harmonic[i].y2,harmonic[i].y3,harmonic[i].y4,harmonic[i].y5,harmonic[i].y6,harmonic[i].y7);
+			}
+		}
+		
+	});
+	
+	//瞬时波形(type=3)
+	function drawInstantCurve(i,xValue,a,b,c){
+		var myChart = echarts.init(document.getElementById('instantLine'+i));
+		currentEchartList1.push(myChart);
+		option = {
+				title:{
+					text: '电流(A)',
+					x:'right',
+					y:'top' ,
+				    textStyle: {
+				        color: '#333',
+				        fontSize : 10,
+				        textAlign:'center'
+				    }
+				},
+				tooltip : {
+					 trigger: 'axis',
+					 zlevel:3,
+					 z:8,
+					 axisPointer:{
+						 type: 'line',
+						    lineStyle: {
+						        color: '#bbb',
+						        width: 1,
+						        type: 'solid'
+						    }
+					 } ,
+					 /*formatter: function (params,ticket,callback) {
+				            var res = params[0].name;
+				            if(!res){
+				            	res = params[1].name;
+				            }
+				            if(!res){
+				            	res = params[2].name;
+				            }
+				            if(params[0].value){
+							 	res += '<br/>' + "A相"+ ' : ' + (Number(params[0].value)).toFixed(2)+"A";
+				            }
+				            if(params[1].value){
+				            	res += '<br/>' + "B相"+ ' : ' + (Number(params[1].value)).toFixed(2)+"A";
+				            }
+				            if(params[2].value){
+				            	res += '<br/>' + "C相"+ ' : ' + (Number(params[2].value)).toFixed(2)+"A";
+				            }
+						 	
+				            return res;
+				      } */
+			    },
+				legend: {
+			        data:['A相','B相','C相'],
+			        x : '10',
+			        itemWidth : 5,
+			        itemHeight : 15,
+			        itemGap : 6
+			    },
+				calculable : false,
+				grid : {
+					borderWidth : '0px',
+					x : '20px',
+					x2 : '60px',
+					y : "30px",
+					y2 : "25px"
+				},
+				xAxis : [ {
+					font : {
+						color : 'red'
+					},
+					axisTick : {
+						show : false
+					},
+					type : 'category',
+					axisLine : {
+						lineStyle : {
+							color : '#666'
+						}
+					},
+					splitLine : {
+						show : false,
+					},
+					
+					boundaryGap : false,
+					show: true,
+					data : xValue
+				} ],
+				yAxis : [{
+					axisLabel : {
+						textStyle : {
+							color : '#666',
+							fontSize : 12
+						}
+					},
+					
+					font : {
+						color : '#666'
+					},
+					position:"right",
+					axisLine : {
+						lineStyle : {
+							color : 'transparent',
+							width : 1
+						},
+						
+					},
+					type : 'value'
+				}],
+				series : [{
+					symbol : 'none',
+					name : 'A相',
+					type : 'line',
+					itemStyle : {
+						normal : {
+							color : 'rgb(255,187,29)',
+							areaStyle : {
+								color : 'transparent'
+							},
+							lineStyle : {
+								color : 'rgb(255,187,29)',
+								width : 1
+							}
+						}
+					},
+					data : a
+				},{
+					symbol : 'none',
+					name : 'B相',
+					type : 'line',
+					itemStyle : {
+						normal : {
+							color : 'rgb(0,190,113)',
+							areaStyle : {
+								color : 'transparent'
+							},
+							lineStyle : {
+								color : 'rgb(0,190,113)',
+								width : 1
+							}
+						}
+					},
+					data : b
+				},{
+					symbol : 'none',
+					name : 'C相',
+					type : 'line',
+					itemStyle : {
+						normal : {
+							color : 'rgb(255,24,55)',
+							areaStyle : {
+								color : 'transparent'
+							},
+							lineStyle : {
+								color : 'rgb(255,24,55)',
+								width : 1
+							}
+						}
+					},
+					data : c
+				}]
+		};
+		myChart.setOption(option);
+	}
+	
+	//瞬时波形(type=2，零序电压用)
+	function drawInstantCurve2(i,xValue,a,b,c){
+		var myChart = echarts.init(document.getElementById('instantLine'+i));
+		currentEchartList1.push(myChart);
+		option = {
+				title:{
+					text: '电压(V)',
+					x:'right',
+					y:'top' ,
+				    textStyle: {
+				        color: '#333',
+				        fontSize : 10,
+				        textAlign:'center'
+				    }
+				},
+				tooltip : {
+					 trigger: 'axis',
+					 zlevel:3,
+					 z:8,
+					 axisPointer:{
+						 type: 'line',
+						    lineStyle: {
+						        color: '#bbb',
+						        width: 1,
+						        type: 'solid'
+						    }
+					 } ,
+					 formatter: function (params,ticket,callback) {
+				            var res = params[0].name;
+				            if(!res){
+				            	res = params[1].name;
+				            }
+				            if(!res){
+				            	res = params[2].name;
+				            }
+				            if(params[0].value){
+							 	res += '<br/>'  + (Number(params[0].value)).toFixed(2);
+				            }
+				            if(params[1].value){
+				            	res += '<br/>'  + (Number(params[1].value)).toFixed(2);
+				            }
+				            if(params[2].value){
+				            	res += '<br/>' + (Number(params[2].value)).toFixed(2);
+				            }
+						 	
+				            return res;
+				      }
+			    },
+				calculable : false,
+				grid : {
+					borderWidth : '0px',
+					x : '20px',
+					x2 : '60px',
+					y : "30px",
+					y2 : "25px"
+				},
+				xAxis : [ {
+					font : {
+						color : 'red'
+					},
+					axisTick : {
+						show : false
+					},
+					type : 'category',
+					axisLine : {
+						lineStyle : {
+							color : '#666'
+						}
+					},
+					splitLine : {
+						show : false,
+					},
+					
+					boundaryGap : false,
+					show: true,
+					data : xValue
+				} ],
+				yAxis : [{
+					axisLabel : {
+						textStyle : {
+							color : '#666',
+							fontSize : 12
+						}
+					},
+					
+					font : {
+						color : '#666'
+					},
+					position:"right",
+					axisLine : {
+						lineStyle : {
+							color : 'transparent',
+							width : 1
+						},
+						
+					},
+					type : 'value'
+				}],
+				series : [{
+					symbol : 'none',
+					name : 'A相',
+					type : 'line',
+					itemStyle : {
+						normal : {
+							color : 'rgb(255,187,29)',
+							areaStyle : {
+								color : 'transparent'
+							},
+							lineStyle : {
+								color : 'rgb(255,187,29)',
+								width : 1
+							}
+						}
+					},
+					data : a
+				},{
+					symbol : 'none',
+					name : 'B相',
+					type : 'line',
+					itemStyle : {
+						normal : {
+							color : 'rgb(0,190,113)',
+							areaStyle : {
+								color : 'transparent'
+							},
+							lineStyle : {
+								color : 'rgb(0,190,113)',
+								width : 1
+							}
+						}
+					},
+					data : b
+				},{
+					symbol : 'none',
+					name : 'C相',
+					type : 'line',
+					itemStyle : {
+						normal : {
+							color : 'rgb(255,24,55)',
+							areaStyle : {
+								color : 'transparent'
+							},
+							lineStyle : {
+								color : 'rgb(255,24,55)',
+								width : 1
+							}
+						}
+					},
+					data : c
+				}]
+		};
+		myChart.setOption(option);
+	}
+	
+	//序分量波形
+	function drawSequenceCurve(i,xValue,a,b,c){
+		var myChart = echarts.init(document.getElementById('sequenceLine'+i));
+		currentEchartList2.push(myChart);
+		option = {
+				title:{
+					text: '电流(A)',
+					x:'right',
+					y:'top' ,
+				    textStyle: {
+				        color: '#333',
+				        fontSize : 10,
+				        textAlign:'center'
+				    }
+				},
+				tooltip : {
+					 trigger: 'axis',
+					 zlevel:3,
+					 z:8,
+					 axisPointer:{
+						 type: 'line',
+						    lineStyle: {
+						        color: '#bbb',
+						        width: 1,
+						        type: 'solid'
+						    }
+					 } ,
+					 /** formatter: function (params,ticket,callback) {
+				            var res = params[0].name;
+						 	res += '<br/>' + "零序分量"+ ' : ' + (Number(params[0].value)).toFixed(2)+"A";
+			            	res += '<br/>' + "正序分量"+ ' : ' + (Number(params[1].value)).toFixed(2)+"A";
+			            	res += '<br/>' + "负序分量"+ ' : ' + (Number(params[2].value)).toFixed(2)+"A";
+						 	
+				            return res;
+				      } */
+			    },
+				legend: {
+			        data:['零序分量','正序分量','负序分量'],
+			        x : '10',
+			        itemWidth : 5,
+			        itemHeight : 15,
+			        itemGap : 6
+			    },
+				calculable : false,
+				grid : {
+					borderWidth : '0px',
+					x : '20px',
+					x2 : '40px',
+					y : "30px",
+					y2 : "25px"
+				},
+				xAxis : [ {
+					font : {
+						color : 'red'
+					},
+					axisTick : {
+						show : false
+					},
+					type : 'category',
+					axisLine : {
+						lineStyle : {
+							color : '#666'
+						}
+					},
+					splitLine : {
+						show : false,
+					},
+					
+					boundaryGap : false,
+					show: true,
+					data : xValue
+				} ],
+				yAxis : [{
+					axisLabel : {
+						textStyle : {
+							color : '#666',
+							fontSize : 12
+						}
+					},
+					
+					font : {
+						color : '#666'
+					},
+					position:"right",
+					axisLine : {
+						lineStyle : {
+							color : 'transparent',
+							width : 1
+						},
+						
+					},
+					type : 'value'
+				}],
+				series : [{
+					symbol : 'none',
+					name : '零序分量',
+					type : 'line',
+					itemStyle : {
+						normal : {
+							color : 'rgb(127,186,255)',
+							areaStyle : {
+								color : 'transparent'
+							},
+							lineStyle : {
+								color : 'rgb(127,186,255)',
+								width : 1
+							}
+						}
+					},
+					data : a
+				},{
+					symbol : 'none',
+					name : '正序分量',
+					type : 'line',
+					itemStyle : {
+						normal : {
+							color : 'rgb(68,68,68)',
+							areaStyle : {
+								color : 'transparent'
+							},
+							lineStyle : {
+								color : 'rgb(68,68,68)',
+								width : 1
+							}
+						}
+					},
+					data : b
+				},{
+					symbol : 'none',
+					name : '负序分量',
+					type : 'line',
+					itemStyle : {
+						normal : {
+							color : 'rgb(109,223,199)',
+							areaStyle : {
+								color : 'transparent'
+							},
+							lineStyle : {
+								color : 'rgb(109,223,199)',
+								width : 1
+							}
+						}
+					},
+					data : c
+				}]
+		};
+		myChart.setOption(option);
+	}
+	
+	//谐波波形
+	function drawHarmonicCurve(i,x,y1,y2,y3,y4,y5,y6,y7){
+		var myChart = echarts.init(document.getElementById('harmonicLine'+i));
+		option = {
+				title:{
+					text: '百分比(%)',
+					x:'right',
+					y:'top' ,
+				    textStyle: {
+				        color: '#333',
+				        fontSize : 10,
+				        textAlign:'center'
+				    }
+				},
+				tooltip : {
+					 trigger: 'axis',
+					 zlevel:3,
+					 z:8,
+					 axisPointer:{
+						 type: 'line',
+						    lineStyle: {
+						        color: '#bbb',
+						        width: 1,
+						        type: 'solid'
+						    }
+					 } ,
+					/** formatter: function (params,ticket,callback) {
+				            var res = params[0].name;
+				            res += '<br/>' + "THD"+ ' : ' + (Number(params[0].value)).toFixed(2)+"%";
+						 	res += '<br/>' + "3次"+ ' : ' + (Number(params[1].value)).toFixed(2)+"%";
+						 	res += '<br/>' + "5次"+ ' : ' + (Number(params[2].value)).toFixed(2)+"%";
+						 	res += '<br/>' + "7次"+ ' : ' + (Number(params[3].value)).toFixed(2)+"%";
+						 	res += '<br/>' + "9次"+ ' : ' + (Number(params[4].value)).toFixed(2)+"%";
+						 	res += '<br/>' + "11次"+ ' : ' + (Number(params[5].value)).toFixed(2)+"%";
+						 	res += '<br/>' + "13次"+ ' : ' + (Number(params[6].value)).toFixed(2)+"%";
+				            return res;
+				      } */
+			    },
+				legend: {
+			        data:['THD','3次','5次','7次','9次','11次','13次'],
+			        x : '10',
+			        itemWidth : 1,
+			        itemHeight : 6,
+			        itemGap : 4
+			    },
+				calculable : false,
+				grid : {
+					borderWidth : '0px',
+					x : '20px',
+					x2 : '30px',
+					y : "30px",
+					y2 : "25px"
+				},
+				xAxis : [ {
+					font : {
+						color : 'red'
+					},
+					axisTick : {
+						show : false
+					},
+					type : 'category',
+					axisLine : {
+						lineStyle : {
+							color : '#666'
+						}
+					},
+					splitLine : {
+						show : false,
+					},
+					
+					boundaryGap : false,
+					show: true,
+					data : x
+				} ],
+				yAxis : [{
+					axisLabel : {
+						textStyle : {
+							color : '#666',
+							fontSize : 12
+						}
+					},
+					
+					font : {
+						color : '#666'
+					},
+					position:"right",
+					axisLine : {
+						lineStyle : {
+							color : 'transparent',
+							width : 1
+						},
+						
+					},
+					type : 'value'
+				}],
+				series : [{
+					symbol : 'none',
+					type : 'line',
+					name : 'THD',
+					itemStyle : {
+						normal : {
+							lineStyle : {
+								width : 1
+							}
+						}
+					},
+					data : y1
+				},{
+					symbol : 'none',
+					type : 'line',
+					name : '3次',
+					itemStyle : {
+						normal : {
+							lineStyle : {
+								width : 1
+							}
+						}
+					},
+					data : y2
+				},{
+					symbol : 'none',
+					type : 'line',
+					name : '5次',
+					itemStyle : {
+						normal : {
+							lineStyle : {
+								width : 1
+							}
+						}
+					},
+					data : y3
+				},{
+					symbol : 'none',
+					type : 'line',
+					name : '7次',
+					itemStyle : {
+						normal : {
+							lineStyle : {
+								width : 1
+							}
+						}
+					},
+					data : y4
+				},{
+					symbol : 'none',
+					type : 'line',
+					name : '9次',
+					itemStyle : {
+						normal : {
+							lineStyle : {
+								width : 1
+							}
+						}
+					},
+					data : y5
+				},{
+					symbol : 'none',
+					type : 'line',
+					name : '11次',
+					itemStyle : {
+						normal : {
+							lineStyle : {
+								width : 1
+							}
+						}
+					},
+					data :y6
+				},{
+					symbol : 'none',
+					type : 'line',
+					name : '13次',
+					itemStyle : {
+						normal : {
+							lineStyle : {
+								width : 1
+							}
+						}
+					},
+					data : y7
+				}]
+		};
+		myChart.setOption(option);
+	}
+});
+	
+</script>
+		

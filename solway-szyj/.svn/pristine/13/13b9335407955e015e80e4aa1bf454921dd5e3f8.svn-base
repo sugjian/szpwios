@@ -1,0 +1,58 @@
+<link rel="stylesheet" type="text/css" href="theme/default/css/datePicker.css">
+    <script type="text/javascript" src="js/require/iscroll.js"></script>
+    <script type="text/javascript" src="js/datePicker.js"></script>
+ <style>
+	.nav-bottom-active{
+	    background-color: #1b262d;
+    	border-bottom: 1px solid #06bebd;
+    	color: #fff;
+    }
+</style>   
+<div class="col-xs-12 no-padder" ng-controller="realStaAllCtrl">
+	<div class="col-xs-12 no-padder">
+		<ul class="nav col-xs-12 no-padder text-center bg-black nav-black-jd m-b-sm m-t-n-md" >
+			<li class="active col-xs-4 no-padder" ui-sref-active="active" >
+				<a ui-sref='app.realStatistics.stat' class="wrapper" ng-click="changeTab('1')">
+					<span class="text-1-2x">概览</span>
+				</a>
+			</li>
+			<li  class="col-xs-4 no-padder" ui-sref='app.realStatistics.equipment'>
+				<a  class="wrapper" ng-click="changeDate('2')">
+					<span class="text-1-2x">PR排名</span>
+				</a>
+			</li>
+			<li  class="col-xs-4 no-padder">
+				<a  class="wrapper" ng-click="changeDate('3')">
+					<span class="text-1-2x">故障</span>
+				</a>
+			</li>
+	</ul>
+	</div>
+	 <div id="statcontent"  class="col-xs-12 no-padder" ui-view ></div></div>
+	<!--公用模态框-->
+	<div  class="modal statModal col-xs-12 no-padder "  id="statModal" tabindex="-1" role="dialog"aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-lg m-n">
+			<div class="modal-content col-sm-12 no-padder">	
+				<!-- <a class="icon-close" data-dismiss="modal" ng-click="closeStatModal()">
+					<img src="./theme/default/img/close.png" style="width:23px;">
+				</a> -->
+					<div class="modal-body no-padder"  id="text" style="overflow-y: auto; overflow-x: hidden;">
+						<div id="statDataPageID" ng-include="statDataPage" /></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--模态框结束-->
+	<!--公用模态框-->
+	<div  class="modal statModal col-xs-12 no-padder"  id="statModal2" tabindex="-1" role="dialog"aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-lg m-n">
+			<div class="modal-content col-sm-12 no-padder">	
+					<div class="modal-body no-padder"  id="text" style="overflow-y: auto; overflow-x: hidden;">
+						<div id="statDataPageID2" ng-include="statDataPage2" /></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--模态框结束-->
+</div>
+<script src="js/controllers/realStat/realStatisticsAll.js"></script>

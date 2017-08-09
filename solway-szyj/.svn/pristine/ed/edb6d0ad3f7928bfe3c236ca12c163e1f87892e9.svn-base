@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="theme/default/css/login.css" type="text/css" />
+</head>
+<body>
+	<center class="padder col-sm-12" ng-controller="registSucCtrl"
+		style="margin-top:50px">		
+			<p  style="font-size: 25px; color: rgba(6, 190, 189,1);margin: 100px 0px;">
+				<i class="fa fa-check m-r-sm"></i>注册成功
+			</p> 			
+			<div class="col-xs-12">
+				<buttom  class="col-xs-12 no-padder btn login-btn"
+					ng-click="goLogin()" >进入新能云</buttom>
+			</div>
+	</center>
+	<script type="text/javascript">
+	app.controller(
+			'registSucCtrl',
+			function($scope, $http, $stateParams, $rootScope,$state) {
+				$scope.goLogin=function(){
+					$state.go("login")
+				}
+	});
+  </script>

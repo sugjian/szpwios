@@ -1,0 +1,463 @@
+<style>
+	.nav-role > li > a:hover,
+	.nav-role > li > a:focus {
+		background-color: rgba(6, 190, 189, 0.5)!important;
+		border-bottom: none;
+		color: #fff;
+	}
+	
+	.nav-role > li.active > a {
+		background-color: rgba(6, 190, 189, 0.5)!important;
+		border-bottom: none;
+		color: #fff;
+	}
+	
+	.statActive {
+		background: rgba(6, 190, 189, 0.2)!important;
+		border-radius: 4px;
+	}
+	
+	.sta0 {
+		color: #66f74b
+	}
+	
+	.sta1 {
+		color: #ec432e
+	}
+	
+	.sta2 {
+		color: #f6fe39
+	}
+	
+	.sta3 {
+		color: #cccccc
+	}
+</style>
+<div ng-controller="statAsideCtrl" class=" col-xs-12 no-padder ">
+	<div class="col-xs-12 no-padder bg-black" id="distNav" style="style="padding-top:20px"">
+		<ul class="nav col-xs-12 no-padder nav-top" style="margin-top:20px;">
+			<li class="col-xs-12 text-center no-padder">
+				<div class="wrapper" ng-click="changeRole()">
+					<img src="./theme/default/img/icon/man.png" style="width:22px;" class="m-t-n-xs" />
+					<span class="text-1-4x m-l-xs m-r-xs" ng-bind="titleName"></span>
+					<span class="caret white"></span>
+				</div>
+				<div class="col-xs-12 no-padder text-center text-1-4x ">
+					<ul class="nav bg-black nav-role hidden">
+						<li ng-repeat="role in roleInfoList">
+						<a ng-click="closeRole(role.roleId,role.roleDisplayName)" ng-bind="role.roleDisplayName"></a></li>
+					</ul>
+				</div>
+			</li>
+		</ul>
+	</div>
+	<div class="col-xs-12 no-padder norm">
+		<div class="col-xs-12 no-padder text-center text-1-4x ">
+		<!-- 	<ul class="nav bg-black nav-role hidden">
+				<li ng-repeat="role in roleInfoList">
+					<a ng-click="closeRole(role.roleId,role.roleDisplayName)" ng-bind="role.roleDisplayName">信息管理产品经理</a></li>
+			</ul> -->
+			<div class="col-xs-offset-2 col-xs-8 no-padder statAside m-t-sm">
+				<div class="col-xs-6 no-padder active" id="asideTab0" ng-click="changeTab('0')">
+					<span class="asideTab ">按部门</span>
+				</div>
+				<div class="col-xs-6 no-padder" id="asideTab1" ng-click="changeTab('1')">
+					<span class="asideTab">自定义</span>
+				</div>
+			</div>
+		</div>
+		<div class="col-xs-12 wrapper-lg " id="root">
+			<div class="b-b-white wrapper-xs text-1-6x statActive m-r-xs" ng-click="goStatData('','全部','9','00')" id="station00">全部
+			</div>
+			<div class="b-b-white wrapper-xs" ng-repeat="station in rootStationInfo" ng-click="goStatData(station.stids,station.name,station.stFlag,$index)" id="station{{$index}}">
+				<span ng-if="station.level==0"> 
+			<i ng-show="station.stFlag==1" class="fa fa-circle m-r-xs"
+			ng-class="{'sta0':station.status=='00','sta1':station.status=='01','sta2':station.status=='02','sta3':station.status=='03'}">
+			</i>
+			<span class="text-1-6x" ng-bind="station.name"></span>
+				</span>
+				<span ng-if="station.level==1" class="m-l"> 
+			<i ng-show="station.stFlag==1"class="fa fa-circle m-r-xs"
+				ng-class="{'sta0':station.status=='00','sta1':station.status=='01','sta2':station.status=='02','sta3':station.status=='03'}">
+			</i>
+			<span class="text-1-6x" ng-bind="station.name"></span>
+				</span>
+				<span ng-if="station.level==2" class="m-l"> 
+			<i ng-show="station.stFlag==1"class="fa fa-circle m-r-xs"
+				ng-class="{'sta0':station.status=='00','sta1':station.status=='01','sta2':station.status=='02','sta3':station.status=='03'}">
+			</i>
+			<span class="text-1-6x" ng-bind="station.name"></span>
+				</span>
+				<span ng-if="station.level==3" class="m-l-md"> 
+			<i ng-show="station.stFlag==1"class="fa fa-circle m-r-xs"
+			ng-class="{'sta0':station.status=='00','sta1':station.status=='01','sta2':station.status=='02','sta3':station.status=='03'}">
+			</i>
+			<span class="text-1-6x" ng-bind="station.name"></span>
+				</span>
+			</div>
+		</div>
+
+		<div class="col-xs-12 wrapper-lg hidden" id="cus">
+			<div class="b-b-white wrapper-xs text-1-6x statActive m-r-xs" ng-click="goCusStatData('','全部','9','00',9)" id="s00">全部
+			</div>
+			<div ng-repeat="station in cusStationInfo">
+				<div class="b-b-white wrapper-xs" id="s{{$index}}" ng-click="goCusStatData(station.stid,station.groupName,station.stFlag,$index,0)">
+					<span class="text-1-6x" ng-bind="station.groupName"></span>
+				</div>
+				<div class="b-b-white wrapper-xs m-l-sm" ng-repeat="ps in station.powerStation" id="ss{{$index}}" ng-click="goCusStatData(ps.powerStationId,ps.stationName,ps.stFlag,$index,1)">
+					<i class="fa fa-circle m-r-xs sta0" ng-class="{'sta0':station.status=='00','sta1':station.status=='01','sta2':station.status=='02','sta3':station.status=='03'}"></i><span class="text-1-6x" ng-bind="ps.stationName"></span>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+	$(".norm").css("height", $(window).height()-100)
+	app.controller('statAsideCtrl', function($scope, $http, $state, $rootScope, toaster) {
+		/* $scope.cusStatIdList = [];
+		$scope.roleInfoList = JSON.parse(storage["currentRoles"]);
+		for (var i = 0; i < $scope.roleInfoList.length; i++) {
+			if (($scope.roleInfoList[i].roleId) == (storage["roleId"])) {
+				$scope.titleName = $scope.roleInfoList[i].roleDisplayName
+			}
+		}
+		//向后台获取状态
+		//获取电站的状态	
+		$scope.stationFlag = [];
+		if (eval("["+JSON.parse(storage["powerStationId"])+"]")[0]!=null) {
+			$scope.stationInfo = JSON.parse(storage["powerStationInfos"]);
+			for (var i = 0; i < $scope.stationInfo.length; i++) {
+				if ($scope.stationInfo[i].stFlag == 1) {
+					//$scope.stationFlag=[];
+					$scope.stationFlag.push($scope.stationInfo[i].stids)
+				}
+			}
+			//如果没有子集
+			if ($scope.stationFlag.length <= 0) {
+				$scope.rootStationInfo = $scope.stationInfo
+			} else {
+				$http({
+						method: "POST",
+						url: ctx + "/MobileRtmStationStatus/getRtmStationStatus.htm",
+						params: {
+							'powerStationId': $scope.stationFlag
+						}
+					})
+					.success(function(msg) {
+						$scope.stationData = [];
+						for (var i = 0; i < $scope.stationInfo.length; i++) {
+							if ($scope.stationInfo[i].stFlag == 1) {
+								for (var j = 0; j < msg.list.length; j++) {
+									$scope.stationInfo[i]["status"] = msg.list[j].status
+								}
+							} else {
+								$scope.stationInfo[i]["status"] = '99'
+							}
+							$scope.stationData.push($scope.stationInfo[i])
+						}
+						$scope.rootStationInfo = $scope.stationData
+						
+					}).error(function(msg) {});
+			}
+		}
+		
+		$scope.allStationInfo = JSON.parse(storage["allStationId"])
+		$scope.changeTab = function(type) {
+				$("#asideTab" + type).siblings().removeClass("active")
+				$("#asideTab" + type).addClass("active")
+				if (type == "1") { //获得自定义的分组
+					$("#root").addClass("hidden")
+					$scope.getCustom();
+					$("#cus").removeClass("hidden")
+				} else {
+					$("#cus").addClass("hidden")
+					$("#root").removeClass("hidden")
+				}
+			}
+			//点击打开权限切换
+		$scope.changeRole = function() {
+				if ($(".nav-role").hasClass("hidden")) {
+					$(".nav-role").removeClass("hidden")
+				} else {
+					$(".nav-role").addClass("hidden")
+				}
+			}
+			//获得自定义的分组
+			$scope.getCustom = function() {
+				$http({
+						method: "POST",
+						url: ctx + "/userGroup/listGroup.htm",
+						params: {
+							'roleId': storage["roleId"]
+						}
+					})
+					.success(function(msg) {
+						console.log(msg)
+						$scope.cusStationInfo = msg.data
+						var stidsss='';
+						if($scope.cusStationInfo.length>=1){
+							for (var i = 0; i < $scope.cusStationInfo.length; i++) {
+								if($scope.cusStationInfo[i].stid){
+									stidsss+=$scope.cusStationInfo[i].stid+","
+								}
+							}
+							var stidsss=stidsss.substring(0,stidsss.length-1)
+							var stlistIds=stidsss.split(",")
+							$scope.cusStatIdList=stlistIds
+						}
+						
+					}).error(function(msg) {});
+			}
+			//切换权限（根据id 重新获得电站列表的值）
+		$scope.closeRole = function(roleId, roleName) {
+				$(".nav-role").addClass("hidden")
+				$scope.titleName = roleName
+					//修改电站id
+				storage["roleId"] = roleId;
+				$.ajax({
+					type: "post",
+					url: ctx + "/UserAuthHandle/changeRoleForMobile.htm",
+					async: false,
+					timeout: 5000,
+					data: {
+						"roleId": roleId
+					},
+					success: function(result) {
+						var powerStationIds = []; //放电站列表ID
+						//$scope.rootStationInfo=result.stlist;
+						for (var i = 0; i < result.stlist.length; i++) {
+							if (result.stlist[i].level == '0') {
+								var stlistIds = result.stlist[i].stids.split(",")
+								for (var j = 0; j < stlistIds.length; j++) {
+									powerStationIds.push(stlistIds[j])
+								}
+							}
+						}
+						var powerStationIdsStr = JSON.stringify(powerStationIds);
+						storage["powerStationId"] = powerStationIdsStr //电站列表ID
+						//重新请求一次数据，用来判断实时状态
+						//获取电站的状态
+						$scope.stationFlag = [];
+						$scope.stationInfo = result.stlist;
+						for (var i = 0; i < $scope.stationInfo.length; i++) {
+							if ([i].stFlag == 1) {
+								//$scope.stationFlag=[];
+								$scope.stationFlag.push($scope.stationInfo[i].stids)
+							}
+						}
+						//如果没有子集
+						if ($scope.stationFlag.length <= 0) {
+							$scope.rootStationInfo = $scope.stationInfo
+						} else {
+							$http({
+									method: "POST",
+									url: ctx + "/MobileRtmStationStatus/getRtmStationStatus.htm",
+									params: {
+										'powerStationId': $scope.stationFlag
+									}
+								})
+								.success(function(msg) {
+									$scope.stationData = [];
+									for (var i = 0; i < $scope.stationInfo.length; i++) {
+										if ($scope.stationInfo[i].stFlag == 1) {
+											for (var j = 0; j < msg.list.length; j++) {
+												$scope.stationInfo[i]["status"] = msg.list[j].status
+											}
+										} else {
+											$scope.stationInfo[i]["status"] = '99'
+										}
+										$scope.stationData.push($scope.stationInfo[i])
+									}
+									$scope.rootStationInfo = $scope.stationData
+								}).error(function(msg) {});
+						}
+					},
+					error: function(json) {
+					}
+				});
+			}
+			//切换电站
+		$scope.goStatData = function(id, name, stFlag, index) {
+			$("#station" + index).addClass("statActive");
+			$("#station" + index).siblings().removeClass("statActive");
+			var flagId = ""
+			var isAll = id.indexOf(",") > 0 //标识是否包含逗号
+			if (isAll && (stFlag != "9")) { //单个电站
+				flagId = id;
+				var powerStationIds = []; //放电站列表ID
+				var stlistIds = id.split(",")
+				for (var i = 0; i < stlistIds.length; i++) {
+					powerStationIds.push(stlistIds[i])
+				}
+				storage["powerStationId"] = JSON.stringify(powerStationIds);
+			} else if (stFlag == "9") { //全部
+				flagId = storage["allStationId"]
+				id = storage["allStationId"]
+					//flagId=id;
+				storage["powerStationId"] = flagId
+			} else { //没有子类
+				flagId = id
+				storage["powerStationId"] = id
+			}
+			if (flagId.indexOf(",") > 0) {
+				storage["stationName"]=name
+				$("#stataTitle").text(storage["stationName"])
+				$scope.$emit("refStationIds",[name,storage["powerStationId"]]);
+				$("#asideModal").animate({
+					left:  "-" + window.screen.width + 'px'
+				}, 300, function() {
+					$('#asideModal').modal("hide");
+				});
+			} else {
+				if(flagId==undefined||(isNaN(parseInt(flagId)))){
+					storage["stationName"]=name
+					$("#stataTitle").text(storage["stationName"])
+					$scope.$emit("refStationIds",[name,storage["powerStationId"]]);
+					$("#asideModal").animate({
+						left: "-" + window.screen.width + 'px'
+					}, 300, function() {
+						$('#asideModal').modal("hide");
+					});
+					return false;
+					
+				}
+				$http({
+						method: "POST",
+						url: ctx + "UserAuthHandle/changeSessionRoleOrSTOrView.htm",
+						params: {
+							'roleId': storage["roleId"],
+							'stId': parseInt(flagId)
+						}
+					})
+					.success(function(msg) {
+						storage["stationName"]=name
+						$("#stataTitle").text(storage["stationName"])
+						$scope.$emit("refStationIds",[name,storage["powerStationId"]]);
+						$("#asideModal").animate({
+							left:  "-" + window.screen.width + 'px'
+						}, 300, function() {
+							$('#asideModal').modal("hide");
+						});
+						// showAside();
+					}).error(function(msg) {});
+			}
+		}
+		$scope.goCusStatData = function(id, name, stFlag, index, indexFlag) {
+			//判断选中状态，
+			if (indexFlag == '0') { //父级样式
+				$("#s" + index).addClass("statActive");
+				$("#s" + index).siblings().removeClass("statActive");
+				$("#s" + index).parent().siblings().removeClass("statActive");
+				$("#s" + index).parent().siblings().children().children().removeClass("statActive");
+				$("#s" + index).parent().siblings().children().removeClass("statActive");
+			} else if (indexFlag == '1') {
+				$("#ss" + index).addClass("statActive");
+				$("#ss" + index).parent().siblings().removeClass("statActive");
+				$("#ss" + index).siblings().removeClass("statActive");
+				$("#ss" + index).parent().siblings().children().removeClass("statActive");
+			} else {
+				$("#s00").addClass("statActive")
+				$("#s00").siblings().children().removeClass("statActive");
+			}
+			if (stFlag == "9") { //全部
+				storage["powerStationId"] = JSON.stringify($scope.cusStatIdList);
+			} else {
+				if ((id+"").indexOf(",") > 0) {
+					var powerStationIds =id.split(",")
+					storage["powerStationId"] = JSON.stringify(powerStationIds);
+				}else{
+					var powerStationIds = [];
+					powerStationIds.push(id)
+					storage["powerStationId"] = JSON.stringify(powerStationIds);
+				}
+			}
+			if (storage["powerStationId"].indexOf(",") > 0) {
+				storage["stationName"]=name
+				$("#stataTitle").text(storage["stationName"])
+				$scope.$emit("refStationIds", name);
+				$("#asideModal").animate({
+					left:  "-" + window.screen.width + 'px'
+				}, 300, function() {
+					$('#asideModal').modal("hide");
+				});
+			} else {
+				if(id==undefined){
+					storage["stationName"]=name
+					$("#stataTitle").text(storage["stationName"])
+					$scope.$emit("refStationIds", name);
+					$("#asideModal").animate({
+						left: "-" + window.screen.width + 'px'
+					}, 300, function() {
+						$('#asideModal').modal("hide");
+					});
+					return false;
+					
+				}
+				var subStr = storage["powerStationId"]
+				var id = subStr.substring(1, subStr.length - 1)
+				$http({
+						method: "POST",
+						url: ctx + "UserAuthHandle/changeSessionRoleOrSTOrView.htm",
+						params: {
+							'roleId': storage["roleId"],
+							'stId': parseInt(id)
+						}
+					})
+					.success(function(msg) {
+						storage["stationName"]=name
+						$("#stataTitle").text(storage["stationName"])
+						$scope.$emit("refStationIds", name);
+						$("#asideModal").animate({
+							left: "-" + window.screen.width + 'px'
+						}, 300, function() {
+							$('#asideModal').modal("hide");
+						});
+					}).error(function(msg) {});
+			}
+		}
+		$scope.isAsideModalDrag = false;
+		//statModal开始拖动
+		document.getElementById("asideModal").addEventListener("dragstart", function(event) {
+			$("#asideModal").css("position", "fixed");
+			$scope.isAsideModalDrag = true;
+		});
+		//statModal拖动中
+		document.getElementById("asideModal").addEventListener("drag", function(event) {
+		});
+		//statModal拖动结束
+		document.getElementById("asideModal").addEventListener("dragend", function(event) {
+			if (!$scope.isAsideModalDrag) {
+				reutrn;
+			}
+			var deltaX = event.detail.deltaX;
+			var deltaY = event.detail.deltaY;
+			if (deltaY > 30 || deltaY < -30) {
+				return;
+			}
+			var angle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
+			var dirc = 0; //1：向上，2：向下，3：向左，4：向右,0：未滑动
+			if (angle >= -45 && angle < 45) {
+				dirc = 4;
+			} else if (angle >= 45 && angle < 135) {
+				dirc = 1;
+			} else if (angle >= -135 && angle < -45) {
+				dirc = 2;
+			} else if ((angle >= 135 && angle <= 180) || (angle >= -180 && angle < -135)) {
+				dirc = 3;
+			}
+			if (deltaX < -80 && dirc == 3) {
+				$("#asideModal").animate({
+					left: "-" + window.screen.width + 'px'
+				}, 300, function() {
+					$('#asideModal').modal("hide");
+				});
+			} else {
+				$("#asideModal").animate({
+					left: '0px',
+					opacity: '1'
+				}, 300);
+			}
+			$scope.isAsideModalDrag = false;
+		}); */
+	});
+</script>

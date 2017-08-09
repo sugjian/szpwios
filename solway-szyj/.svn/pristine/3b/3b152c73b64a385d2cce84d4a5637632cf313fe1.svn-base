@@ -1,0 +1,348 @@
+	window.onresize = function () {
+		$(".norm").css("height",$(window).height()-158)
+		}
+		$(".norm").css("height",$(window).height()-158)
+	var myChart
+	app.controller('staDayCtrl',function($scope, $http, $state,$rootScope,toaster) {
+		//获得电站列表的id
+		$scope.rootStationId;
+		if(storage["powerStationId"]){
+			$scope.rootStationId=JSON.parse(storage["powerStationId"])
+		}else{
+			return false
+		}
+		//监听切换电站刷新数据
+		$scope.$on("refStaionInfo",
+			    function (event, msg) {
+			        $scope.rootStationId=JSON.parse(storage["powerStationId"])
+			        $scope.getstaDayData();
+			        $scope.ctr1Name = msg;
+			        $scope.showRootStation=($scope.rootStationId.length > 1)
+			        if(myChart) {myChart.clear();}
+			 });
+		//当前界面的获得全部数据
+		$scope.getstaDayData=function(){
+			if($scope.rootStationId.length<=1){
+				if($scope.rootStationId[0]==null||$scope.rootStationId==null){
+					console.log("set empty")
+					$scope.rootStationId=[]
+				}
+			}
+			beginLoad();
+			$http({
+				method : "POST",
+				url : ctx+"MobileHmDeviceMonitor/getDayRDM.htm",
+				params : {
+					'userId':1,
+					'dateString':new Date($scope.mapTimeDay).Format("yyyy-MM-dd"),
+					'powerStationId':$scope.rootStationId
+				}
+				})
+				.success(function (msg) {
+					endLoad()
+					$scope.statDayData=msg;
+					$scope.getPowerData()//加载报表
+				}).error(function(msg){
+					endLoad()
+				});
+		}
+		$scope.getstaDayData();
+		//判断电站个数以及改变标题
+		
+		$scope.showRootStation=($scope.rootStationId.length > 1)
+		console.log($scope.showRootStation+"我就是看看我有数据吗")
+		if($scope.rootStationId.length==1){
+			$("#statTitle").text("演示电站一")
+		}
+		//监听切换时间时间，并刷新数据
+		$scope.$on('statDayBro', function(event, data) {  
+		       if(data[0]){
+		    	   $scope.mapTimeDay=data[1]
+		    	   $scope.getstaDayData()
+		    	   if(myChart) {myChart.clear();}
+		      	 }
+		  }); 
+
+		//请求报表  
+		$scope.getPowerData=function(){
+			if($scope.rootStationId.length<=1){
+				if($scope.rootStationId[0]==null||$scope.rootStationId==null){
+					console.log("set empty")
+					$scope.rootStationId=[]
+				}
+			}
+			$("#ssglqxDay").html("")
+			if(myChart) {myChart.clear();}
+			$.showLoading(loadFlags)
+			$http({
+				method : "POST",
+				url : ctx+"MobileHmDeviceMonitor/getDayChartRealTimePower.htm",
+				params : {
+					'userId':1,
+					'dateString':new Date($scope.mapTimeDay).Format("yyyy-MM-dd"),
+					'powerStationId':$scope.rootStationId
+				}
+				})
+				.success(function (msg) {
+					 $.hideLoading(loadFlags)
+					if(msg.echarts_xaxisTime==null){
+						getPowerV([],[],[],[])
+					}else{
+						getPowerV(msg.echarts_xaxisTime,msg.echarts_predictPower,msg.echarts_power,msg.echarts_luminousIntensity,$http, $scope);
+					}
+				}).error(function(msg){
+				});
+		}
+		
+		// 点击模块打开实时功率界面
+		$scope.showRealPower=function(){
+			$rootScope.statDataPage="./tpl/statistics/modal/statDayModal/staTodayAllPower.html"
+			$scope.openStatModal();
+		}
+		//打开气象实时监控
+		$scope.showWeatherPower=function(){
+			storage["weatherIsNow"]='false'
+			$rootScope.statDataPage="./tpl/statistics/modal/statDayModal/showWeatherPower.html"
+			$scope.openStatModal();
+		}
+		//打开综合评估
+		$scope.showSyScore=function(){
+			storage["scoreIsNow"]='false';
+			$rootScope.statDataPage="./tpl/statistics/modal/statDayModal/showSyScore.html"
+			$scope.openStatModal();
+		}
+		// 打开发电量
+		$scope.showDayElectric=function(){
+			$rootScope.statDataPage="./tpl/statistics/modal/statDayModal/staTodayPower.html"
+			$scope.openStatModal();
+		}
+		// 打开上网电量
+		$scope.showMonElectric=function(){
+			storage["statOnLineType"]="D"
+			$scope.powerStationId=JSON.parse(storage["powerStationId"]);//获取电站id 列表
+			
+			if($scope.powerStationId.length>1){
+				$rootScope.statDataPage="./tpl/statistics/modal/statDayModal/onlineQuantity.html"
+			}else{
+				$rootScope.statDataPage="./tpl/statistics/modal/statDayModal/onlineOneQuantity.html"
+			}
+			$scope.openStatModal();
+		}
+		// 打开故障
+		$scope.showYearElectric=function(){
+			storage["statFaultType"]="D"
+			$scope.powerStationId=JSON.parse(storage["powerStationId"]);//获取电站id 列表
+			
+			if($scope.powerStationId.length>1){
+				$rootScope.statDataPage="./tpl/statistics/modal/statDayModal/faultList.html"
+			}else{
+			$rootScope.statDataPage="./tpl/statistics/modal/statDayModal/faultStation.html"
+			}
+			$scope.openStatModal();
+		}
+		// 打开减排
+		$scope.showAllElectric=function(){
+			if($scope.statDayData){
+				$rootScope.plantedTree=$scope.statDayData.plantedTree
+				$rootScope.emissionReduction=$scope.statDayData.emissionReduction[0]
+				$rootScope.emissionReductionUnit=$scope.statDayData.emissionReduction[1]
+			}
+			$rootScope.statDataPage="./tpl/statistics/modal/statDayModal/staReductionModal.html"
+			$scope.openStatModal();
+		}
+		
+	});
+	//实时功率曲线绘制
+	function getPowerV(echarts_xaxisTime,echarts_predictPower,echarts_power,echarts_luminousIntensity,$http, $scope) {
+		 myChart = echarts.init(document.getElementById('ssglqxDay'));
+		 $.hideLoading(loadFlags)
+		 window.addEventListener("resize", function() {
+				myChart.resize();
+			});
+			option = {
+					tooltip : {
+						 trigger: 'axis',
+						 axisPointer:{
+							 type: 'line',
+							    lineStyle: {
+							        color: '#bbb',
+							        width: 1,
+							        type: 'solid'
+							    }
+						 } ,
+						 formatter: function (params,ticket,callback) {
+					            var res = params[0].name;
+					            console.log(params)
+					            for (var i = 0, l = params.length; i < l; i++) {
+					            	if(params[i].value!=""&&!isNaN(params[i].value)){
+					            		console.log((parseFloat((params[i]).value)).toFixed(1))
+					            		console.log((parseFloat((params[i]).value)).toFixed(1))
+					                	res += '<br/>' + params[i].seriesName + ' : ' + (parseFloat((params[i]).value)).toFixed(1);
+					                	/*if(i==1){
+					                		res += powerVstr.name2;
+					                	}else{
+					                		res += powerVstr.name1;
+					                	}*/
+					            	} else if(params[i].value==""){
+					                	res += '<br/>' + params[i].seriesName + ' : N/A';
+					            	}
+					            }
+					            return res;
+					      } 
+				    },
+				    noDataLoadingOption:{
+				        text : '暂无数据',
+				        effect :function(params,callback){
+				        	return "暂无数据"
+				        }
+				    },
+					calculable : true,
+					grid : {
+						borderWidth : '0px',
+						x : '15px',
+						x2 : '15px',
+						y : "30px",
+						y2 : "0px"
+					},
+					xAxis : [ {
+						font : {
+							color : '#fff'
+						},
+						position : 'top',//X 轴显示的方位
+						type : 'category',
+						axisLine : {
+							lineStyle : {
+								color : 'transparent'
+							}
+						},
+						axisLabel : {
+							interval:119,
+							axisLabel : 5,
+							textStyle : {
+								align : 'center',
+								color : '#666',
+								fontSize : 13
+							}
+						},
+						splitLine : {
+							show : true,
+							lineStyle : {
+								color : '#444'//分割线颜色
+							}
+						},
+						boundaryGap : false,
+						show: true,
+						data : echarts_xaxisTime
+					} ],
+					yAxis : [ {
+						show:false,
+						axisLabel : {
+							textStyle : {
+								color : '#666',
+								fontSize : 12
+							}
+						},
+						//name : powerVstr.name1,
+						nameLocation:'start',
+						font : {
+							color : '#666'
+						},
+						axisLine : {
+							lineStyle : {
+								color : '#666',
+								width : 1
+							}
+						},
+						splitLine : {
+							show : false
+						},
+						type : 'value'
+					}, {
+						show:false,
+					//	name : powerVstr.name2,
+						nameLocation:'start',
+						font : {
+							color : '#666'
+						},
+						axisLine : {
+							lineStyle : {
+								color : '#666',
+								width : 1
+							}
+						},
+						splitLine : {
+							show : false
+						},
+						type : 'value',
+						axisLabel : {
+							textStyle : {
+								color : '#666',
+								fontSize : 12
+							},
+							formatter : function(v) {
+								return v;
+							}
+						}
+					} ],
+					series : [{
+						symbol : 'none',
+						name : '应发功率',
+						type : 'line',
+						
+						z : 1,
+						itemStyle : {
+							normal : {
+								color : '#90a8fc',
+								areaStyle : {
+									color : 'transparent'
+								},
+								lineStyle : {
+								/* 	type : 'none',
+									width:2, */
+									color : '#92aaff',
+									width : 2
+								}
+							}
+						},
+						data : echarts_predictPower
+					}, {
+						name : '实发功率',
+						type : 'line',
+						z : 1,
+						itemStyle : {
+							normal : {
+								areaStyle : {
+									color : '#f56669'
+								},
+								lineStyle : {
+									color : '#f56669',
+									width : 1
+								}
+							}
+						},
+						symbol : 'none',
+						data : echarts_power
+					}, {
+						name : '光照强度',
+						type : 'line',
+						yAxisIndex : 1,
+						z : 2,
+						itemStyle : {
+							normal : {
+								areaStyle : {
+									color : 'transparent'
+								},
+								lineStyle : {
+									type : 'dotted',
+									color : '#ffc700',
+									width : 1
+								}
+							}
+						},
+						symbol : 'none',
+						data : echarts_luminousIntensity
+					}
+					]
+				};
+			myChart.setOption(option);
+	}

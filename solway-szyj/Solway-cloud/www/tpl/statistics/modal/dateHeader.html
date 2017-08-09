@@ -1,0 +1,384 @@
+<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap-datetimepicker.min.css" />
+<link rel="stylesheet" type="text/css" href="theme/default/css/historyStatistics/statisticsAll.css">
+<script type="text/javascript" src="js/require/iscroll.js"></script>
+<script src="vendor/bootstrap/js/bootstrap-datetimepicker.js" type="text/javascript"></script>
+<script src="vendor/bootstrap/js/bootstrap-datetimepicker.zh-CN.js" type="text/javascript"></script>
+<script src="js/data-format.js" type="text/javascript"></script>
+<div ng-controller="dateHeaderCtrl">
+	<div class="no-padder">
+		<ul class="nav  no-padder text-center bg-black nav-black-jd" >
+			<li ng-class="{'active':dateTypeActive == 'day'}">
+				<a class="wrapper" ng-click="changeDate('1')">
+					<span class="text-1-2x">日</span>
+				</a>
+			</li>
+			<li ng-class="{'active':dateTypeActive == 'month'}">
+				<a class="wrapper" ng-click="changeDate('2')">
+					<span class="text-1-2x">月</span>
+				</a>
+			</li>
+			<li ng-class="{'active':dateTypeActive == 'year'}">
+				<a class="wrapper" ng-click="changeDate('3')">
+					<span class="text-1-2x">年</span>
+				</a>
+			</li>
+			<li class="pull-right" >
+	         	<div class="wrapper changeJt">
+					<i class="fa fa-angle-left map-jt text-2x" ng-click="dateByJtLeft()"></i> 
+						<span>
+							<span id="changeTimeIdTimer-day" data-link-field="date-day" ng-show="changeTimeId == '1'">
+								<input type="hidden" id="date-day" value="" />
+								<span id="changeTimeId1" class="text-1-3x" ng-bind="mapTimeDay | date:'yyyy/MM/dd'"></span>
+							</span>
+							<span id="changeTimeIdTimer-month" data-link-field="date-month" ng-show="changeTimeId == '2'">
+								<input type="hidden" id="date-month" value="" />
+								<span id="changeTimeId2" class="text-1-3x" ng-bind="mapTimeMonth"></span>
+							</span>
+							<span id="changeTimeIdTimer-year" data-link-field="date-year" ng-show="changeTimeId == '3'">
+								<input type="hidden" id="date-year" value="" />
+								<span id="changeTimeId3" class="text-1-3x" ng-bind="mapTimeYear"></span>
+							</span>
+							<!-- <span id="changeTimeId1" class="text-1-6x" ng-bind="mapTimeDay| date:'yyyy/MM/dd'"></span>
+							<span id="changeTimeId2" class="hidden text-1-6x" ng-bind="mapTimeMonth"></span> 
+							<span id="changeTimeId3" class="hidden text-1-6x m-l-sm m-r-sm" ng-bind="mapTimeYear"></span>  --> 
+						</span>
+					<i class="fa fa-angle-right map-jt text-2x" id="dateRightId" ng-click="dateByJtRight()"  ng-class="{'col-0':dailyJt}"></i>
+	          		<i  class="map-jt text-2x" ng-click="dataRefresh()"  ng-show="searchPage == false">
+	          			<img id="resImg"style="width:15px" src="./theme/default/img/icon/Refresh.png"/>
+	          		</i> 
+			   	</div>
+		   </li>
+		</ul>
+	</div>
+</div>
+<script>
+app.controller('dateHeaderCtrl', function($scope) {
+	
+	$scope.$on("toDateHeader",function(e,data){
+		if(data && data == 'left'){
+			$scope.dateByJtRight();
+		}else{
+			$scope.dateByJtLeft();
+		}
+	});
+	//只能查询到前一天数据 mod 2017-05-11
+	var nowDate = new Date();
+	nowDate.setDate(nowDate.getDate()-1);
+	
+	//点击选择时间
+	$("#changeTimeIdTimer-day").datetimepicker({
+		language : 'zh-CN',
+		format : "yyyy/mm/dd",
+		minView : 2,
+		autoclose : true,
+		todayBtn : true,
+		endDate : nowDate,
+		initialDate : nowDate,
+		pickerPosition : "bottom-left"
+	});
+	
+	//选择完日期，关闭时触发（日）
+	$("#changeTimeIdTimer-day").on('hide',function(ev) {
+		var stringTime = $("#date-day").val();
+		if(stringTime){
+			var timestamp = getDateForStringDate(stringTime);
+			$scope.mapTimeDay = timestamp.getTime();
+			$("#changeTimeId1").text(timestamp.Format("yyyy/MM/dd"));
+			$scope.dailyJt = (new Date($scope.mapTimeDay).Format("yyyy-MM-dd") == (new Date($scope.mapTimeDayFlag).Format("yyyy-MM-dd"))) //标记下一天是否可以点击	
+			if($scope.dailyJt){
+				$("#dateRightId").addClass('col-0');
+			}else{
+				$("#dateRightId").removeClass('col-0');
+			}
+			$scope.$emit("time",[new Date($scope.mapTimeDay).Format("yyyy-MM-dd"),"day"])
+		}
+	});
+	
+	
+	//点击选择时间
+	$("#changeTimeIdTimer-month").datetimepicker({
+		language : 'zh-CN',
+		startView: 3, 
+		minView: 3, 
+		format: 'yyyy/mm',
+		autoclose : true,
+		todayBtn : true,
+		endDate : nowDate,
+		initialDate : nowDate,
+		pickerPosition : "bottom-left"
+	});
+	
+	//选择完日期，关闭时触发（月）
+	$("#changeTimeIdTimer-month").on('hide',function(ev) {
+		var stringTime = $("#date-month").val();
+		if(stringTime){
+			var timestamp = getDateForStringDate(stringTime);
+			//$scope.mapTimeMonth = timestamp.getTime();
+			//初始化的月份
+			var month = timestamp.getMonth()+1;
+			if(month < 10){
+				$scope.mapTimeMonth = timestamp.getFullYear() + '/0' + month;
+			}else{
+				$scope.mapTimeMonth = timestamp.getFullYear() + '/' + month;
+			}
+			$scope.mapCurrTimeMonth = timestamp.getMonth()+1;
+			$scope.mapTimeMonthY = timestamp.getFullYear();
+			$("#changeTimeId2").text(timestamp.Format("yyyy/MM"));
+			//$scope.JudgedailyJt();
+			$scope.dailyJt = ($scope.mapTimeMonth == (nowDate.Format("yyyy/MM")));
+			if($scope.dailyJt){
+				$("#dateRightId").addClass('col-0');
+			}else{
+				$("#dateRightId").removeClass('col-0');
+			}
+			$scope.$emit("time",[$scope.mapTimeMonth.replace("/","-") +"-01","month"])
+		}
+	});
+	
+	//点击选择时间
+	$("#changeTimeIdTimer-year").datetimepicker({
+		language : 'zh-CN',
+		startView: 4, 
+		minView: 4, 
+		format: 'yyyy',
+		autoclose : true,
+		todayBtn : true,
+		endDate : nowDate,
+		initialDate : nowDate,
+		pickerPosition : "bottom-left"
+	});
+	
+	//选择完日期，关闭时触发（年）
+	$("#changeTimeIdTimer-year").on('hide',function(ev) {
+		var stringTime = $("#date-year").val();
+		if(stringTime){
+			var timestamp = getDateForStringDate(stringTime);
+			$scope.mapTimeYear = timestamp.getFullYear();
+			$("#changeTimeId3").text(timestamp.Format("yyyy"));
+			$scope.dailyJt = ($scope.mapTimeYear == (nowDate.Format("yyyy")));
+			if($scope.dailyJt){
+				$("#dateRightId").addClass('col-0');
+			}else{
+				$("#dateRightId").removeClass('col-0');
+			}
+			$scope.$emit("time",[$scope.mapTimeYear+"-01-01","year"])
+		}
+	});
+	
+	function init(type,time){
+		$scope.dateTypeActive = type;
+		var dtime;
+		var mtime;
+		var ytime;
+		if(type == 'day'){
+			dtime = time;
+			mtime = nowDate;
+			ytime = nowDate;
+		}else if(type == 'month'){
+			dtime = nowDate;
+			mtime = time;
+			ytime = nowDate;
+		}else if(type == 'year'){
+			dtime = nowDate;
+			mtime = nowDate;
+			ytime = time;
+		}
+		
+		//当前日
+		$scope.mapTimeDay = dtime.getTime(); //用来计算时间
+		$scope.mapTimeDayFlag = nowDate.getTime(); //当天时间，用来判断是否可以点击
+
+		//当前月
+		$scope.mapCurrTimeMonth = mtime.getMonth()+1;
+		$scope.mapTimeMonthFlag = nowDate.getMonth()+1
+
+		//当前年
+		$scope.mapTimeYear = ytime.getFullYear();
+		$scope.mapTimeYearFlag = nowDate.getFullYear();
+
+		//初始化的月份
+		if($scope.mapCurrTimeMonth < 10){
+			$scope.mapTimeMonth = mtime.getFullYear() + '/0' + $scope.mapCurrTimeMonth;
+		}else{
+			$scope.mapTimeMonth = mtime.getFullYear() + '/' + $scope.mapCurrTimeMonth;
+		}
+		//初始化年
+		$scope.mapTimeMonthY = mtime.getFullYear();
+	}
+
+	//切换日月年标签
+	$scope.changeDate = function(changeDateFlag) {
+		$scope.changeTimeId = changeDateFlag
+		
+		if (changeDateFlag == "1") { //日
+			$scope.changeTime = "日";
+			$scope.dateTypeActive = "day";
+			$(".map-jt").removeClass("hidden");
+			$("#changeTimeId1").removeClass("hidden");
+			$("#changeTimeId1").siblings().addClass("hidden");
+			$scope.dailyJt = (new Date($scope.mapTimeDay).Format("yyyy-MM-dd") == (new Date($scope.mapTimeDayFlag).Format("yyyy-MM-dd"))); //标记下一天是否可以点击	
+			$scope.$emit("time",[new Date($scope.mapTimeDay).Format("yyyy-MM-dd"),"day"])
+		} else if (changeDateFlag == "2") { //月
+			$scope.dateTypeActive = "month";
+			$(".map-jt").removeClass("hidden");
+			$scope.dailyJt = ($scope.mapTimeMonth == (nowDate.Format("yyyy/MM")));
+			$scope.changeTime = "月";
+			$("#changeTimeId2").removeClass("hidden");
+			$("#changeTimeId2").siblings().addClass("hidden");
+			$scope.$emit("time",[$scope.mapTimeMonth.replace("/","-") +"-01","month"])
+		} else if (changeDateFlag == "3") { //年
+			$scope.dateTypeActive = "year";
+			$(".map-jt").removeClass("hidden");
+			$scope.dailyJt = ($scope.mapTimeYear == (nowDate.Format("yyyy")));
+			$scope.changeTime = "年";
+			$("#changeTimeId3").removeClass("hidden");
+			$("#changeTimeId3").siblings().addClass("hidden");
+			$scope.$emit("time",[$scope.mapTimeYear+"-01-01","year"])
+		}
+	}
+	
+	//箭头
+	$scope.dateByJtRight=function(){
+		
+		if($scope.dailyJt){
+			return false;
+		}else{
+			$scope.dateRight();
+			$("#statcontent").addClass("animated slideInRight")
+			setTimeout("addAnimete()", 500); 
+		}
+		
+	}
+	$scope.dateByJtLeft=function(){
+		$scope.dateLeft();
+		$("#statcontent").addClass("animated slideInLeft")
+		setTimeout("addAnimete()", 500);
+		
+	}
+
+	//向左面切换
+	$scope.dateLeft = function() {
+			//$("#statcontent").addClass("animated  slideInLeft")
+			//setTimeout("addAnimete()", 500); 
+			if ($scope.changeTimeId == "1") { //日
+				$scope.mapTimeDay = $scope.mapTimeDay - 1000 * 60 * 60 * 24;
+				$("#date-day").val(new Date($scope.mapTimeDay).Format("yyyy-MM-dd"));
+				$scope.dailyJt = (new Date($scope.mapTimeDay).Format("yyyy-MM-dd") == (new Date($scope.mapTimeDayFlag).Format("yyyy-MM-dd"))) //标记下一天是否可以点击	
+				$scope.$emit("time",[new Date($scope.mapTimeDay).Format("yyyy-MM-dd"),"day"])
+			} else if ($scope.changeTimeId == "2") { //月
+				
+				if ($scope.mapCurrTimeMonth - 1 <= 0) {
+					$scope.mapCurrTimeMonth = $scope.mapCurrTimeMonth + 11
+					$scope.mapTimeMonthY = $scope.mapTimeMonthY - 1
+				} else {
+					$scope.mapCurrTimeMonth = $scope.mapCurrTimeMonth - 1;
+				}
+				if($scope.mapCurrTimeMonth < 10){
+					$scope.mapTimeMonth = $scope.mapTimeMonthY + '/0' + $scope.mapCurrTimeMonth;
+				}else{
+					$scope.mapTimeMonth = $scope.mapTimeMonthY + '/' + $scope.mapCurrTimeMonth;
+				}
+				$("#date-month").val($scope.mapTimeMonth.replace("/","-"));
+				$scope.dailyJt = ($scope.mapTimeMonth == (nowDate.Format("yyyy/MM"))); //标记下一天是否可以点击	
+				
+				$scope.$emit("time",[$scope.mapTimeMonth.replace("/","-") +"-01","month"])
+			} else if ($scope.changeTimeId == "3") { //年
+				$scope.mapTimeYear = $scope.mapTimeYear - 1;
+				$scope.dailyJt = ($scope.mapTimeYear == (nowDate.Format("yyyy")));
+				$("#date-year").val($scope.mapTimeYear);
+				$scope.$emit("time",[$scope.mapTimeYear+"-01-01","year"])
+			}
+		}
+		//向右面切换
+	$scope.dateRight = function() {
+		if($scope.dailyJt){
+			return false;
+		}
+		//$("#statcontent").addClass("animated  slideInLeft")
+		//setTimeout("addAnimete()", 500);
+		if ($scope.changeTimeId == "1") { //日
+			$scope.mapTimeDay = $scope.mapTimeDay + 1000 * 60 * 60 * 24;
+			$("#date-day").val(new Date($scope.mapTimeDay).Format("yyyy-MM-dd"));
+			$scope.dailyJt = (new Date($scope.mapTimeDay).Format("yyyy-MM-dd")) == (new Date($scope.mapTimeDayFlag).Format("yyyy-MM-dd")) //标记下一天是否可以点击	
+				//广播
+			$scope.$emit("time",[new Date($scope.mapTimeDay).Format("yyyy-MM-dd"),"day"])
+		} else if ($scope.changeTimeId == "2") { //月
+			if ($scope.mapCurrTimeMonth + 1 > 12) {
+				$scope.mapCurrTimeMonth = ($scope.mapCurrTimeMonth + 1) % 12;
+				$scope.mapTimeMonthY = $scope.mapTimeMonthY + 1;
+			} else {
+				$scope.mapCurrTimeMonth = $scope.mapCurrTimeMonth + 1;
+			}
+			if($scope.mapCurrTimeMonth < 10){
+				$scope.mapTimeMonth = $scope.mapTimeMonthY + '/0' + $scope.mapCurrTimeMonth;
+			}else{
+				$scope.mapTimeMonth = $scope.mapTimeMonthY + '/' + $scope.mapCurrTimeMonth;
+			}
+			$("#date-month").val($scope.mapTimeMonth.replace("/","-"));
+			$scope.dailyJt = ($scope.mapTimeMonth == (nowDate.Format("yyyy/MM")));
+			/*if($scope.mapTimeMonthY==new Date().getFullYear()){
+				$scope.dailyJt = $scope.mapCurrTimeMonth == $scope.mapTimeMonthFlag //标记下一天是否可以点击	
+			}else{
+				$scope.dailyJt=false;
+			}*/
+			
+			$scope.$emit("time",[$scope.mapTimeMonth.replace("/","-") +"-01","month"])
+		} else if ($scope.changeTimeId == "3") { //年
+			$scope.mapTimeYear = $scope.mapTimeYear + 1;
+			$scope.dailyJt = ($scope.mapTimeYear == (nowDate.Format("yyyy")));
+			$("#date-year").val($scope.mapTimeYear);
+			$scope.$emit("time",[$scope.mapTimeYear+"-01-01","year"])
+		}
+	}
+		
+	//刷新
+	$scope.dataRefresh = function() {
+		if ($scope.changeTimeId == "1") { //日
+			$scope.$emit("time",[new Date($scope.mapTimeDay).Format("yyyy-MM-dd"),"day"])
+		} else if ($scope.changeTimeId == "2") { //月
+			$scope.$emit("time",[$scope.mapTimeMonth.replace("/","-") +"-01","month"])
+		} else if ($scope.changeTimeId == "3") { //年
+			$scope.$emit("time",[$scope.mapTimeYear+"-01-01","year"])
+		}
+	}
+	
+	//判断是否有传参
+	if($scope.gdjIdSP && $scope.bdzIdSP && $scope.lineIdSP && $scope.nodeIdSP){
+		if($scope.stypeSP && $scope.stimeSP){
+			init($scope.stypeSP , new Date($scope.stimeSP));
+			if ($scope.stypeSP == "day") { //日
+				$scope.changeTimeId = "1";
+				$scope.changeTime = "日";
+				$scope.dateTypeActive = "day";
+				$(".map-jt").removeClass("hidden");
+				$("#changeTimeId1").removeClass("hidden");
+				$("#changeTimeId1").siblings().addClass("hidden");
+				$scope.dailyJt = (new Date($scope.mapTimeDay).Format("yyyy-MM-dd") == (new Date($scope.mapTimeDayFlag).Format("yyyy-MM-dd"))); //标记下一天是否可以点击	
+			} else if ($scope.stypeSP == "month") { //月
+				$scope.changeTimeId = "2";
+				$scope.dateTypeActive = "month";
+				$(".map-jt").removeClass("hidden");
+				$scope.dailyJt = ($scope.mapTimeMonth == (nowDate.Format("yyyy/MM")));
+				$scope.changeTime = "月";
+				$("#changeTimeId2").removeClass("hidden");
+				$("#changeTimeId2").siblings().addClass("hidden");
+			} else if ($scope.stypeSP == "year") { //年
+				$scope.changeTimeId = "3";
+				$scope.dateTypeActive = "year";
+				$(".map-jt").removeClass("hidden");
+				$scope.dailyJt = ($scope.mapTimeYear == (nowDate.Format("yyyy")));
+				$scope.changeTime = "年";
+				$("#changeTimeId3").removeClass("hidden");
+				$("#changeTimeId3").siblings().addClass("hidden");
+			}
+			
+		}else{
+			init("day" , nowDate);
+			$scope.dailyJt = (new Date($scope.mapTimeDay).Format("yyyy-MM-dd") == (new Date($scope.mapTimeDayFlag).Format("yyyy-MM-dd"))); //标记下一天是否可以点击	
+		}
+	}else{
+		init("day" , nowDate);
+		$scope.dailyJt = (new Date($scope.mapTimeDay).Format("yyyy-MM-dd") == (new Date($scope.mapTimeDayFlag).Format("yyyy-MM-dd"))); //标记下一天是否可以点击	
+	}
+});
+</script>

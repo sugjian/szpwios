@@ -1,0 +1,35 @@
+<script src="js/controllers/realStat/equipment.js"></script>
+<div class="col-xs-12 norm" ng-controller="equipmentCtrl" >
+	<div class="col-xs-12 no-padder bg-writer m-t-sm ">
+		<div class="col-xs-12 wrapper-sm wrapper-l-r-md text-1-4x">逆变器D-103</div>
+		<div class="col-xs-6 wrapper-sm wrapper-l-r-md text-center col-d b-r-5 b-t-5">
+			<span class="text-1-2x">实时功率</span>
+			<span class="white text-1-5x" >36</span>
+			<span class="white text-1-4x">kWh</span>
+		</div>
+		<div class="col-xs-6 wrapper-sm wrapper-l-r-md col-d text-center b-t-5">
+			<span class="text-1-2x">实时效率</span>
+			<span class="white text-1-5x" >56</span>%
+		</div> 
+		<div class="col-xs-6 wrapper-sm wrapper-l-r-md text-center col-d b-r-5 b-t-5">
+			<span class="text-1-2x">日发电量</span>
+			<span class="white text-1-5x" >36</span>
+			<span class="white text-1-4x">kWh</span>
+		</div>
+		<div class="col-xs-6 wrapper-sm wrapper-l-r-md col-d text-center b-t-5">
+			<span class="text-1-2x">日  收  入</span>￥
+			<span class="white text-1-5x" >56</span>
+		</div>
+		<div class="col-xs-6 wrapper-sm wrapper-l-r-md text-center col-d b-r-5 b-t-5">
+			<span class="text-1-2x">电站装机容量</span>
+			<span class="white text-1-5x" >36</span>
+			<span class="white text-1-4x">kWh</span>
+		</div>
+		<div class="col-xs-6 wrapper-sm wrapper-l-r-md col-d text-center b-t-5">
+			<span class="text-1-2x">电站状态</span>
+			<span class="white text-1-5x" >故障</span>
+		</div>
+	</div>
+</div>
+	<toaster-container toaster-options="{'position-class': 'toast-top-full-width', 'close-button':true,'time-out':5000000}">
+</toaster-container>	

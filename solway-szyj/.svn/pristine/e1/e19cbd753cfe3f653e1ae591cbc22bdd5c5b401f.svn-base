@@ -1,0 +1,67 @@
+
+<style>
+.noteDetails00 span {
+	color: #666;
+}
+</style>
+<div class="modal fade modal-full" id="noteDetails00" tabindex="-1"
+	role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog ">
+			<div class="modal-content col-xs-12 no-padder" style="padding-bottom:30px!important">
+				<div class="modal-header col-3 col-xs-12 no-padder ">
+				
+					<button type="button" class="close close-img m-b-n-sm main-green" data-dismiss="modal" aria-hidden="true">
+                  	<img src="theme/default/img/icon/close.png">
+          		  </button>
+					<h4 class="modal-title text-center m-t-sm" >
+            		   故障详情
+            		</h4>
+				</div>
+				<div class="modal-body col-3 col-xs-12 no-padder">
+					<div class="col-xs-12 list-div b-w">
+						<span class="text-1-5x">电站名称</span>
+						<span class="pull-right text-1-5x col-6" id="stationDiv00"></span>
+					</div>
+					<div class="col-xs-12 list-div b-w">
+						<span class="text-1-5x">设备类型</span>
+						<span class="pull-right text-1-5x col-6" id="deviceTypeSp00"></span>
+					</div>
+					<div class="col-xs-12 list-div b-w">
+						<span class="text-1-5x">设备名称</span>
+						<span class="pull-right text-1-5x col-6" id="deviceNameSp00"></span>
+					</div>
+					<div class="col-xs-12 list-div b-w">
+						<span class="text-1-5x">故障状态</span>
+						<span class="pull-right text-1-5x col-6" id="faultStatusSp00"></span>
+					</div>
+					<div class="col-xs-12 list-div b-w">
+						<span class="text-1-5x">故障码</span>
+						<span class="pull-right text-1-5x col-6" id="faultcodeTd00"></span>
+					</div>
+					<div class="col-xs-12 list-div b-w">
+						<span class="text-1-5x">故障级别</span>
+						<span class="pull-right text-1-5x col-6" id="faultLevelTd00"></span>
+					</div>
+					<div class="col-xs-12 list-div b-w">
+						<span class="text-1-5x">开始时间</span>
+						<span class="pull-right text-1-5x col-6" id="dStartTime00"></span>
+					</div>
+					<div class="col-xs-12 list-div b-w">
+						<span class="text-1-5x">结束时间</span>
+						<span class="pull-right text-1-5x col-6" id="dEndTime00"></span>
+					</div>
+					<div class="col-xs-12 list-div b-w">
+						<span class="text-1-5x">报告时间</span>
+						<span class="pull-right text-1-5x col-6" id="sStartTime00"></span>
+					</div>
+					<div class="col-xs-12  wrapper b-w">
+						<span class="text-1-5x">故障类型</span>
+						<span class="col-xs-12 no-padder text-1-5x col-6"  id="faultclassTd00"></span>
+					</div>
+					<div class="col-xs-12 wrapper b-w">
+						<span class="text-1-5x">故障描述</span>
+						<span class="col-xs-12 no-padder text-1-5x col-6" id="faultdescTd00"></span>
+					</div>
+				</div>
+			</div>
+	</div>

@@ -1,0 +1,333 @@
+<link rel="stylesheet" href="theme/default/css/login.css" type="text/css" />
+<style>
+	body {
+		background-color: transparent;
+	}
+	.app {
+		background-color: transparent !important;
+	}
+</style>
+<script type="text/javascript">
+
+$(function() {
+	//版本彩蛋
+	var appVersionEgg_bool = true;
+	var appVersionEgg_Html = $("#appVersionEgg").html();
+	$("#appVersionEgg").on("click", function() {
+		if (appVersionEgg_bool) {
+			$("#appVersionEgg").html("[" + svnRevision + "]" + ctx)
+		} else {
+			$("#appVersionEgg").html(appVersionEgg_Html)
+		}
+		appVersionEgg_bool = !appVersionEgg_bool
+	});
+})
+
+//启动登录按钮登录状态样式
+function addBtnClass() {
+	$(".login-btn").button('loading').delay(1000).queue(function() {});
+}
+
+function dologin() {
+	$("#login_username").val('demo');
+	$("#login_pass").val('123456');
+	$("#loginBtn").trigger('click');
+}
+
+//判读是不是最新版本
+function isNewVer(){
+	if(svnRevision=='10149'){
+		return true;
+	}else{
+		$("#loginMessage").html("请您升级最新版本。  <a href='https://itunes.apple.com/cn/app/xin-neng-yun/id1066626493?mt=8'>下载地址</a>");
+		$("#loginMessage").show();
+		return false
+	}
+}
+app.controller('loginCtrl',function($scope, $http, $stateParams, $rootScope, $state) {
+	
+	//登录方法
+	$scope.login = function() {
+		addBtnClass();
+		$("#loginMessage").html("");
+		$("#loginMessage").hide();
+		cleanStorageNotUserName();
+		overViewData = {};
+		//localStorage.clear();
+		
+		var username = $("#login_username").val();
+		var password = $("#login_pass").val();
+
+		if (username == "" || null == username) {
+			$("#loginMessage").html("用户名不能为空");
+			$(".login-btn").button('reset');
+			return false;
+		}
+		if (null == password || password == "") {
+			$("#loginMessage").html("密码不能为空");
+			$(".login-btn").button('reset');
+			return false;
+		}
+		$scope.powerSupplys = null;
+		$http({
+				method : "GET",
+				url : ctx+"solway/getUserInfoForSolway",
+				params : {
+					'userName':username
+				},
+				timeout : 20000
+			})
+			.success(function (msg) {
+				console.log("中间数据库中获取权限列表")
+				console.log(msg)
+				var data = msg.data;
+				if(data && data.length>0){
+					var arr = [];
+					var arrMap = {};
+					for(var i=0;i<data.length;i++){
+						var isFirst = true;
+						if(arrMap[data[i].dataRequestAddress]){
+							isFirst = false;
+						}else{
+							arrMap[data[i].dataRequestAddress] = "1";
+						}
+						arr.push({'gdjId':data[i].gdjId,'address':data[i].dataRequestAddress,'systemId':data[i].id,'isFirst':isFirst})
+					}
+					$scope.powerSupplys = arr;
+				}
+				/* 
+				console.log("$scope.powerSupplys");
+				console.log($scope.powerSupplys) */
+				if($scope.powerSupplys && $scope.powerSupplys.length>0){
+					//登录接口（1个或者多个）
+					var loginSuccessResults = [];//存储登录接口返回值
+					var num=0;
+					for(var i=0;i<$scope.powerSupplys.length;i++){
+						(function(i){
+							if($scope.powerSupplys[i].isFirst){
+								$http({
+									method : "POST",
+									url : $scope.powerSupplys[i].address + "api/v1/user/login",
+									data :{
+										"username":username,
+										"password": password
+									},
+									dataType: "json",
+									timeout : 20000
+								}).success(function (msg) {
+									loginSuccessResults[i] = msg;
+									num++;
+									if(num == $scope.powerSupplys.length){//几个权限全部登录完之后，再操作
+										loginData(loginSuccessResults,username,password);
+									}
+									
+								}).error(function(msg){
+									loginSuccessResults[i] = null;
+									num++;
+									if(num == $scope.powerSupplys.length){//几个权限全部登录完之后，再操作
+										loginData(loginSuccessResults,username,password);
+									}
+								});
+							}else{
+								loginSuccessResults[i] = null;
+								num++;
+								if(num == $scope.powerSupplys.length){//几个权限全部登录完之后，再操作
+									loginData(loginSuccessResults,username,password);
+								}
+							}
+							
+						})(i);
+					}  
+					
+				}else{
+					$("#loginMessage").html("用户名不存在!");
+					$("#loginMessage").show();
+					$(".login-btn").button('reset');
+				}
+					
+			}).error(function(msg){
+				$("#loginMessage").html("连接超时，请重试!");
+				$("#loginMessage").show();
+				$(".login-btn").button('reset');
+			});
+	}
+	
+	function loginData(loginSuccessResults,username,password){
+			var hasSuccessedFlag = false; //登录接口中是否有一个成功的标志位，>= 1,则置为true
+			var addMap = {};
+			for(var j = 0;j<loginSuccessResults.length;j++){
+				if(loginSuccessResults[j] && loginSuccessResults[j].code == '0'){
+					hasSuccessedFlag = true;
+					addMap[$scope.powerSupplys[j].address]=loginSuccessResults[j].data.userId;
+					$scope.powerSupplys[j]['userId'] = loginSuccessResults[j].data.userId;
+				}
+			}
+			var tempPowerSupplys = [];
+			var powerSupplysMap = {};
+			for(var j = 0;j<$scope.powerSupplys.length;j++){
+				if(addMap[$scope.powerSupplys[j].address]){
+					$scope.powerSupplys[j]['userId'] = addMap[$scope.powerSupplys[j].address];
+				}
+				if($scope.powerSupplys[j].userId != undefined && $scope.powerSupplys[j].userId != null){
+					tempPowerSupplys.push($scope.powerSupplys[j]);
+					powerSupplysMap[$scope.powerSupplys[j].systemId] = $scope.powerSupplys[j];
+				}
+			}
+			//存储供电局信息
+			if(tempPowerSupplys && tempPowerSupplys.length>0){
+				var jsonObj = JSON.stringify(tempPowerSupplys);  //将JSON对象转化成字符串
+				storage["powerSupplys"] = jsonObj;   //用localStorage保存转化好的的字符串
+				storage["powerSupplysMap"] = JSON.stringify(powerSupplysMap);   //用localStorage保存转化好的的字符串
+			}
+			//若有一个供电站登录成功，则存储用户名，密码，并更新设备ID到中间数据库
+			if(hasSuccessedFlag){
+				storage["userName"]=username;//存储用户名
+				storage["password"]=password;//存储密码
+				storage["isLogin"]=1;//是否登录成功
+				//存储最近登录的5个账号密码
+				var listLen = 5;
+				var stuserList = storage["userList"];
+				var userList = [];
+				if(stuserList){
+					userList = JSON.parse(stuserList);
+				}
+				
+				if(userList && userList.length > 0){
+					var isHas = false;
+					for(var i=0;i<userList.length;i++){
+						if(userList[i].userName == username){
+							isHas = true;
+							break;
+						}
+					}
+					if(!isHas){
+						var newlist = userList.length;
+						if(userList.length == listLen){
+							newlist = listLen-1; 
+						}
+						var um = {"userName":username,"password":password};
+						var userListNew = [um];
+						userListNew = userListNew.concat(userList.slice(0,newlist));
+						storage["userList"] = JSON.stringify(userListNew);   
+					}
+				}else{
+					var um = {"userName":username,"password":password};
+					var userListNew = [um];
+					storage["userList"] = JSON.stringify(userListNew);   
+				}
+				saveDeviceId();
+				console.log(storage);
+				
+			}else{
+				$("#loginMessage").html("用户名或密码有误!");
+				$("#loginMessage").show();
+				$(".login-btn").button('reset');
+			}
+	}
+	
+	function saveDeviceId(){
+		$http({
+			method : "GET",
+			url : ctx+ "solway/updateDeviceIdForSolway",
+			params : {
+				"userName":storage["userName"],
+				"deviceId": deviceToken
+			}
+		}).success(function (msg) {
+		})
+		$state.go("app.realStatistics");
+	}
+	
+	//自动登录
+	var isAutoLogin = storage["isAutoLogin"];
+	console.log(isAutoLogin)
+	if(isAutoLogin=="1"){
+		$('#isAutoLoginId').attr('checked', 'checked');
+	}
+	var username = storage["userName"];
+	var password = storage["password"];
+	$("#login_username").val(username);
+	$("#login_pass").val(password);
+	if(username && password && (isAutoLogin==true)){
+		$scope.login();
+	}
+	//得到用户名历史清单
+	var userList = storage["userList"];
+	if(userList && userList.length > 0){
+		$scope.userList = JSON.parse(storage["userList"]);
+	}
+	$("#login_username").focus(function(){
+		$(".usedUsername").show();
+	});
+	
+	$("#centerId").click(function(){
+		if(!$("#login_username").is(":focus")){
+			$(".usedUsername").hide();
+		}
+	});
+	
+	$scope.selectUser = function(username,password) {
+		$("#login_username").val(username);
+		$("#login_pass").val(password);
+	}
+	
+	$scope.checkBoxClick = function() {
+		var ischeck = $("#isAutoLoginId").is(":checked");
+		if(ischeck){
+			storage["isAutoLogin"] = "1";
+		}else{
+			storage["isAutoLogin"] = "2";
+		}
+		
+	}
+	
+});
+</script>
+</head>
+<body>
+	<img src="theme/default/img/bg.jpg" class="bg-img" />
+	<center class="padder col-sm-12" ng-controller="loginCtrl" style="margin-top: -20px"  id="centerId">
+		<div class="logoImg" style="color:rgb(11,149,152);font-size: 20px;">
+		</div>
+		<div style="color:#008347;font-size: 22px;margin:80px 0px;">
+			<!--<img src="./theme/default/img/login.png" style="zoom: 0.5;" class="logoImg">-->
+			<span>智能配网监测系统</span>
+		</div>
+		<form class="col-xs-12">
+			<div class="col-xs-12 form-group login-input">
+				<div class="input-group">
+					<div class="input-group-addon">
+						<span>
+							<img alt="" src="./theme/default/img/icon/person.png" style="zoom: 0.5;">
+						</span>
+					</div>
+					<div class="userd-username-con">
+						<input type="text" class="form-control" id="login_username" placeholder="用户名" >
+						<div class="usedUsername">
+							<p ng-repeat="user in userList"  ng-click="selectUser(user.userName,user.password)" ng-bind="user.userName"></p>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-xs-12 form-group login-input">
+				<div class="input-group">
+					<div class="input-group-addon">
+						<span>
+							<img alt="" src="./theme/default/img/icon/key.png" style="zoom: 0.5;">
+						</span>
+					</div>
+					<input type="password" class="form-control" id="login_pass" placeholder="用户密码">
+				</div>
+			</div>
+			<p id="loginMessage" style="font-size: 14px; font-family: '黑体'; color: red; text-align: center; display: none;"></p>
+			<div class="col-xs-12">
+				<button id="loginBtn" class="col-xs-12 no-padder btn login-btn" ng-click="login()" data-loading-text="登录中...">登录</button>
+			</div>
+		</form>
+		<div class="col-xs-12 footTilte">
+			<span class="col-xs-12 ">
+					<input type="checkbox" name="isAutoLoginId" id="isAutoLoginId" ng-click = "checkBoxClick()" class="m-r-xs"  />自动登录
+			</span>
+		</div>
+	</center>
+</body>

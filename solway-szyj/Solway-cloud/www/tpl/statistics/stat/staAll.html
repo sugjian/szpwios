@@ -1,0 +1,713 @@
+<link rel="stylesheet" type="text/css" href="theme/default/css/historyStatistics/staDetailModel.css">
+<div ng-controller="staDetailModelCtrl" >
+	<div class="bg-black app-header navbar ng-scope" id="distUserNav">
+		<ul class="nav col-xs-12 no-padder nav-top"  >
+	         <li class="col-xs-3 no-padder">
+	         	<a ng-click="beback()">
+	         		<!-- <img src="./theme/default/img/icon/top-back@2x.png" class="v-middle img_goBack"> -->
+	         		<i class="iocn icon-magnifier" style="vertical-align: middle;    font-size: 18px;"></i>
+	         	</a>
+	          </li>
+	         <li class="col-xs-6 no-padder text-center">
+	         	<div style="    line-height: 40px;">
+	         		<div class="loaderHead hidden" id="loadFlagHS">
+				    <div class="loader-inner ball-beat">
+				      <div></div>
+				      <div></div>
+				      <div></div>
+				    </div>
+			 	 </div>
+	         		<a style="font-size:18px;" id="historyStatic">历史统计</a>
+	         	</div>
+	          </li>
+	          <li class="col-xs-3 no-padder text-right">
+	          		<a ng-click="goRealSta()" class="text-1-1x">
+	          		<img alt="" src="./theme/default/img/icon/foot-antenna1@2x.png" style="width: 20px;">
+	          	</a>
+	          </li>
+	    </ul>
+	</div>
+	<div id="statcontent"  class="col-xs-12 no-padder" >
+		<a class="beback" ng-click="beback()">
+	   		<img src="./theme/default/img/icon/top-back@2x.png" class="img_goBack" style="vertical-align: sub;">
+	   	</a>
+	   	<div class="overflow-auto">
+		   	<div class="detail-position">{{gdjName|dataNullFilter}}-{{bdzName|dataNullFilter}}-{{lineName|dataNullFilter}}-{{nodeName|dataNullFilter}}</div>
+		   	<!-- <div class="detail-position">
+		   		<span class="triangle-left"></span><span class="square">{{gdjName|dataNullFilter}}-{{bdzName|dataNullFilter}}-{{lineName|dataNullFilter}}-{{nodeName|dataNullFilter}}</span><span class="triangle-right"></span>
+		   	</div> -->
+			<div class="load-con">
+				<p class="p-title">负荷曲线</p>
+				<!-- <div id="loadLine">
+				</div> -->
+				<div ng-include="'tpl/statistics/modal/loadLineModel.html'" ng-show="hasCurveLineData"></div>
+				<div style="text-align: center;" ng-hide="hasCurveLineData">
+					<img src="./theme/default/img/realStatistics/no-data.png"  id="tipImg" style="width:30%;"></img>
+					<p >该时间段无数据</p>
+				</div>
+				<div class="curve-tip">
+					<!-- <span class="a"><span></span>A相平均</span>
+					<span class="b"><span></span>B相平均</span>
+					<span class="c"><span></span>C相平均</span>-->
+				</div> 
+			</div>
+			<div class="harmonic-con">
+				<p class="p-title">谐波含有率</p>
+				<div class="abc-btn clearfix" ng-show="hasHarmonicData"><div class="pull-right"><a class="active" ng-click="getDataABC('a')">A相</a><a ng-click="getDataABC('b')">B相</a><a ng-click="getDataABC('c')">C相</a></div></div>
+				<div ng-include="'tpl/statistics/modal/harmonicLineModel.html'" ng-show="hasHarmonicData"></div>
+				<div style="text-align: center;" ng-hide="hasHarmonicData">
+					<img src="./theme/default/img/realStatistics/no-data.png"  id="tipImg" style="width:30%;"></img>
+					<p >该时间段无数据</p>
+				</div>
+				<div class="curve-tip">
+					<!--<span class="a"><span></span>THD</span>
+					<span class="b"><span></span>3次</span>
+					<span class="c"><span></span>5次</span>
+					<span class="d"><span></span>7次</span>
+					<span class="e"><span></span>9次</span>
+					<span class="f"><span></span>11次</span>
+					<span class="g"><span></span>13次</span>-->
+				</div> 
+			</div>
+			<div class="clearfix statistics-con">
+				<!--<div class="pull-left temperature" ng-click="showDetail('tempContent')">
+					<h1>平均温度(℃)</h1>
+					<p class="value"><span>A相:</span>{{temData[0][4]|dataNullFilter}}</p>
+					<p class="value"><span>B相:</span>{{temData[1][4]|dataNullFilter}}</p>
+					<p class="value"><span>C相:</span>{{temData[2][4]|dataNullFilter}}</p>
+					 <p class="unit">平均温度（℃）</p> 
+				</div>-->
+				<div class="pull-left current" ng-click="showDetail('curContent')">
+					<h1>平均电流(A)</h1>
+					<p class="value">A相:{{currData[0][4]|dataNullFilter| limitTo:5}}</p>
+					<p class="value">B相:{{currData[1][4]|dataNullFilter| limitTo:5}}</p>
+					<p class="value">C相:{{currData[2][4]|dataNullFilter| limitTo:5}}</p>
+					<!--<p class="unit">平均电量（A）</p> -->
+				</div>
+				<div class="pull-left THD" ng-click="showDetail('thdContent')">
+					<h1>平均谐波THD(%)</h1>
+					<p class="value">A相:{{thdData[0][4]|dataNullFilter}}</p>
+					<p class="value">B相:{{thdData[1][4]|dataNullFilter}}</p>
+					<p class="value">C相:{{thdData[2][4]|dataNullFilter}}</p>
+					<!--<p class="unit">平均谐波THD（%）</p> -->
+				</div>
+				<div class="pull-left average" ng-click="showDetail('averContent')">
+					<h1>3次谐波含量平均值(%)</h1>
+					<p class="value">A相:{{averData[0][0]|dataNullFilter}}</p>
+					<p class="value">B相:{{averData[1][0]|dataNullFilter}}</p>
+					<p class="value">C相:{{averData[2][0]|dataNullFilter}}</p>
+					<!--<p class="unit">平均谐波THD（%）</p> -->
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="alert-con">
+		<div id="cover">
+		</div>
+		<div class="content-con" ng-show="content == 'tempContent'">
+			<p class="title">温度(℃)</p>
+			<span class="close-con" ng-click="closeAlert()"><img src="theme/default/img/historyStatistics/close.png" style="width: 30px;"></span>
+			<div class="table-con">
+				<div class="clearfix">
+					<div class="pull-left blue-word">所在相</div>
+					<div class="pull-left yellow-word">A</div>
+					<div class="pull-left green-word">B</div>
+					<div class="pull-left red-word">C</div>
+				</div>
+				<div class="clearfix">
+					<div class="pull-left blue-word">最高温度</div>
+					<div class="pull-left common-word">{{temData[0][0]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{temData[1][0]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{temData[2][0]|dataNullFilter}}</div>
+				</div>
+				<div class="clearfix">
+					<div class="pull-left blue-word">出现时间</div>
+					<div class="pull-left common-word time"><div>{{temData[0][1]|cleanTimeTZ|dataNullFilter}}</div></div>
+					<div class="pull-left common-word time"><div>{{temData[1][1]|cleanTimeTZ|dataNullFilter}}</div></div>
+					<div class="pull-left common-word time"><div>{{temData[2][1]|cleanTimeTZ|dataNullFilter}}</div></div>
+				</div>
+				<div class="clearfix">
+					<div class="pull-left blue-word">最低温度</div>
+					<div class="pull-left common-word">{{temData[0][2]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{temData[1][2]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{temData[2][2]|dataNullFilter}}</div>
+				</div>
+				<div class="clearfix">
+					<div class="pull-left blue-word">出现时间</div>
+					<div class="pull-left common-word time"><div>{{temData[0][3]|cleanTimeTZ|dataNullFilter}}</div></div>
+					<div class="pull-left common-word time"><div>{{temData[1][3]|cleanTimeTZ|dataNullFilter}}</div></div>
+					<div class="pull-left common-word time"><div>{{temData[2][3]|cleanTimeTZ|dataNullFilter}}</div></div>
+				</div>
+				<div class="clearfix">
+					<div class="pull-left blue-word">平均温度</div>
+					<div class="pull-left common-word">{{temData[0][4]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{temData[1][4]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{temData[2][4]|dataNullFilter}}</div>
+				</div>
+				<div class="clearfix">
+					<div class="pull-left blue-word">温度超限时长</div>
+					<div class="pull-left common-word ">{{temData[0][5]|dataNullFilter}}</div>
+					<div class="pull-left common-word ">{{temData[1][5]|dataNullFilter}}</div>
+					<div class="pull-left common-word ">{{temData[2][5]|dataNullFilter}}</div>
+				</div>
+			</div>
+		</div>
+		<div class="content-con" ng-show="content == 'curContent'">
+			<p class="title">电流(A)</p>
+			<span class="close-con" ng-click="closeAlert()"><img src="theme/default/img/historyStatistics/close.png" style="width: 30px;"></span>
+			<div class="table-con">
+				<div class="clearfix">
+					<div class="pull-left blue-word">所在相</div>
+					<div class="pull-left yellow-word">A</div>
+					<div class="pull-left green-word">B</div>
+					<div class="pull-left red-word">C</div>
+				</div>
+				<div class="clearfix">
+					<div class="pull-left blue-word">最高电流</div>
+					<div class="pull-left common-word">{{currData[0][0]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{currData[1][0]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{currData[2][0]|dataNullFilter}}</div>
+				</div>
+				<div class="clearfix">
+					<div class="pull-left blue-word">出现时间</div>
+					<div class="pull-left common-word time"><div>{{currData[0][1]|cleanTimeTZ|dataNullFilter}}</div></div>
+					<div class="pull-left common-word time"><div>{{currData[1][1]|cleanTimeTZ|dataNullFilter}}</div></div>
+					<div class="pull-left common-word time"><div>{{currData[2][1]|cleanTimeTZ|dataNullFilter}}</div></div>
+				</div>
+				<div class="clearfix">
+					<div class="pull-left blue-word">最小电流</div>
+					<div class="pull-left common-word">{{currData[0][2]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{currData[1][2]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{currData[2][2]|dataNullFilter}}</div>
+				</div>
+				<div class="clearfix">
+					<div class="pull-left blue-word">出现时间</div>
+					<div class="pull-left common-word time">
+						<div>{{currData[0][3]|cleanTimeTZ|dataNullFilter}}</div>
+    				</div>
+					<div class="pull-left common-word time"><div>{{currData[1][3]|cleanTimeTZ|dataNullFilter}}</div></div>
+					<div class="pull-left common-word time"><div>{{currData[2][3]|cleanTimeTZ|dataNullFilter}}</div></div>
+				</div>
+				<div class="clearfix">
+					<div class="pull-left blue-word">平均电流</div>
+					<div class="pull-left common-word">{{currData[0][4]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{currData[1][4]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{currData[2][4]|dataNullFilter}}</div>
+				</div>
+				<div class="clearfix">
+					<div class="pull-left blue-word">电流超限时长</div>
+					<div class="pull-left common-word ">{{currData[0][5]|dataNullFilter}}</div>
+					<div class="pull-left common-word ">{{currData[1][5]|dataNullFilter}}</div>
+					<div class="pull-left common-word ">{{currData[2][5]|dataNullFilter}}</div>
+				</div>
+			</div>
+		</div>
+		<div class="content-con" ng-show="content == 'thdContent'">
+			<p class="title">谐波THD(%)</p>
+			<span class="close-con" ng-click="closeAlert()"><img src="theme/default/img/historyStatistics/close.png" style="width: 30px;"></span>
+			<div class="table-con">
+				<div class="clearfix">
+					<div class="pull-left blue-word">所在相</div>
+					<div class="pull-left yellow-word">A</div>
+					<div class="pull-left green-word">B</div>
+					<div class="pull-left red-word">C</div>
+				</div>
+				<div class="clearfix">
+					<div class="pull-left blue-word">谐波THD最大值</div>
+					<div class="pull-left common-word">{{thdData[0][0]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{thdData[1][0]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{thdData[2][0]|dataNullFilter}}</div>
+				</div>
+				<div class="clearfix">
+					<div class="pull-left blue-word">出现时间</div>
+					<div class="pull-left common-word time"><div>{{thdData[0][1]|cleanTimeTZ|dataNullFilter}}</div></div>
+					<div class="pull-left common-word time"><div>{{thdData[1][1]|cleanTimeTZ|dataNullFilter}}</div></div>
+					<div class="pull-left common-word time"><div>{{thdData[2][1]|cleanTimeTZ|dataNullFilter}}</div></div>
+				</div>
+				<div class="clearfix">
+					<div class="pull-left blue-word">谐波THD最小值</div>
+					<div class="pull-left common-word">{{thdData[0][2]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{thdData[1][2]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{thdData[2][2]|dataNullFilter}}</div>
+				</div>
+				<div class="clearfix">
+					<div class="pull-left blue-word">出现时间</div>
+					<div class="pull-left common-word time"><div>{{thdData[0][3]|cleanTimeTZ|dataNullFilter}}</div></div>
+					<div class="pull-left common-word time"><div>{{thdData[1][3]|cleanTimeTZ|dataNullFilter}}</div></div>
+					<div class="pull-left common-word time"><div>{{thdData[2][3]|cleanTimeTZ|dataNullFilter}}</div></div>
+				</div>
+				<div class="clearfix">
+					<div class="pull-left blue-word">平均谐波THD</div>
+					<div class="pull-left common-word">{{thdData[0][4]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{thdData[1][4]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{thdData[2][4]|dataNullFilter}}</div>
+				</div>
+			</div>
+		</div>
+		<div class="content-con" ng-show="content == 'averContent'">
+			<p class="title">各次谐波含有量平均值(%)</p>
+			<span class="close-con" ng-click="closeAlert()"><img src="theme/default/img/historyStatistics/close.png" style="width: 30px;"></span>
+			<div class="table-con">
+				<div class="clearfix">
+					<div class="pull-left blue-word">所在相</div>
+					<div class="pull-left yellow-word">A</div>
+					<div class="pull-left green-word">B</div>
+					<div class="pull-left red-word">C</div>
+				</div>
+				<div class="clearfix">
+					<div class="pull-left blue-word">3次</div>
+					<div class="pull-left common-word">{{averData[0][0]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{averData[1][0]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{averData[2][0]|dataNullFilter}}</div>
+				</div>
+				<div class="clearfix">
+					<div class="pull-left blue-word">5次</div>
+					<div class="pull-left common-word">{{averData[0][1]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{averData[1][1]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{averData[2][1]|dataNullFilter}}</div>
+				</div>
+				<div class="clearfix">
+					<div class="pull-left blue-word">7次</div>
+					<div class="pull-left common-word">{{averData[0][2]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{averData[1][2]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{averData[2][2]|dataNullFilter}}</div>
+				</div>
+				<div class="clearfix">
+					<div class="pull-left blue-word">9次</div>
+					<div class="pull-left common-word">{{averData[0][3]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{averData[1][3]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{averData[2][3]|dataNullFilter}}</div>
+				</div>
+				<div class="clearfix">
+					<div class="pull-left blue-word">11次</div>
+					<div class="pull-left common-word">{{averData[0][4]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{averData[1][4]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{averData[2][4]|dataNullFilter}}</div>
+				</div>
+				<div class="clearfix">
+					<div class="pull-left blue-word">13次</div>
+					<div class="pull-left common-word">{{averData[0][5]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{averData[1][5]|dataNullFilter}}</div>
+					<div class="pull-left common-word">{{averData[2][5]|dataNullFilter}}</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<toaster-container toaster-options="{'position-class': 'toast-top-right', 'close-button':true}"></toaster-container>
+<script>
+app.controller('staDetailModelCtrl', function($scope,$state, $http,$q,toaster) {
+	var windowH = $(window).height();
+	var windowW= $(window).width();
+	$(".overflow-auto").height(windowH-160);
+	
+	$scope.beback = function(){
+		$scope.$emit("beback")
+	}
+	//测试代码
+	/* $scope.loadLineData  = [{"time":"2016-11-17T00:00:00Z","sgs_a_max":92.97,"sgs_a_avg":86.31,"sgs_b_max":93.5,"sgs_b_avg":87.69,"sgs_c_max":88.56,"sgs_c_avg":83.23},
+	     		        {"time":"2016-11-17T01:00:00Z","sgs_a_max":85.79,"sgs_a_avg":81.81,"sgs_b_max":87.53,"sgs_b_avg":84.6,"sgs_c_max":83.31,"sgs_c_avg":79.8},
+	     		        {"time":"2016-11-17T02:00:00Z","sgs_a_max":82.97,"sgs_a_avg":80.09,"sgs_b_max":86.74,"sgs_b_avg":82.95,"sgs_c_max":82.61,"sgs_c_avg":78.51},
+	     		        {"time":"2016-11-17T03:00:00Z","sgs_a_max":83.66,"sgs_a_avg":79.57,"sgs_b_max":89.55,"sgs_b_avg":83.08,"sgs_c_max":83,"sgs_c_avg":78.31},
+	     		        {"time":"2016-11-17T04:00:00Z","sgs_a_max":87.25,"sgs_a_avg":82.82,"sgs_b_max":90.95,"sgs_b_avg":85.92,"sgs_c_max":86.77,"sgs_c_avg":81.64},
+	     		        {"time":"2016-11-17T05:00:00Z","sgs_a_max":98.91,"sgs_a_avg":91.19,"sgs_b_max":102.8,"sgs_b_avg":94.3,"sgs_c_max":96.72,"sgs_c_avg":89.51},
+	     		        {"time":"2016-11-17T06:00:00Z","sgs_a_max":103.66,"sgs_a_avg":98.22,"sgs_b_max":105.47,"sgs_b_avg":100.65,"sgs_c_max":98.97,"sgs_c_avg":96},
+	     		        {"time":"2016-11-17T07:00:00Z","sgs_a_max":130.41,"sgs_a_avg":114.59,"sgs_b_max":131.96,"sgs_b_avg":116.07,"sgs_c_max":131.3,"sgs_c_avg":112.55},
+	     		        {"time":"2016-11-17T08:00:00Z","sgs_a_max":136.77,"sgs_a_avg":130.81,"sgs_b_max":139.02,"sgs_b_avg":133.37,"sgs_c_max":136.46,"sgs_c_avg":130.2}
+	     		      ];
+	$scope.harmonicLineData = [{"time":"2016-11-17T00:00:00Z","thd":3.76,"h100":0.71,"h150":0.89,"h250":2.96,"h350":1.08,"h450":0.22,"h550":1.46,"h650":1.05},
+	                        {"time":"2016-11-17T01:00:00Z","thd":4.37,"h100":0.73,"h150":0.86,"h250":3.59,"h350":1.28,"h450":0.17,"h550":1.53,"h650":1.1},
+	                        {"time":"2016-11-17T02:00:00Z","thd":4.28,"h100":0.56,"h150":0.8,"h250":3.59,"h350":1.38,"h450":0.18,"h550":1.26,"h650":1.05},
+	                        {"time":"2016-11-17T03:00:00Z","thd":4.17,"h100":0.63,"h150":0.77,"h250":3.58,"h350":1.08,"h450":0.16,"h550":1.18,"h650":1.06},
+	                        {"time":"2016-11-17T04:00:00Z","thd":4.28,"h100":0.48,"h150":0.68,"h250":3.67,"h350":1.15,"h450":0.14,"h550":1.31,"h650":1.06},
+	                        {"time":"2016-11-17T05:00:00Z","thd":3.44,"h100":0.51,"h150":0.55,"h250":2.9,"h350":0.95,"h450":0.08,"h550":1.14,"h650":0.86},
+	                        {"time":"2016-11-17T06:00:00Z","thd":3.7,"h100":0.52,"h150":0.29,"h250":3.17,"h350":1.01,"h450":0.12,"h550":1.36,"h650":0.79},
+	                        {"time":"2016-11-17T07:00:00Z","thd":3.99,"h100":0.31,"h150":0.22,"h250":3.63,"h350":1.08,"h450":0.09,"h550":0.95,"h650":0.6},
+	                        {"time":"2016-11-17T08:00:00Z","thd":3.66,"h100":0.35,"h150":0.17,"h250":3.38,"h350":0.8,"h450":0.08,"h550":0.91,"h650":0.62}
+	                      ];
+	$scope.statisticsLineData= {"sgs_a":{"maxCurrent":152.6,"maxCurrentTime":"2016-11-17T09:40:00Z","minCurrent":75.5,"minCurrentTime":"2016-11-17T02:50:00Z","maxTemp":15,"maxTempTime":"2016-11-17T09:40:00Z",
+						"minTemp":14,"minTempTime":"2016-11-17T00:00:00Z","maxThd":5.17,"maxThdTime":"2016-11-17T01:20:00Z","minThd":2.57,"minThdTime":"2016-11-17T09:25:00Z","avgCurrent":97.9,
+						"avgTemp":14.4,"avgThd":3.89,"avgH150":0.55,"avgH250":3.34,"avgH350":1.05,"avgH450":0.13,"avgH550":1.21,"avgH650":0.88,"currentOverLimit":null,"tempOverLimit":null},
+				"sgs_b":{"maxCurrent":157.1,"maxCurrentTime":"2016-11-17T09:40:00Z","minCurrent":77.4,"minCurrentTime":"2016-11-17T03:35:00Z","maxTemp":15,"maxTempTime":"2016-11-17T00:35:00Z",
+						"minTemp":14,"minTempTime":"2016-11-17T00:05:00Z","maxThd":5.36,"maxThdTime":"2016-11-17T01:30:00Z","minThd":2.39,"minThdTime":"2016-11-17T09:25:00Z","avgCurrent":100.6,
+						"avgTemp":14.2,"avgThd":3.97,"avgH150":0.5,"avgH250":3.47,"avgH350":1.1,"avgH450":0.14,"avgH550":1.02,"avgH650":0.96,"currentOverLimit":null,"tempOverLimit":null},
+				"sgs_c":{"maxCurrent":150.5,"maxCurrentTime":"2016-11-17T09:40:00Z","minCurrent":74.9,"minCurrentTime":"2016-11-17T02:50:00Z","maxTemp":15,"maxTempTime":"2016-11-17T02:35:00Z",
+						"minTemp":14,"minTempTime":"2016-11-17T09:40:00Z","maxThd":4.94,"maxThdTime":"2016-11-17T01:20:00Z","minThd":2.43,"minThdTime":"2016-11-17T09:25:00Z","avgCurrent":96.2,
+						"avgTemp":14,"avgThd":3.62,"avgH150":0.3,"avgH250":3.01,"avgH350":1.07,"avgH450":0.17,"avgH550":1.18,"avgH650":1.02,"currentOverLimit":null,"tempOverLimit":null}} */
+	$scope.$on("toStaAll",function(e,data){
+		$scope.dcu_id = data[0];
+		$scope.type = data[1];
+		$scope.time = data[2];
+		$scope.address =data[3];
+		$scope.sys_id = data[4];
+		$scope.bdz_id = data[5];
+		$scope.line_id = data[6];
+		
+		$scope.initLineData();//获取数据
+		$scope.gdjName = null;
+		$scope.bdzName =  null;
+		$scope.lineName =  null;
+		$scope.nodeName = null;
+		$scope.getName($scope.sys_id,$scope.bdz_id,$scope.line_id,$scope.dcu_id);
+	});
+	
+	$scope.$on("toStaAllTime",function(e,data){
+		//console.log(data);
+		$scope.time = data[0];
+		$scope.type = data[1];
+		
+		$scope.initLineData();
+		
+	});
+	var num,dataIsSuccess = true;
+	//页面曲线数据等的获取
+	$scope.initLineData = function(){
+		$("#historyStatic").addClass("hidden");
+		$("#loadFlagHS").removeClass("hidden");
+		num=3;
+		dataIsSuccess = true;
+		$scope.getLoadLine($scope.dcu_id);
+		$scope.getHarmonicLine($scope.dcu_id);
+		$scope.getStatistics($scope.dcu_id);
+		
+	}
+	
+	
+	//负荷曲线
+	$scope.hasCurveLineData = true;
+	$scope.getLoadLine = function(id){
+		$http({
+			method : "GET",
+			url : $scope.address+"api/v1/dcu/stats",
+			params : {
+				'dcu_id':id,
+				'time':$scope.time,
+				'type':$scope.type
+			
+			},
+			timeout : 60000
+		}).success(function(msg) {
+			if(msg && msg.data && msg.data.length>0){
+				$scope.hasCurveLineData = true;
+			}else{
+				$scope.hasCurveLineData = false;
+			}
+			if(msg && msg.code == "0"){
+				$scope.loadData = msg.data;
+				$scope.$broadcast('loadData',null);
+			}else{
+				dataIsSuccess = false;
+			}
+			numStatistics();
+		}).error(function(msg) {
+			dataIsSuccess = false;
+			numStatistics();
+			$scope.hasCurveLineData = false;
+		});
+		
+	}
+	$scope.abc = "sgs_a";
+	//谐波含有率
+	$scope.hasHarmonicData = true;
+	$scope.getHarmonicLine = function(id){
+		
+		$http({
+			method : "GET",
+			url : $scope.address+"api/v1/dcu/harmonicInfo/avg",
+			params : {
+				'dcu_id':id,
+				'time':$scope.time,
+				'type':$scope.type,
+				'position':$scope.abc
+			
+			},
+			timeout : 60000
+		}).success(function(msg) {
+			if(msg && msg.data && msg.data.length>0){
+				$scope.hasHarmonicData = true;
+			}else{
+				$scope.hasHarmonicData = false;
+			}
+			
+			if(msg && msg.code == "0"){
+				$scope.harmonicData = msg.data;
+				$scope.$broadcast('harmonicData',null);
+			}else{
+				dataIsSuccess = false;
+			}
+			numStatistics();
+		}).error(function(msg) {
+			dataIsSuccess = false;
+			numStatistics();
+			$scope.hasHarmonicData = false;
+		});
+	}
+	
+	//温度，谐波，电流，平均值
+	$scope.getStatistics = function(id){
+		$http({
+			method : "GET",
+			url : $scope.address+"api/v1/dcu/statistics",
+			params : {
+				'dcu_id':id,
+				'time':$scope.time,
+				'type':$scope.type
+			
+			},
+			timeout : 60000
+		}).success(function(msg) {
+			if(msg && msg.code == "0"){
+				//if(msg.data.sgs_a != null ||msg.data.sgs_b != null || msg.data.sgs_c != null ){
+					renderStaLine(msg.data);
+				//} 
+			} else{
+				dataIsSuccess = false;
+			}
+			numStatistics();
+		}).error(function(msg) {
+			dataIsSuccess = false;
+			numStatistics();
+		});
+	}
+	function numStatistics(){
+		num--;
+		if(num==0){
+			$("#historyStatic").removeClass("hidden");
+			$("#loadFlagHS").addClass("hidden");
+			if(!dataIsSuccess){
+				toaster.pop('error', '', '数据获取失败!');
+			}
+		}
+	}
+	//渲染基础数据
+	function renderStaLine(data){
+		var bdzNo = overViewData[$scope.sys_id].substationsMap[$scope.bdz_id].no;
+		$scope.temData = [];$scope.currData=[];$scope.thdData =[];$scope.averData =[];
+		if(data.sgs_a){
+			if(bdzNo != '2'){
+				$scope.temData.push([data.sgs_a.maxTemp,data.sgs_a.maxTempTime,data.sgs_a.minTemp,data.sgs_a.minTempTime,data.sgs_a.avgTemp,formatSeconds(data.sgs_a.tempOverLimit)]);
+			}else{
+				$scope.temData.push(["-","-","-","-","-","-"]);
+			}
+			$scope.currData.push([data.sgs_a.maxCurrent,data.sgs_a.maxCurrentTime,data.sgs_a.minCurrent,data.sgs_a.minCurrentTime,data.sgs_a.avgCurrent,formatSeconds(data.sgs_a.currentOverLimit)]);
+			$scope.thdData.push([data.sgs_a.maxThd,data.sgs_a.maxThdTime,data.sgs_a.minThd,data.sgs_a.minThdTime,data.sgs_a.avgThd]);
+			$scope.averData.push([data.sgs_a.avgH150,data.sgs_a.avgH250,data.sgs_a.avgH350,data.sgs_a.avgH450,data.sgs_a.avgH550,data.sgs_a.avgH650]);
+		}else{
+			$scope.temData.push(["","","","","",""]);
+			$scope.currData.push(["","","","","",""]);
+			$scope.thdData.push(["","","","","",""]);
+			$scope.averData.push(["","","","","",""]);
+		}
+		
+		if(data.sgs_b){
+			if(bdzNo != '2'){
+				$scope.temData.push([data.sgs_b.maxTemp,data.sgs_b.maxTempTime,data.sgs_b.minTemp,data.sgs_b.minTempTime,data.sgs_b.avgTemp,formatSeconds(data.sgs_b.tempOverLimit)]);
+			}else{
+				$scope.temData.push(["-","-","-","-","-","-"]);
+			}
+			$scope.currData.push([data.sgs_b.maxCurrent,data.sgs_b.maxCurrentTime,data.sgs_b.minCurrent,data.sgs_b.minCurrentTime,data.sgs_b.avgCurrent,formatSeconds(data.sgs_b.currentOverLimit)]);
+			$scope.thdData.push([data.sgs_b.maxThd,data.sgs_b.maxThdTime,data.sgs_b.minThd,data.sgs_b.minThdTime,data.sgs_b.avgThd]);
+			$scope.averData.push([data.sgs_b.avgH150,data.sgs_b.avgH250,data.sgs_b.avgH350,data.sgs_b.avgH450,data.sgs_b.avgH550,data.sgs_b.avgH650]);
+		}else{
+			$scope.temData.push(["","","","","",""]);
+			$scope.currData.push(["","","","","",""]);
+			$scope.thdData.push(["","","","","",""]);
+			$scope.averData.push(["","","","","",""]);
+		}
+		
+		if(data.sgs_c){
+			if(bdzNo != '2'){
+				$scope.temData.push([data.sgs_c.maxTemp,data.sgs_c.maxTempTime,data.sgs_c.minTemp,data.sgs_c.minTempTime,data.sgs_c.avgTemp,formatSeconds(data.sgs_c.tempOverLimit)]);
+			}else{
+				$scope.temData.push(["-","-","-","-","-","-"]);
+			}
+			$scope.currData.push([data.sgs_c.maxCurrent,data.sgs_c.maxCurrentTime,data.sgs_c.minCurrent,data.sgs_c.minCurrentTime,data.sgs_c.avgCurrent,formatSeconds(data.sgs_c.currentOverLimit)]);
+			$scope.thdData.push([data.sgs_c.maxThd,data.sgs_c.maxThdTime,data.sgs_c.minThd,data.sgs_c.minThdTime,data.sgs_c.avgThd]);
+			$scope.averData.push([data.sgs_c.avgH150,data.sgs_a.avgH250,data.sgs_a.avgH350,data.sgs_a.avgH450,data.sgs_a.avgH550,data.sgs_a.avgH650]);
+		}else{
+			$scope.temData.push(["","","","","",""]);
+			$scope.currData.push(["","","","","",""]);
+			$scope.thdData.push(["","","","","",""]);
+			$scope.averData.push(["","","","","",""]);
+		}
+	}
+	
+	$(".abc-btn a").click(function(){
+		$(this).addClass("active").siblings().removeClass("active");
+	});
+	
+	$scope.showDetail = function(type){
+		$(".alert-con").show();
+		if(type == "tempContent"){
+			$scope.content = "tempContent";
+		}else if(type == "curContent"){
+			$scope.content = "curContent";
+		}else if(type == "thdContent"){
+			$scope.content = "thdContent";
+		}else if(type == "averContent"){
+			$scope.content = "averContent";
+		}
+	}
+	
+	$scope.closeAlert = function(){
+		$(".alert-con").hide();
+		$scope.content = "";
+	}
+	$scope.getDataABC = function(type){
+		if(type == "a"){
+			//ajaxDataA("sgs_a");
+			$scope.abc = "sgs_a";
+		}else if(type == "b"){
+			//ajaxDataB("sgs_b");
+			$scope.abc = "sgs_b";
+		}else if(type == "c"){
+			//ajaxDataC("sgs_c");
+			$scope.abc = "sgs_c";
+		}
+		$scope.getHarmonicLine($scope.dcu_id);
+	}
+	
+	$scope.getName = function(sysId,bdzId,lineId,nodeId){
+		//console.log("nodeId:"+nodeId)
+		$scope.gdjName = overViewData[sysId].name;
+		$scope.bdzName = overViewData[sysId].substationsMap[bdzId].name;
+		$scope.lineName = overViewData[sysId].powerLinesMap[lineId].name;
+		if(overViewData[sysId].nodesMap[nodeId]){
+			$scope.nodeName = overViewData[sysId].nodesMap[nodeId].name;
+		}else{
+			$scope.nodeName = null;
+		}
+		
+	}
+	
+	function ajaxDataA(abc){
+		$http({
+			method : "GET",
+			url : $scope.address+"api/v1/dcu/harmonicInfo/avg",
+			params : {
+				'dcu_id':$scope.dcu_id,
+				'time':$scope.time,
+				'type':$scope.type,
+				'position':abc
+			
+			},
+			timeout : 60000
+		}).success(function(msg) {
+			if(msg.code == "0"){
+				$scope.harmonicData = msg.data;
+				$scope.$broadcast('harmonicData',null);
+			}
+		});
+	}
+	
+	function ajaxDataB(){
+		$http({
+			method : "GET",
+			url : $scope.address+"api/v1/dcu/harmonicInfo/avg",
+			params : {
+				'dcu_id':$scope.dcu_id,
+				'time':$scope.time,
+				'type':$scope.type,
+				'position':'sgs_b'
+			
+			},
+			timeout : 60000
+		}).success(function(msg) {
+			if(msg.code == "0"){
+				$scope.harmonicData = msg.data;
+				$scope.$broadcast('harmonicData',null);
+			}
+		});
+	}
+	
+	function ajaxDataC(){
+		$http({
+			method : "GET",
+			url : $scope.address+"api/v1/dcu/harmonicInfo/avg",
+			params : {
+				'dcu_id':$scope.dcu_id,
+				'time':$scope.time,
+				'type':$scope.type,
+				'position':'sgs_c'
+			
+			},
+			timeout : 60000
+		}).success(function(msg) {
+			if(msg.code == "0"){
+				$scope.harmonicData = msg.data;
+				$scope.$broadcast('harmonicData',null);
+			}
+		});
+	}
+	
+	$scope.goRealSta = function(){
+		 $scope.$emit('refreshView', {
+            view: 'realSta'
+        });
+		 $state.go('app.circuit', {
+         	 sysId:$scope.sys_id,
+             bdzId: $scope.bdz_id,
+             parentId: null,
+             lineId: $scope.line_id,
+             nodeId: $scope.dcu_id,
+             stype : $scope.type,
+             stime : $scope.time
+         });
+	}
+	
+	if($scope.gdjIdSP && $scope.bdzIdSP && $scope.lineIdSP && $scope.nodeIdSP){
+		$scope.dcu_id = $scope.nodeIdSP;
+		if($scope.stypeSP && $scope.stimeSP){
+			$scope.type = $scope.stypeSP;
+			$scope.time = new Date($scope.stimeSP);
+		}else{
+			$scope.type = "day";
+			//只能查询到前一天数据 mod 2017-05-11
+			var nowDate = new Date();
+			nowDate.setDate(nowDate.getDate()-1);
+			$scope.time = nowDate;
+		}
+		
+		var powerSupplysMap = JSON.parse(storage["powerSupplysMap"]);
+		$scope.address = powerSupplysMap[$scope.gdjIdSP].address;
+		
+		$scope.sys_id = $scope.gdjIdSP;
+		$scope.bdz_id = $scope.bdzIdSP;
+		$scope.line_id = $scope.lineIdSP;
+		
+		$scope.initLineData();//获取数据
+		$scope.gdjName = null;
+		$scope.bdzName =  null;
+		$scope.lineName =  null;
+		$scope.nodeName = null;
+		$scope.getName($scope.sys_id,$scope.bdz_id,$scope.line_id,$scope.dcu_id);
+	}
+	
+	
+});
+
+	function formatSeconds(value) { 
+		if(!value) return value;
+		var theTime = parseInt(value);// 秒 
+		var theTime1 = 0;// 分 
+		var theTime2 = 0;// 小时 
+		// alert(theTime); 
+		if(theTime > 60) { 
+			theTime1 = parseInt(theTime/60); 
+			theTime = parseInt(theTime%60); 
+			// alert(theTime1+"-"+theTime); 
+			/** if(theTime1 > 60) { 
+				theTime2 = parseInt(theTime1/60); 
+				theTime1 = parseInt(theTime1%60); 
+			} */
+		} 
+		var result = ""+parseInt(theTime)+"秒"; 
+		if(theTime1 > 0) { 
+			result = ""+parseInt(theTime1)+"分"+result; 
+		} 
+		/**if(theTime2 > 0) { 
+			result = ""+parseInt(theTime2)+"小时"+result; 
+		} */
+		return result; 
+	} 
+</script>

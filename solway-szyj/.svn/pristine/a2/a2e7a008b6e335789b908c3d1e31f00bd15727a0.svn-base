@@ -1,0 +1,107 @@
+<!-- navbar header -->
+<div class="col-xs-12 no-padder" ng-controller="ChangeUserPwdCtrl">
+<div class="navbar-header bg-black app-header navbar ng-scope" id="distPassNav">
+	<ul class="nav col-xs-12 no-padder nav-top" >
+           <li class="col-xs-3 no-padder" ui-sref-active="active">
+          	<a ui-sref="userList" class="text-1-6x  m-t-xs">
+          		取消
+          	</a>
+           </li>
+          <li class="col-xs-6 no-padder text-center">
+          	<a href="" class="text-1-8x m-t-xs">
+          		修改密码
+          	</a>
+           </li> 
+          <li class="col-xs-3 no-padder" ng-click="submitUserPasswordChangeModelForm();">
+         	 <a class="text-1-6x  m-t-xs pull-right">完成</a>	 	
+          </li>
+        </ul>
+</div>
+<!-- / navbar header -->
+	<div class="col-xs-12 no-padder" >
+		<form class="col-xs-12 m-t-md no-padder form-horizontal  col-d" action="./AdminUser/updateDataSelective.htm" method="post" id="editFormForUserMod" name="editFormForUserMod">
+          <input type="hidden" name="userId" value="" id="userId" class="formData">
+          <input type="hidden" name="roleIdS" id="roleIdS" class="formData" value="">
+				<div class="col-xs-12  list-div  padder-no m-b-1 bg-writer">
+					<span class="text-1-5x col-xs-3 ">旧密码</span> 
+					 <div class="col-xs-9">
+		              <input type="password" placeholder="请输入旧密码" id="oldpwd" name="oldpwd" class="m-t-xs form-control-n-b form-control formData"  ng-focus="checkPwd('oldpwd');">
+			          </div>
+			           <span id="oldpwdMess" class="warn m-l-sm m-t-xs col-xs-9"></span >
+				</div>
+				<div class="col-xs-12  list-div  padder-no m-b-1 bg-writer m-t-sm"> 
+	              <span class="text-1-5x col-xs-3 ">新密码</span>
+	              <div class="col-xs-9">
+	 				<input type="password" placeholder="请输入新密码"  id="newpwd" name="newpwd" class="m-t-xs form-control-n-b form-control formData"  ng-focus="checkPwd('newpwd');">
+	              </div>
+	 				 <span  id="newpwdMess" class="warn m-l-sm m-t-xs col-xs-9"></span >
+	            </div>
+	           <div class="col-xs-12 list-div  padder-no bg-writer"> 
+	              <span class="text-1-5x col-xs-3 ">再输一遍</span>
+	              <div class="col-xs-9">
+	 				<input type="password" placeholder="再输一遍"  id="aginnewpwd" name="aginnewpwd" class="m-t-xs form-control-n-b form-control formData"  ng-focus="checkPwd('aginnewpwdMess');">
+	              </div>
+	 				 <span  id="aginnewpwdMess" class="warn m-l-sm m-t-xs col-xs-9"></span >
+	            </div>
+          </form>
+	</div>
+</div>
+<toaster-container toaster-options="{'position-class': 'toast-top-right', 'close-button':true}"></toaster-container>
+<script>
+if(isAndroid){//判断安卓，修改顶部样式
+	$("#distPassNav").addClass("m-t-none");
+}
+app.controller('ChangeUserPwdCtrl',function($scope, $http,$state,$stateParams,toaster) {
+	$scope.checkPwd=function(obj){
+		var pwdObj=document.getElementById(obj).value; 
+		$("#oldpwdMess").html("")
+		$("#newpwdMess").html("")
+		$("#aginnewpwdMess").html("")
+		/* if(pwdObj.length<6){
+			$("#errorMess").html("")
+		} */
+	}
+	$scope.submitUserPasswordChangeModelForm = function(){
+		if($("#aginnewpwd").val()!=$("#newpwd").val()){
+			$("#aginnewpwdMess").html("两次输入密码不一致！");
+			return false;
+		}
+		var oldpwd=document.getElementById("oldpwd").value;
+		if(oldpwd.length<6){
+			$("#oldpwdMess").html("请输入正确的旧密码")
+			return false;
+		}
+		var newpwd=document.getElementById('newpwd').value;
+		if(newpwd.length<6){
+			$("#newpwdMess").html("新密码不能少于6位")
+			return false;
+		}
+		$http({
+			method : "POST",
+			url :ctx+"AdminUser/userPasswordChangeModelMobile.htm",
+			params:{
+				"userId":$.trim($("#userId").val()),
+				"oldpwd":$.trim($("#oldpwd").val()),
+				"newpwd":$.trim($("#newpwd").val())
+			}
+		}).success(function(result) {
+		//	if(result.respStatus==1){
+// 				toaster.pop('success', '', result.message);
+// 			} else {
+// 				toaster.pop('error', '', result.message);
+// 			}
+			//alert( result.message);
+ 			if(result.respStatus==1){
+ 				toaster.pop('success', '', result.message);
+ 				$state.go('userList')
+ 			//	setTimeout(,5000);
+ 				//setTimeout("$scope.goBack()",1000)
+ 			} else {
+ 				toaster.pop('error', '', result.message);
+ 			}
+		}).error(function(){
+			toaster.pop('error', '', '修改失败!');
+		});
+	}
+});
+</script>

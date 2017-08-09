@@ -1,0 +1,52 @@
+
+<div class="navbar-header bg-black app-header navbar ng-scope"id="distUserNav">
+	<ul class="nav col-xs-12 no-padder nav-top"  >
+          <li class="col-xs-3 no-padder" ui-sref-active="active">
+          	<a ui-sref="stationConf" class="text-1-6x m-t-xs">
+          		取消
+          	</a>
+           </li>
+          <li class="col-xs-6 no-padder text-center">
+          	<a href="" class="text-1-8x m-t-xs">
+          		维护电站信息
+          	</a>
+           </li>
+          <li class="col-xs-3 no-padder">
+          	<a class="text-1-6x m-t-xs pull-right">完成</a>
+          </li>
+        </ul>
+</div>
+		<div class="col-xs-12  list-div  m-b-1 bg-writer m-t col-d">
+			<span class="text-1-5x ">电站名称</span> 
+			<span class="pull-right ">
+               <input  class="m-t-xs form-control-right">
+			</span>
+		</div>
+		<div class="col-xs-12  list-div  m-b-1 bg-writer col-d">
+			<span class="text-1-5x col-d">装机容量</span> 
+			<span class="pull-right ">
+			 <input  class="m-t-xs form-control-right">
+			</span>
+		</div>
+		
+		<div class="col-xs-12  list-div m-t-sm m-b-1 bg-writer col-d">
+			<span class="text-1-5x col-d">地址</span> 
+			<span class="pull-right ">
+				 <input  class="m-t-xs form-control-right">
+			</span>
+		</div>
+		<div class="col-xs-12  bg-writer list-div m-t-sm col-d">
+			<span class="text-1-5x col-d">气象信息引用配置</span> 
+			<span class="pull-right ">
+				<select name="account" class="form-control m-t-xs form-control-no-bg">
+	              <option value="option 1">河北省</option>
+	              <option value="option 2">option 2</option>
+	              <option value="option 3">option 3</option>
+	              <option value="option 4">option 4</option>
+	           </select>
+			</span>
+		</div>
+<script>
+if(isAndroid){//判断安卓，修改顶部样式
+	$("#distUserNav").addClass("m-t-none");
+}

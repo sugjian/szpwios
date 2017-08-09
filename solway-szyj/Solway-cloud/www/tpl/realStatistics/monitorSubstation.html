@@ -1,0 +1,83 @@
+<link rel="stylesheet" href="theme/default/css/realStatistics/monitorSubstation.css">  
+<link rel="stylesheet" href="theme/default/css/realStatistics/directive.css">  
+
+<div ng-controller="monitorSubstationCtrl">
+	<div class="bg-black app-header navbar ng-scope"id="distUserNav">
+		<ul class="nav col-xs-12 no-padder nav-top"  >
+	          <li class="col-xs-3 no-padder" ui-sref-active="active">
+	          	<a ui-sref="app.realStatistics">
+	          		<img src="./theme/default/img/icon/top-back@2x.png" class="v-middle img_goBack">
+	          	</a>
+	           </li>
+	          <li class="col-xs-6 no-padder text-center">
+	          	<a href="" class="text-1-8x" id="gdjNameId">
+	          		{{gdjName}}
+	          	</a>
+	           </li>
+	        </ul>
+	</div>
+	<div class="select">
+		<select id = "areas">
+		</select>
+		<select id = "bdzs" >
+		</select>
+	</div>
+	<div class="overflow-auto">
+		<div class="survey">
+			<span style="width: 20px;"><img src="./theme/default/img/realStatistics/plug.png"></span>
+			<span>运行概况</span>
+		</div>
+		<div class="line-state clearfix">
+			<div class="pull-left"><span>正常线路</span><span>({{normalLineNum | dataNullFilter}})</span></div>
+			<div class="pull-right"><span>故障线路</span><span>({{alarmLineNum | dataNullFilter}})</span></div>
+			
+		</div>
+		<div class="survey" ng-show="hasAlarm">
+			<span style="width: 20px;"><img src="./theme/default/img/realStatistics/plug.png"></span>
+			<span>当前报警</span>
+		</div>
+		<div class="line-state clearfix" ng-show="hasAlarm">
+			<div class="pull-left-red pull-left"><span>短路故障</span><span>({{dlAlarmNum | dataNullFilter}})</span></div>
+			<div class="pull-right"><span>接地故障</span><span>({{jdAlarmNum | dataNullFilter}})</span></div>
+		</div>
+		<div class="line-detail clearfix" >
+			<div class="pull-left">线路详情</div>
+			<div class="pull-right">
+				<span ng-click="goSmall()" class="text-1-3x">
+					<img src="theme/default/img/realStatistics/smaller.png">
+			    </span>
+			    <span ng-click="goBig()" class="text-1-3x">
+					<img src="theme/default/img/realStatistics/largest.png"  ng-show="largestFlag">
+					<img src="theme/default/img/realStatistics/larger.png" ng-hide="largestFlag">
+			    </span>
+			</div>
+		</div>
+		
+		<div style="overflow-x: auto;height:291px;margin: 0 8px;position:relative;">
+			<div class="loader" id="loadFlagOver" ng-show="isBDZDataFinish == false" style="top:140px;">
+			    <div class="loader-inner ball-beat overview-load">
+			      <div></div>
+			      <div></div>
+			      <div></div>
+			    </div>
+		 	 </div>
+		 	 <div id="svgDataSub">
+		 	 </div>
+		</div>
+		
+		<div class="curve-con" ng-show="isZeroVdata">
+			<p style="font-size : 12px ;margin: 15px;">零序电压3U0有效值</p>
+			<div ng-include="'tpl/realStatistics/model/parentLine.html'" ng-show="hasZeroVData"></div>
+			<div style="text-align: center;" ng-hide="hasZeroVData">
+				<img src="./theme/default/img/realStatistics/no-data.png"  id="tipImg" style="width:30%;"></img>
+				<p >该时间段无数据</p>
+			</div>
+			
+		</div>
+	</div>
+	
+</div>
+<script src="js/controllers/realStat/monitorSubStationCtrl.js"></script>
+<script>
+
+</script>

@@ -1,0 +1,119 @@
+<script src="js/controllers/staMon.js"></script>
+<div class="col-xs-12 norm" ng-controller="staMonCtrl" >
+	<!--电站个数大于1全部-->
+	<!--电站个数大于1-->
+	<div class="col-xs-12 no-padder" ng-class="{'hidden':!showRootStation}">
+	<!-- 当日数据 -->
+	<div class="col-xs-12 wrapper norm-module-stationCout m-b-1 hvr-solway" ng-click="showRealPower()">
+		<div class="col-xs-6 ">
+			<i>
+				<img src="./theme/default/img/icon/statCout.png"class="v-middle m-t-n" style="zoom: 0.5;" />
+			</i>
+			<span class="text-1-6x opa-8">电站数量</span>
+			<div  class="text-3x">
+				<span ng-bind="statDayData.powerStationNum|dataNullFilter">-</span>
+			</div>
+			<p class="m-n text-1-4x">总装机<span ng-bind="statDayData.installedCapacity[0]|dataNullFilter">-</span>
+										<span ng-bind="statDayData.installedCapacity[1]|dataNullFilter">W</span></p>
+		</div>
+		<div class="col-xs-6 m-t-md">
+			<div class="m-b-xs text-1-3x opa-8">效率最优
+			<span class="pull-right text-1-4x"><span ng-bind="statDayData.maxEfficiencyPercen|dataNullFilter"></span>%</span></div>
+			<div class="progress-xxs col-xs-12 no-padder progress m-b-sm  bg-op2" value="25" animate="true" type="warning">
+  				<div class="progress-bar bg-white" ng-style="{width: statDayData.maxEfficiencyPercen + '%'}" ></div>
+			</div>
+			<div class="text-1-3x">
+			<span ng-bind="statDayData.powerStationName|dataNullFilter"></span>
+			</div>
+		</div>
+	</div>
+	</div>
+	<!--电站个数等于1-->
+	<div class="col-xs-12 no-padder" ng-class="{'hidden':showRootStation}">
+	<!-- 当月数据 -->
+	<div class="col-xs-12 no-padder m-b-1" style="padding: 8px 10px;">
+		<div class="col-xs-8 b-r-black  norm-module-scroll hvr-solway"ng-click="showSyScore()">
+			<div class="col-xs-5 no-padder  " >
+				<div class="text-center scoreScroll">
+					<div class="text-2-6x m-t-sm"  ng-bind="statDayData.powerStationScore|dataNullFilter">89</div>
+					<div class="text-1-6x m-t-n-xs">综合得分</div>
+				</div>
+			</div>
+			<div class="col-xs-7 no-padder  m-t-xl" >
+					<div class="text-1-6x">同城中排第<span ng-bind="statDayData.powerStationRank|dataNullFilter"></span>名</div>
+					
+			</div>
+		</div>
+		<div class="col-xs-4 no-padder norm-module-weather hvr-solway" style="height: 120px;"  ng-click="showLightRanking()">
+			<div class="text-center col-xs-12 wrapper">
+				<div class="text-1-6x m-t">晴天数量</div>
+				<div class="text-2-6x m-t-n-xs "  ng-bind="statDayData.sunnyNum|dataNullFilter">89</div>
+			</div>
+			<div class="progress-xxs m-t-n col-xs-6 col-xs-offset-3 progress m-b-sm no-padder norm-module-weather-bg" value="25" animate="true" type="warning">
+  				<div class="progress-bar bg-white" ng-style="{width: statDayData.sunnyNumPercen + '%'}" ></div>
+			</div>
+		</div>
+	</div>
+	</div>
+	<!--电站个数等于1-->
+	<div class="col-xs-12 no-padder m-b-1">
+		<div class="col-xs-6 wrapper text-center norm-module-mon b-r-black hvr-solway padding-media" ng-click="showDayElectric()">
+			<span class="text-1-4x opa-8 title-tip">发电量</span>
+			<div class=" m-t-md m-b-xs">
+				<span class="text-2-4x" ng-bind="statDayData.generatingPower[0]|dataNullFilter"></span>
+				<span class="text-2-2x" ng-bind="statDayData.generatingPower[1]|dataNullFilter">kWh</span>
+			</div>
+				<span class="norm-tip"><span ng-bind="statDayData.generatingPowerHours|dataNullFilter"></span>h</span>
+		</div>
+		<div class="col-xs-6 wrapper text-center norm-module-onlineQuantity hvr-solway padding-media"  ng-click="showMonElectric()">
+			<span class="text-1-4x opa-8 title-tip">上网电量</span>
+			<div class="m-t-md m-b-xs"><span class="text-2-4x" ng-bind="statDayData.onlineQuantity[0]|dataNullFilter"></span>
+											<span class="text-2-2x" ng-bind="statDayData.onlineQuantity[1]|dataNullFilter">kWh</span></div>
+			<div class=" m-t-n-xs">￥<span class="text-1-4x" ng-bind="statDayData.onlineQuantityIncome[0]|dataNullFilter"></span>
+											<span class="text-1-2x" ng-bind="statDayData.onlineQuantityIncome[1]|dataNullFilter">元</span></div>
+		
+		</div>
+	</div>
+	<div class="col-xs-12 no-padder m-b-1">
+		<div class="col-xs-6 wrapper text-center norm-module-gz b-r-black hvr-solway padding-media" ng-click="showYearElectric()">
+			<span class="text-1-4x opa-8 title-tip">故障</span>
+			<div class=" m-t-md m-b-xs">
+				<span class="text-2-4x" ng-bind="statDayData.faultNum|dataNullFilter"></span>
+				<span class="text-2-2x" >台次</span></div>
+			<div class=" m-t-n-xs">
+				<span class="text-1-4x" ng-bind="statDayData.faultPercen|dataNullFilter"></span>
+				<span class="text-1-2x" >%</span></div>
+			</div>
+		<div class="col-xs-6 wrapper text-center norm-module-trees hvr-solway padding-media"  ng-click="showAllElectric()">
+			<span class="text-1-4x opa-8 title-tip">减排</span>
+			<div class=" m-t-md m-b-xs">
+				<span class="text-2-4x" ng-bind="statDayData.emissionReduction[0]|dataNullFilter"></span>
+				<span class="text-2-2x" ng-bind="statDayData.emissionReduction[1]|dataNullFilter">-</span></div>
+			<div class=" m-t-n-xs">
+				<span class="text-1-4x" ng-bind="statDayData.plantedTree|dataNullFilter"></span>
+				<span class="text-1-2x" >棵</span></div>
+		</div>
+	</div>
+	<div class="col-xs-12 m-t-sm no-padder norm-black-bg m-b-sm">
+		<span class="text-1-4x col-xs-12 no-padder m-t-xs m-l-sm">月发电量分析</span>
+		<div class="col-xs-12 no-padder" id="kwhTotalMReportDiv" style="overflow: auto;">
+			<div class="col-xs-12 text-center m-t-xs"id="loadFlags">
+			 </div>
+			<div id="kwhTotalMReportModal" style="height:125px;"></div>
+		</div>
+		<div class="col-xs-12 wrapper-xs">
+			<div class="col-xs-6 no-padder text-center">
+				<i class="fa fa-circle" style="color: #ffc700"></i> <span
+					class="col-9 m-r-xs text-1-1x">应发电量<small>(kWh)</small></span> 
+			</div>
+			<div class="col-xs-6 no-padder text-center">
+				<i class="fa fa-circle" style="color: #ff9a00"></i> <span
+					class="col-9 m-r-xs text-1-1x">实发电量<small>(kWh)</small></span>
+
+				</span>
+			</div>
+		</div>
+	</div>
+</div>
+	<toaster-container toaster-options="{'position-class': 'toast-top-full-width', 'close-button':true,'time-out':5000000}">
+</toaster-container>	

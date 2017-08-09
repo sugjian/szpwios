@@ -1,0 +1,312 @@
+<!-- 日期插件 -->
+	<link rel="stylesheet" type="text/css" href="theme/default/css/datePicker.css">
+    <script type="text/javascript" src="js/require/iscroll.js"></script>
+    <script type="text/javascript" src="js/datePicker.js"></script>
+    <style>
+.app {
+	background-color: #fff !important;
+}
+</style>
+<!-- navbar header -->
+<div ng-controller="createTaskCtrl" class="col-0">
+<div class="fault-header bg-black app-header navbar ng-scope"id="taskDeDoNav" style="height:68px">
+	<ul class="nav col-xs-12 no-padder nav-top" style="margin-top:20px">
+		<li class="col-xs-3 no-padder">
+			<a ng-click="goBackNoteList()">
+				<img src="theme/default/img/icon/top-back@2x.png" class="v-middle m-t-xs img_goBack">
+			</a>
+		</li>
+		<li class="col-xs-6 no-padder text-center"><a class="text-2x">发送任务通知</a></li>
+		<li class="col-xs-3 no-padder"></li>
+	</ul>
+</div>
+<!-- / navbar header -->
+<div class="hbox hbox-auto-xs hbox-auto-sm"ng-init=" app.settings.asideFolded = false; app.settings.asideDock = false;">
+	<div class="col-xs-12  bg-writer m-b-xs padder-v"style="padding-bottom: 60px;"id="createTask">
+		<form class="col-xs-12 no-padder m-t-md form-horizontal">
+			<div class="form-group">
+	              <label class="col-xs-4 control-label m-t-xs text-1-4x">电站名称</label>
+	              <div class="col-xs-7 no-padder" >
+	              <ui-select ng-model="stationdCT.selected" theme="bootstrap" ng-change="textChangeCT()">
+		            <ui-select-match placeholder="请输入关键字..." ng-model="stationdCT.selected.stationname" >{{$select.selected.stationname}}</ui-select-match>
+		            <ui-select-choices  repeat="item in stationCT | filter: $select.search">
+		              <div ng-bind-html="item.stationname | highlight: $select.search"></div>
+		            </ui-select-choices>
+		          </ui-select>
+		          <input type="hidden" id="pstationidCT" name="pstationidCT" onMouseOut="cllarverifyhandle01()" class="form-control formData">
+	              <input type="hidden" id="pstationnameCT" name="pstationnameCT" class="form-control formData">
+	              <div  id="pstationidverifyCT" class="col-xs-12 control-label m-t-sm black-1 no-padder"></div>
+	              </div>
+	             </div>
+	             <div class="form-group">   
+	              <label class="col-xs-4 control-label m-t-xs text-1-4x">受理人</label>
+	              <div class="col-xs-7 no-padder">
+		           	<ui-select ng-model="managerdCT.selected" theme="bootstrap" ng-change="managerChangeCT()">
+		            <ui-select-match placeholder="请输入关键字..." ng-model="managerdCT.selected.realName" >{{$select.selected.realName}}</ui-select-match>
+		            <ui-select-choices  repeat="item in managerCT | filter: $select.search">
+		              <div ng-bind-html="item.realName | highlight: $select.search"></div>
+		            </ui-select-choices>
+		         	 </ui-select>
+	 				<input type="hidden" id="respmanCT" name="respmanCT" onMouseOut="cllarverifyhandle01()" class="form-control formData">
+	              <div  id="respmanverifyCT" class="col-xs-12 control-label m-t-sm black-1 no-padder"></div>
+	              </div>
+	             </div>
+				<div class="form-group">
+					<label class="col-xs-4  control-label m-t-xs  default-col  text-1-4x">期望完成时间</label>
+						<div class="col-xs-7 no-padder ">
+							<!-- <input class="form-control" style="border: 1px solid #cfdadd;"
+								id="expectedtime" name="expectedtime" type="text" value=""> -->
+								<div type="text" id="expectedtimeCT" name="expectedtimeCT" style="background-color: #f7f7f7" class="form-control col-6" onchange="cllarverifyhandleCT()"></div>
+								<!-- <div class="form-control col-6 " id="expectedtimeCT" ng-click="removeClass('timeWran')"> </div> -->
+						<div  id="expectedverifyCT" class="col-xs-12 control-label m-t-sm black-1 no-padder"></div>
+						</div>
+				</div>
+				<div class="col-xs-12 no-padder default-col  m-b-xs text-1-4x">任务内容</div>
+				<div class="col-xs-12 no-padder">
+					<textarea id="taskcontentCT" maxlength="50"class="col-xs-12 padder-v-xsm bg-f7f7f7 text-1-2x" rows="5"placeholder="请输入任务内容" 
+						onMouseOut="cllarverifyhandleCT()"></textarea>
+					<div  id="taskcontentverifyCT" class="col-xs-12 control-label m-t-sm black-1 no-padder"></div>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div class="navbar  navbar-fixed-bottom" ui-view="footer" ng-click="saveTaskForm()">
+		<button class="col-xs-12 pull-in btn  btn-success padder-v">完成</button>
+	</div>
+</div>
+ <toaster-container toaster-options="{'position-class': 'toast-top-right', 'close-button':true}"></toaster-container>
+<script>  
+function cllarverifyhandleCT(){
+	var pstationid=$("#pstationidCT").val();
+	var respman=$("#respmanCT").val();
+	var expectedtime=$("#expectedtimeCT").val();
+	var taskcontent=$("#taskcontentCT").val();
+	
+	if(pstationid){
+	   $("#pstationidverifyCT").html("");	
+	}
+	
+	if(respman){
+	   $("#respmanverifyCT").html("");	
+	}
+	
+	if(expectedtime){
+	   $("#expectedverifyCT").html("");
+	}
+	
+	if(taskcontent){
+	   $("#taskcontentverifyCT").html("");
+	}
+}
+
+function clearHandleCTInfo(){
+   $("#pstationidverifyCT").html("");	
+   $("#respmanverifyCT").html("");	
+   $("#expectedverifyCT").html("");
+   $("#taskcontentverifyCT").html("");
+   
+   $("#pstationidCT").val(null);
+   $("#respmanCT").val(null);
+   $("#expectedtimeCT").val(null);
+   $("#taskcontentCT").val(null);
+   
+  
+}
+
+	$('#expectedtimeCT').html("请选择") 
+	$('#expectedtimeCT').datePicker({
+        beginyear: new Date().getFullYear(),
+        theme: 'datetime',
+        callBack: function() {
+        	$('#expectedtimeCT').html($('#expectedtimeCT').val())
+        }
+    });
+	if (isAndroid) {//判断安卓，修改顶部样式
+		$("#taskDeDoNav").css("height","48px");
+		$("#taskDeDoNav ul").addClass("m-t-none");
+	}
+	app.controller('createTaskCtrl', function($scope, $http, $stateParams,toaster,$state) {
+		//返回上一页
+		$scope.goBackNoteList=function(){
+			$state.go("noteList");
+		}
+		$scope.getUserListCT = function(sid){
+			$scope.managerdCT = {};
+			$scope.managerCT = null;
+			$http({method:"POST",url:ctx+"AdminUser/selectAllUserBySTID.htm",params:{sid:sid}})
+			.success(function (result) {
+		    	 $scope.managerCT = result;
+		    	 for(var i=0,len=$scope.managerCT.length;i<len;i++){
+	 					if($scope.managerCT[i].userId==  $("#respmanCT").val()){
+	 						$scope.managerdCT.selected= { realName: $scope.managerCT[i].realName,userId:  $("#manageridCT").val()};
+	 					}
+	 				}
+		    	 $scope.managerChangeCT= function () {
+			         $("#respmanCT").val(angular.copy($scope.managerdCT.selected.userId));
+				} 
+			});
+		}
+		
+		 $scope.textChangeCT= function () {
+	         $("#pstationidCT").val(angular.copy($scope.stationdCT.selected.id));
+	         //$("#pstationnameCT").val(angular.copy($scope.stationdCT.selected.stationname));
+	         $scope.getUserListCT($scope.stationdCT.selected.id);
+		}
+		$scope.getStationsAndUserList=function(){
+			$scope.stationdCT = {};
+			$scope.stationCT = null;
+			$http({method:"POST",url:ctx+"UserAuthHandle/getAllSTListForPCBySession.htm",params:{}})
+			.success(function (result) {
+		    	 $scope.stationCT = result;		    	 
+		    	 console.log("here"+result.length)
+		    	 
+		    	 if($("#pstationidCT").val() != null && $("#pstationidCT").val() != "" ){
+			    	 for(var i=0,len=$scope.stationCT.length;i<len;i++){
+						if($scope.stationCT[i].id==  $("#pstationidCT").val()){
+							$scope.stationdCT.selected= { stationname: $scope.stationCT[i].stationname,id:  $("#pstationidCT").val()};
+						}
+					}
+		    	 } else if(result.length==1){
+		    		 $scope.stationdCT.selected= { stationname: $scope.stationCT[0].stationname,id:  $scope.stationCT[0].id};
+		    		 $("#pstationidCT").val($scope.stationCT[0].id);
+		    		 $scope.getUserListCT($scope.stationCT[0].id);
+		    	 }
+		    	 $scope.textChange= function () {
+			         $("#pstationidCT").val(angular.copy($scope.stationdCT.selected.id));
+			         //$("#pstationnameCT").val(angular.copy($scope.stationdCT.selected.stationname));
+			         $scope.getUserListCT($scope.stationdCT.selected.id);
+				} 
+			});
+		}
+		$scope.getStationsAndUserList()
+		//保存任务单
+		$scope.saveTaskForm=function(){
+			var respman=$("#respmanCT").val();
+			var expectedtime=$("#expectedtimeCT").val();
+			var taskcontent=$("#taskcontentCT").val();
+			var pstationid=$("#pstationidCT").val();
+			if(pstationid && respman && expectedtime && taskcontent){
+				//保存任务单
+				$http({
+					method : "POST",
+					url : ctx+"Optask/assignTaskManual.htm",
+					params : {
+						'respman':$("#respmanCT").val(),
+						'pstationid':$("#pstationidCT").val(),
+						'expectedtime':$("#expectedtimeCT").val(),
+						'taskcontent':$("#taskcontentCT").val(),
+					}
+				}).success(function(msg) {
+					if(msg.result){
+						promptObj('success','',msg.infoMsg);
+					}else{
+						promptObj('error','',msg.infoMsg);
+					}
+				//	$('#createTask').modal('hide');
+					//刷新列表
+				//	$scope.showNoteList(noteActiveId)
+				//	$scope.getMessage()
+				});
+			}else{
+				if(!pstationid){
+					$("#pstationidverifyCT").html("<font color='#FF0000'>非空</font>");
+				}else{
+					$("#pstationidverifyCT").html("");
+				}
+				
+				if(!respman){
+					$("#respmanverifyCT").html("<font color='#FF0000'>非空</font>");
+				}else{
+					$("#respmanverifyCT").html("");
+				}
+					
+				if(!expectedtime){
+					$("#expectedverifyCT").html("<font color='#FF0000'>非空</font>"); 
+				}else{
+					$("#expectedverifyCT").html("");
+				}
+				
+				if(!taskcontent){
+					$("#taskcontentverifyCT").html("<font color='#FF0000'>非空</font>"); 
+				}else{
+					$("#taskcontentverifyCT").html("");
+				}
+			}
+			$scope.goBackNoteList()
+		}
+	});
+</script>
+ <script type="text/javascript" charset="utf-8">
+    function countTime(opt) {
+        var now = new Date().getTime();
+        var defaultOpt = {
+            st: now, //开始时间,时间戳
+            et: now, //结束时间,时间戳
+            sdom: null,
+            mdom: null,
+            hdom: null,
+            ddom: null,
+            Mdom: null,
+            ydom: null
+        };
+        this.opt = $.extend({}, defaultOpt, opt);
+        this.h = 0;
+        this.m = 0;
+        this.s = 0;
+        this.d = 0;
+        this.M = 0;
+        this.y = 0;
+        this.init = function() {
+            if (now >= this.st) {
+                this.interCount();
+            } else {
+                this.interCount();
+            }
+        };
+        this.interCount = function() {
+            var _this = this;
+            var bTime = _this.bTime();
+            if (bTime > 0) {
+                _this.interSwitch = setInterval(function() {
+                    bTime--;
+                    if (bTime < 0) {
+                        clearInterval(_this.interSwitch);
+                    } else {
+                        _this.renderTime(bTime);
+                    }
+                }, 1000);
+            } else {
+
+            }
+        };
+        this.bTime = function() { //距离的时间(单位s)
+            return Math.round(this.opt.et / 1000 - now / 1000);
+        };
+        this.renderTime = function(t) {
+            this.s = t % 60;
+            this.m = Math.floor(t / 60) % 60;
+            this.h = (Math.floor(t / 3600) % 60) % 24;
+            this.d = Math.floor(t / 86400) % 30;
+            this.M = Math.floor(t / 2592000) % 12;
+            this.y = Math.floor(t / 31104000);
+            this.opt.ydom.innerHTML = this.y < 10 ? "0" + this.y : this.y;
+            this.opt.Mdom.innerHTML = this.M < 10 ? "0" + this.M : this.M;
+            this.opt.ddom.innerHTML = this.d < 10 ? "0" + this.d : this.d;
+            this.opt.hdom.innerHTML = this.h < 10 ? "0" + this.h : this.h;
+            this.opt.mdom.innerHTML = this.m < 10 ? "0" + this.m : this.m;
+            this.opt.sdom.innerHTML = this.s < 10 ? "0" + this.s : this.s;
+
+        }
+
+    };
+    var two = new countTime({
+        et: new Date('2015-4-7 8:30').getTime(),
+        ydom: document.getElementById('y'),
+        Mdom: document.getElementById('M'),
+        ddom: document.getElementById('d'),
+        hdom: document.getElementById('h'),
+        mdom: document.getElementById('m'),
+        sdom: document.getElementById('s')
+    });
+    two.init();
+    </script>

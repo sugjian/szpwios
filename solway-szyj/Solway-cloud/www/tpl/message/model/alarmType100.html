@@ -1,0 +1,483 @@
+<style>
+.curves{    border-top: 1px solid rgb(207,207,207);
+    margin-top: 10px;
+    padding-top: 10px;}
+    h4{text-indent:10px;}
+</style>
+<div class=""  ng-controller="alarm100ModelCtrl" >
+	<div class="clearfix" >
+		<div class="pull-left">
+			<p style="padding-left: 10px;    padding-top: 10px;"><span style="font-size:13px;">{{s_time|dataNullFilter}}</span></p>
+			<h4>{{result|dataNullFilter}}</h4>
+		</div>
+		<div class="pull-right" style="margin: 15px;">
+				<span ng-click="goBig()" class="bigger" ng-show="largestFlag == 1">
+					<img src="theme/default/img/realStatistics/larger.png">
+			    </span>
+				<span ng-click="goSmall()" class="smaller"  ng-show="largestFlag == 2">
+					<img src="theme/default/img/realStatistics/smaller.png">
+			    </span>
+		</div>
+	</div>
+	<div ng-repeat="item in alarmNodes" class="curves voltageLineClass"  on-finish-render-filters>
+		<p style="text-indent:10px;">{{item.nodeName|dataNullFilter}}</p>
+		<div id="voltageLine{{$index}}" style="height:150px;margin:0;" ></div>
+	</div>
+	<div class="loader" id="loadFlagOver" ng-show="loading == true" style="top:110px;">
+	    <div class="loader-inner ball-beat overview-load">
+	      <div></div>
+	      <div></div>
+	      <div></div>
+	    </div>
+ 	</div>
+</div>
+
+<script>
+app.directive('onFinishRenderFilters', function ($timeout) {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attr) {
+            if (scope.$last === true) {
+                $timeout(function() {
+                    scope.$emit('ngRepeatFinished');
+                });
+            }
+        }
+    };
+});
+app.controller('alarm100ModelCtrl',function($scope, $http, $state,$rootScope) {
+	
+	var maxNum = 1536;
+	var minNum = 768;
+	var currentEchartList = [];
+	$scope.$on('currentAlarm', function(event, data) {
+		 //if($scope.s_alarmId == data.alarmId) return;
+		 $(".voltageLineClass").html("");
+		 $scope.alarmNodes = [];
+		 $scope.s_Address = data.address;
+		 $scope.s_dcu_ids = data.dcu_ids;
+		 $scope.s_time = data.time;
+		 $scope.s_sample = data.sample;
+		 $scope.s_alarmId = data.alarmId;
+		 $scope.s_sysId = data.sysId;
+		 $scope.result = data.result;
+		 $scope.loading = true;
+		 var powerSupplys = $scope.s_dcu_ids.split(",");
+		 
+		 currentEchartList = [];
+		 $scope.biggerAlarmNodes = [];
+		 
+		 if(powerSupplys && powerSupplys.length>0){
+			var msgAll = [];
+			var num = 0;
+			for(var i=0;i<powerSupplys.length;i++){
+				(function(i){
+					$http({
+						type: "GET",
+						url: $scope.s_Address+"api/v1/dcu/short_alarmrecorder",
+						//timeout : 30000,
+						params : {
+							'dcuId':powerSupplys[i],
+							'time':$scope.s_time,
+							'sample':$scope.s_sample,
+							'alarmId': $scope.s_alarmId,
+							'type' : 'stock'
+						}
+					}).success(function (result) {
+							msgAll[i] = result;
+							num++;
+							
+							if(num == powerSupplys.length){
+								$scope.alarmNodes = parseData(msgAll,powerSupplys);
+								$scope.loading = false;
+								$scope.largestFlag = 1;
+								var current = [];
+								for(var k = 0;k<$scope.alarmNodes.length;k++){
+									var m = {};
+									m["x"] = $scope.alarmNodes[k].x.slice(minNum,maxNum);
+									m["a"] = $scope.alarmNodes[k].a.slice(minNum,maxNum);
+									m["b"] = $scope.alarmNodes[k].b.slice(minNum,maxNum);
+									m["c"] = $scope.alarmNodes[k].c.slice(minNum,maxNum);
+									current.push(m);
+								}
+								$scope.biggerAlarmNodes = current;
+							}
+							
+						}).error(function(msg){
+							msgAll[i] = null;
+							num++;
+							
+							if(num == powerSupplys.length){
+								$scope.alarmNodes = parseData(msgAll,powerSupplys);
+								$scope.loading = false;
+								$scope.largestFlag = 1;
+								var current = [];
+								for(var k = 0;k<$scope.alarmNodes.length;k++){
+									var m = {};
+									m["x"] = $scope.alarmNodes[k].x.slice(minNum,maxNum);
+									m["a"] = $scope.alarmNodes[k].a.slice(minNum,maxNum);
+									m["b"] = $scope.alarmNodes[k].b.slice(minNum,maxNum);
+									m["c"] = $scope.alarmNodes[k].c.slice(minNum,maxNum);
+									current.push(m);
+								}
+								$scope.biggerAlarmNodes = current;
+							}
+						});
+				})(i);
+			
+			}
+		}else{
+			$scope.loading = false;
+		}
+			
+    });
+	
+	//曲线放大
+	$scope.goBig = function(){
+		$scope.largestFlag = 2;
+		
+		for(var i=0;i<currentEchartList.length;i++){
+			var option2 = currentEchartList[i].getOption();
+			option2.xAxis[0].data = $scope.biggerAlarmNodes[i].x;
+			option2.series[0].data = $scope.biggerAlarmNodes[i].a;
+			option2.series[1].data = $scope.biggerAlarmNodes[i].b;
+			option2.series[2].data = $scope.biggerAlarmNodes[i].c;
+			currentEchartList[i].setOption(option2);
+		}
+	}
+	
+	//曲线缩小
+	$scope.goSmall = function(){
+		$scope.largestFlag = 1;
+		
+		for(var i=0;i<currentEchartList.length;i++){
+			var option2 = currentEchartList[i].getOption();
+			option2.xAxis[0].data = $scope.alarmNodes[i].x;
+			option2.series[0].data = $scope.alarmNodes[i].a;
+			option2.series[1].data = $scope.alarmNodes[i].b;
+			option2.series[2].data = $scope.alarmNodes[i].c;
+			
+			currentEchartList[i].setOption(option2);
+		}
+	}
+	
+	function parseData(msgAll,nodeIds){
+		var list = [];
+		for(var i=0;i<msgAll.length;i++){
+			if(!msgAll[i]) continue;
+			var map = {};
+			var node = overViewData[$scope.s_sysId].nodesMap[nodeIds[i]];
+			var lineName = overViewData[$scope.s_sysId].powerLinesMap[node.dlxId].name;
+			map["nodeName"] = lineName + "-" + node.name;
+			var x=[],a=[],b=[],c=[];
+			var stockLists = msgAll[i].data[0].recorderStockInfo;
+			//三相数据都有
+			if(stockLists && stockLists.length > 2){
+				var stockLista = stockLists[0].stockList;
+				for(var k=0;k<stockLista.length;k++){
+					if(stockLista[k].datas != null && stockLista[k].datas != undefined){
+						a.push(stockLista[k].datas);
+					}else{
+						a.push("-");
+					}
+					x.push(stockLista[k].xindex);
+				}
+				
+				var stockListb = stockLists[1].stockList;
+				for(var k=0;k<stockListb.length;k++){
+					if(stockListb[k].datas != null && stockListb[k].datas != undefined){
+						b.push(stockListb[k].datas);
+					}else{
+						b.push("-");
+					}
+				}
+				
+				var stockListc = stockLists[2].stockList;
+				for(var k=0;k<stockListc.length;k++){
+					if(stockListc[k].datas != null && stockListc[k].datas != undefined){
+						c.push(stockListc[k].datas);
+					}else{
+						c.push("-");
+					}
+				}
+			}
+			
+			//其中两相数据
+			if(stockLists && stockLists.length == 2){
+				var sgs = stockLists[0].sgs;
+				if(sgs == "A相"){
+					var stockLista = stockLists[0].stockList;
+					for(var k=0;k<stockLista.length;k++){
+						if(stockLista[k].datas != null && stockLista[k].datas != undefined){
+							a.push(stockLista[k].datas);
+						}else{
+							a.push("-");
+						}
+						x.push(stockLista[k].xindex);
+					}
+				}
+				if(sgs == "B相"){
+					var stockListb = stockLists[0].stockList;
+					for(var k=0;k<stockListb.length;k++){
+						if(stockListb[k].datas != null && stockListb[k].datas != undefined){
+							b.push(stockListb[k].datas);
+						}else{
+							b.push("-");
+						}
+						x.push(stockListb[k].xindex);
+					}
+				}
+				if(sgs == "C相"){
+					var stockListc = stockLists[0].stockList;
+					for(var k=0;k<stockListc.length;k++){
+						if(stockListc[k].datas != null && stockListc[k].datas != undefined){
+							c.push(stockListc[k].datas);
+						}else{
+							c.push("-");
+						}
+						x.push(stockListc[k].xindex);
+					}
+				}
+				
+				var sgs = stockLists[1].sgs
+				if(sgs == "A相"){
+					var stockLista = stockLists[1].stockList;
+					for(var k=0;k<stockLista.length;k++){
+						if(stockLista[k].datas != null && stockLista[k].datas != undefined){
+							a.push(stockLista[k].datas);
+						}else{
+							a.push("-");
+						}
+						x.push(stockLista[k].xindex);
+					}
+				}
+				if(sgs == "B相"){
+					var stockListb = stockLists[1].stockList;
+					for(var k=0;k<stockListb.length;k++){
+						if(stockListb[k].datas != null && stockListb[k].datas != undefined){
+							b.push(stockListb[k].datas);
+						}else{
+							b.push("-");
+						}
+						x.push(stockListb[k].xindex);
+					}
+				}
+				if(sgs == "C相"){
+					var stockListc = stockLists[1].stockList;
+					for(var k=0;k<stockListc.length;k++){
+						if(stockListc[k].datas != null && stockListc[k].datas != undefined){
+							c.push(stockListc[k].datas);
+						}else{
+							c.push("-");
+						}
+						x.push(stockListc[k].xindex);
+					}
+				}
+			}
+			
+			//一相数据都有
+			if(stockLists && stockLists.length == 1){
+				var sgs = stockLists[0].sgs;
+				if(sgs == "A相"){
+					var stockLista = stockLists[0].stockList;
+					for(var k=0;k<stockLista.length;k++){
+						if(stockLista[k].datas != null && stockLista[k].datas != undefined){
+							a.push(stockLista[k].datas);
+						}else{
+							a.push("-");
+						}
+						x.push(stockLista[k].xindex);
+					}
+				}
+				if(sgs == "B相"){
+					var stockListb = stockLists[0].stockList;
+					for(var k=0;k<stockListb.length;k++){
+						if(stockListb[k].datas != null && stockListb[k].datas != undefined){
+							b.push(stockListb[k].datas);
+						}else{
+							b.push("-");
+						}
+						x.push(stockListb[k].xindex);
+					}
+				}
+				if(sgs == "C相"){
+					var stockListc = stockLists[0].stockList;
+					for(var k=0;k<stockListc.length;k++){
+						if(stockListc[k].datas != null && stockListc[k].datas != undefined){
+							c.push(stockListc[k].datas);
+						}else{
+							c.push("-");
+						}
+						x.push(stockListc[k].xindex);
+					}
+				}
+			}
+			
+			map['x'] = x;
+			map['a'] = a;
+			map['b'] = b;
+			map['c'] = c;
+			list.push(map);
+		}
+		return list;
+	}
+	
+	$scope.$on('ngRepeatFinished', function (ngRepeatFinishedEvent) {
+		for(var i = 0;i<$scope.alarmNodes.length;i++){
+			init(i,$scope.alarmNodes[i].x,$scope.alarmNodes[i].a,$scope.alarmNodes[i].b,$scope.alarmNodes[i].c);
+		}
+	});
+	
+	function init(i,xValue,a,b,c){
+		var myChart = echarts.init(document.getElementById('voltageLine'+i));
+		currentEchartList.push(myChart);
+		option = {
+				title:{
+					text: '电流(A)',
+					x:'right',
+					y:'top' ,
+				    textStyle: {
+				        color: '#333',
+				        fontSize : 10,
+				        textAlign:'center'
+				    }
+				},
+				tooltip : {
+					 trigger: 'axis',
+					 zlevel:3,
+					 z:8,
+					 axisPointer:{
+						 type: 'line',
+						    lineStyle: {
+						        color: '#bbb',
+						        width: 1,
+						        type: 'solid'
+						    }
+					 } ,
+					 /*formatter: function (params,ticket,callback) {
+				            var res = params[0].name;
+						 	res += '<br/>' + "A相"+ ' : ' + (Number(params[0].value)).toFixed(2)+"A";
+						 	res += '<br/>' + "B相"+ ' : ' + (Number(params[1].value)).toFixed(2)+"A";
+						 	res += '<br/>' + "C相"+ ' : ' + (Number(params[2].value)).toFixed(2)+"A";
+				            return res;
+				      } */
+			    },
+				legend: {
+			        data:['A相','B相','C相'],
+			        x : '10',
+			        itemWidth : 5,
+			        itemHeight : 15,
+			        itemGap : 6
+			    },
+				calculable : false,
+				grid : {
+					borderWidth : '0px',
+					x : '20px',
+					x2 : '65px',
+					y : "30px",
+					y2 : "25px"
+				},
+				xAxis : [ {
+					font : {
+						color : 'red'
+					},
+					axisTick : {
+						show : false
+					},
+					type : 'category',
+					axisLine : {
+						lineStyle : {
+							color : '#666'
+						}
+					},
+					splitLine : {
+						show : false,
+					},
+					
+					boundaryGap : false,
+					show: true,
+					data : xValue
+				} ],
+				yAxis : [{
+					axisLabel : {
+						textStyle : {
+							color : '#666',
+							fontSize : 12
+						}
+					},
+					
+					font : {
+						color : '#666'
+					},
+					position:"right",
+					axisLine : {
+						lineStyle : {
+							color : 'transparent',
+							width : 1
+						},
+						
+					},
+					type : 'value'
+				}],
+				series : [{
+					symbol : 'none',
+					name : 'A相',
+					type : 'line',
+					itemStyle : {
+						normal : {
+							color : 'rgb(255,187,29)',
+							areaStyle : {
+								color : 'transparent'
+							},
+							lineStyle : {
+								color : 'rgb(255,187,29)',
+								width : 1
+							}
+						}
+					},
+					data : a
+				},{
+					symbol : 'none',
+					name : 'B相',
+					type : 'line',
+					itemStyle : {
+						normal : {
+							color : 'rgb(0,190,113)',
+							areaStyle : {
+								color : 'transparent'
+							},
+							lineStyle : {
+								color : 'rgb(0,190,113)',
+								width : 1
+							}
+						}
+					},
+					data : b
+				},{
+					symbol : 'none',
+					name : 'C相',
+					type : 'line',
+					itemStyle : {
+						normal : {
+							color : 'rgb(255,24,55)',
+							areaStyle : {
+								color : 'transparent'
+							},
+							lineStyle : {
+								color : 'rgb(255,24,55)',
+								width : 1
+							}
+						}
+					},
+					data : c
+				}]
+		};
+		myChart.setOption(option);
+	}
+	
+	
+	
+});
+	
+</script>
+		

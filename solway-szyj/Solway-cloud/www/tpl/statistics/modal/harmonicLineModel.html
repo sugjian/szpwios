@@ -1,0 +1,243 @@
+<div ng-controller="harmonicLineModelCtrl" >
+	<div id="harmonicLineContainer" style="height:150px;"></div>
+</div>
+
+<script>
+app.controller('harmonicLineModelCtrl',function($scope, $http) {
+	$scope.xtype = "h";
+	$scope.$on("harmonicData",function(event, data){
+		var data = $scope.harmonicData;
+		var THD=[],A = [],B=[],C=[],D = [],E=[],F=[],X = [];
+		if(data && data.length>0){
+			for(var i = 0;i<data.length;i++){
+				if(data[i]!= null){
+					THD.push(data[i]['thd']);
+					A.push(data[i]['h150']);
+					B.push(data[i]['h250']);
+					C.push(data[i]['h350']);
+					D.push(data[i]['h450']);
+					E.push(data[i]['h550']);
+					F.push(data[i]['h650']);
+					if($scope.type == "day"){
+						X.push(parseInt(data[i]['time'].substring(11,13)) + "H");
+					}else if($scope.type == "month"){
+						X.push(parseInt(data[i]['time'].substring(8,10)) + "日");
+					}else if($scope.type == "year"){
+						X.push(parseInt(data[i]['time'].substring(5,7)) + "月");
+					}
+					
+				}else{
+					THD.push(0);
+					A.push(0);
+					B.push(0);
+					C.push(0);
+					D.push(0);
+					E.push(0);
+					F.push(0);
+					X.push(0);
+				}
+			}
+			init(X,THD,A,B,C,D,E,F);
+		}else{
+			init([],[],[],[],[],[],[],[]);
+		}
+	});
+	function init(X,THD,A,B,C,D,E,F){
+		var myChart = echarts.init(document.getElementById('harmonicLineContainer'));
+		option = {
+				title:{
+					text: '百分比(%)' ,
+					x:'right',
+					y:'top' ,
+				    textStyle: {
+				        color: '#333',
+				        fontSize : 8,
+				        textAlign:'center'
+				    }
+				},
+				legend: {
+			        data:['THD','3次','5次','7次','9次','11次','13次'],
+			        x : 'left',
+			        itemWidth : 2,
+			        itemHeight : 8,
+			        itemGap : 4
+			    },
+				tooltip : {
+					 trigger: 'axis',
+					 zlevel:3,
+					 z:8,
+					 axisPointer:{
+						 type: 'line',
+						    lineStyle: {
+						        color: '#bbb',
+						        width: 1,
+						        type: 'solid'
+						    }
+					 } ,
+					 /*formatter: function (params,ticket,callback) {
+				            var res = params[0].name;
+						 	res += '<br/>' + "THD"+ ' : ' + (Number(params[0].value)).toFixed(2)+"%";
+						 	res += '<br/>' + "3次"+ ' : ' + (Number(params[1].value)).toFixed(2)+"%";
+						 	res += '<br/>' + "5次"+ ' : ' + (Number(params[2].value)).toFixed(2)+"%";
+						 	res += '<br/>' + "7次"+ ' : ' + (Number(params[3].value)).toFixed(2)+"%";
+						 	res += '<br/>' + "9次"+ ' : ' + (Number(params[4].value)).toFixed(2)+"%";
+						 	res += '<br/>' + "11次"+ ' : ' + (Number(params[5].value)).toFixed(2)+"%";
+						 	res += '<br/>' + "13次"+ ' : ' + (Number(params[6].value)).toFixed(2)+"%";
+				            return res;
+				      } */
+			    },
+				calculable : false,
+				grid : {
+					borderWidth : '0px',
+					x : '10px',
+					x2 : '30px',
+					y : "30px",
+					y2 : "25px"
+				},
+				dataZoom:{
+			    	type: 'inside',
+			        xAxisIndex: [0],
+			    },
+				xAxis : [ {
+					font : {
+						color : 'red'
+					},
+					axisTick : {
+						show : false
+					},
+					type : 'category',
+					axisLine : {
+						lineStyle : {
+							color : '#666'
+						}
+					},
+					splitLine : {
+						show : false,
+					},
+					boundaryGap : false,
+					show: true,
+					data : X
+				} ],
+				yAxis : [{
+					axisLabel : {
+						textStyle : {
+							color : '#666',
+							fontSize : 12
+						}
+					},
+					
+					font : {
+						color : '#666'
+					},
+					position:"right",
+					axisLine : {
+						lineStyle : {
+							color : 'transparent',
+							width : 1
+						},
+						
+					},
+					type : 'value'
+				}],
+				series : [{
+					symbol : 'circle',
+					type : 'line',
+					name : 'THD',
+					smooth : true,
+					data : THD,
+					itemStyle : {
+						normal : {
+							lineStyle : {
+								width : 1
+							}
+						}
+					},
+				},{
+					symbol : 'circle',
+					type : 'line',
+					name : '3次',
+					smooth : true,
+					data : A,
+					itemStyle : {
+						normal : {
+							lineStyle : {
+								width : 1
+							}
+						}
+					},
+				},{
+					symbol : 'circle',
+					type : 'line',
+					name : '5次',
+					smooth : true,
+					data : B,
+					itemStyle : {
+						normal : {
+							lineStyle : {
+								width : 1
+							}
+						}
+					},
+				},{
+					symbol : 'circle',
+					type : 'line',
+					name : '7次',
+					smooth : true,
+					data : C,
+					itemStyle : {
+						normal : {
+							lineStyle : {
+								width : 1
+							}
+						}
+					},
+				},{
+					symbol : 'circle',
+					type : 'line',
+					name : '9次',
+					smooth : true,
+					data : D,
+					itemStyle : {
+						normal : {
+							lineStyle : {
+								width : 1
+							}
+						}
+					},
+				},{
+					symbol : 'circle',
+					type : 'line',
+					name : '11次',
+					smooth : true,
+					data :E,
+					itemStyle : {
+						normal : {
+							lineStyle : {
+								width : 1
+							}
+						}
+					},
+				},{
+					symbol : 'circle',
+					type : 'line',
+					name : '13次',
+					smooth : true,
+					data : F,
+					itemStyle : {
+						normal : {
+							lineStyle : {
+								width : 1
+							}
+						}
+					},
+				}]
+		};
+		myChart.setOption(option);
+	}
+	
+	
+	
+});
+	
+</script>
+		

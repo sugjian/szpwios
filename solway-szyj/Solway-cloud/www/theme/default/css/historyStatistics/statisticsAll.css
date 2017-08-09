@@ -1,0 +1,39 @@
+@CHARSET "UTF-8";
+.nav-bottom-active{
+	    background-color: #1b262d;
+    	border-bottom: 1px solid #06bebd;
+    	color: #fff;
+}
+.datetimepicker {
+    color: black;
+}
+#statcontent{
+ animation-duration:1.5;   
+ animation-delay: 0s;   
+ animation-iteration-count: 1;   
+ animation-timing-function:ease;
+ -webkit-animation-duration:1.5s;   
+  -webkit-animation-delay: 0s;   
+  -webkit-animation-iteration-count: 1;   
+}
+.select-con{}
+.condition{width:26%;}
+.condition >div{height:80px;line-height:80px;font-size:15px;text-align:right;}
+.condition-sel{width:74%;}
+.condition-sel select{background:white;border:none; -webkit-appearance:none;appearance:none;width:59%;height:25px;line-height:24px;text-indent:8px; background: white url("../../img/historyStatistics/arrow-black-down.png") no-repeat;
+    background-position: 90% center;background-size: 8px; font-size: 12px;color: black;}
+.condition-sel>div{    text-align: center;line-height: 80px;}
+input{background-image: -webkit-gradient(linear, 0 0, right 0, from(rgb(1,210,195)), to(rgb(98,229,173)));
+		color:black;height:35px;line-height:35px;border-radius:18px;display: block;
+    width: 70%;
+    margin: 30px auto;
+    padding: 0;
+    border: none;}
+.back-con{position: fixed;
+    top: 0px;
+    z-index: 10;
+    display: inline-block;
+    width: 50px;
+    text-align: center;
+    height: 50px;
+    line-height: 40px;}

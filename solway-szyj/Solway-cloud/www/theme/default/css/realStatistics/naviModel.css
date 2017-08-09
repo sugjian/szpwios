@@ -1,0 +1,127 @@
+@CHARSET "UTF-8";
+.app { background-color: white !important;}
+.content{padding:0;}
+.search-con{margin:14px 0;}
+.search-con .select-left{width:35%;}
+.search-con .search-center{width:55%;}
+.search-con .search-right{width:10%;    line-height: 28px;}
+select{ -webkit-appearance:none;appearance:none;width:90px;height:30px;line-height:28px;text-indent:8px; background: white url("../../img/realStatistics/arrow-down.png") no-repeat;
+    background-position: 90% center;background-size: 12px; font-size: 12px;border: 1px solid rgb(189,189,189) !important;border-radius: 15px;}
+.input-con{border:1px solid rgb(125,125,125);width:95%;    line-height: 28px;display: -webkit-box;}
+.input-con input{width:160px;border:none;font-size:12px;    -webkit-box-flex: 1;display: block;    text-indent: 1em;}
+.input-con a{ width: 50px; background: rgb(19,126,253) url(../../img/realStatistics/search-icon.png) no-repeat;background-position: center;    display: block;background-size: 18px;}
+
+.normal-circle-b {
+    background: #00BE71;
+}
+.warn-circle-b {
+    background: rgb(255,107,9);
+}
+.label-text {
+    height: 25px;
+    box-shadow: 0px 2px 5px 0px rgba(0,0,0,0.25), 0px 0px 1px 0px rgba(0,0,0,0.30);
+    padding: 2px 5px;
+    color: #444444;
+    border-radius: 20px;
+    position: relative;
+}
+.normal-circle-img {
+    background: url(../../img/realStatistics/normal.png) no-repeat;    background-size: 20px;
+}
+.warn-circle-img {
+    background: url(../../img/realStatistics/warn.png) no-repeat;background-size: 20px;
+}
+.label-map {
+    display: inline-block;
+    font-family: "Microsoft Yahei",  Arial, STHeiti;
+}
+.label-circle {
+       width: 21px;
+    height: 25px;
+    display: inline-block;
+    margin-left: -2px;
+    vertical-align: middle;
+}
+.laberl-name-1 {
+    padding-right: 28px;
+    color: #ffffff;
+    padding-left: 5px;
+}
+.label-breadcrumbs {
+    width: 24px;
+    height: 24px;
+    position: absolute;
+    background: url(../../img/realStatistics/arrow-right.png) no-repeat;
+    top: 1px;
+    right: 3px;
+}
+.label-breadcrumbs-left{
+    background: url(../../img/realStatistics/arrow-left.png) no-repeat;
+    width: 16px;
+    height: 22px;
+    display: inline-block;
+    line-height: 30px;
+    vertical-align: -webkit-baseline-middle;
+}
+.power-mark-map {
+    background: url(../../img/realStatistics/mark.png) no-repeat;
+    height: 35px;
+    width: 20px;
+    position: absolute;
+    top: -30px;
+    display: none;
+    left: 3px;
+    background-size: 20px;
+}
+.power-mark-map-right {
+    background: url(../../img/realStatistics/mark.png) no-repeat;
+    height: 35px;
+    width: 20px;
+    position: absolute;
+    top: -30px;
+    display: none;
+     right: 6px;
+    background-size: 20px;
+}
+.power-mark-map-show {
+    display: block;
+}
+.station-list{    z-index: 1;
+       border-top: 1px solid rgb(107,107,107);
+    padding: 15px 0 33px;
+    background: white;
+    position: absolute;
+    width: 100%;
+    top: 108px;    overflow: auto;-webkit-overflow-scrolling:touch;
+}
+.list-item{    border-bottom: 1px solid grey;
+    padding-bottom: 10px;
+    margin-bottom: 10px;}
+.station-list .region{     text-indent: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    border-bottom: 1px solid gray;
+    padding-bottom: 13px;}
+.station-list .station{background:url(../../img/realStatistics/arr-black-right.png) no-repeat;    border-bottom: 1px solid rgb(207,207,207);    margin: 0 30px;
+    padding: 10px 0;background-position: right center;background-size: 10px;font-size:13px;}    
+.station-list .border-none{border:none;}    
+    .alarm-color{color:rgb(255,107,9);}
+    .no-data{    text-align: center;}
+     .no-data img{width:80px;}
+     .no-data p{margin-top:20px;font-size:14px;}
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    

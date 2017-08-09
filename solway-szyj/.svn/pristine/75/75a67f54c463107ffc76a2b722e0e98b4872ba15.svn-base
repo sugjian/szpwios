@@ -1,0 +1,124 @@
+
+<style>
+.noteDetails00 span {
+	color: #666;
+}
+</style>
+<script type="text/javascript">
+$("#picture0").css("display","block");
+function  getImg(obj,fileImgClass){
+	  var fileImg = $("."+ fileImgClass);
+     var explorer = navigator.userAgent;
+     var imgSrc = $(obj)[0].value;
+     if (explorer.indexOf('MSIE') >= 0) {
+         if (!/\.(jpg|jpeg|png|JPG|PNG|JPEG)$/.test(imgSrc)) {
+             imgSrc = "";
+             fileImg.attr("src","/img/default.png");
+             return false;
+         }else{
+             fileImg.attr("src",imgSrc);
+         }
+     }else{
+         if (!/\.(jpg|jpeg|png|JPG|PNG|JPEG)$/.test(imgSrc)) {
+             imgSrc = "";
+             fileImg.attr("src","/img/default.png");
+             return false;
+         }else{
+             var file = $(obj)[0].files[0];
+             var url = URL.createObjectURL(file);
+             fileImg.attr("src",url);
+         }
+     }
+     var index=$(".imgfile .file").index($(obj));//获得当前元素的下标
+     var imgs=$(".imgfile").children().size();
+     if(index<imgs){
+  	    var indexS=index+1;
+       if(indexS==imgs){
+      	 $(".imgfile").css("display","none");
+       }
+  	    $("#picture" + index).css("display","none");
+       $("#picture"+(index+1)).css("display","block");
+     }
+}
+
+</script>
+<div class="modal modal-full fade" id="noteDetails01" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+			<div class="modal-content col-xs-12 no-padder" style="padding-bottom:30px!important">
+				<div class="modal-header col-3 col-xs-12 no-padder">
+					    <button type="button" class="close close-img m-b-n-sm main-green" data-dismiss="modal" aria-hidden="true">
+                  			<img src="theme/default/img/icon/close.png">
+           				 </button>
+					 <h4 class="modal-title text-center m-t-sm" id="myModalLabel">
+            		   任务详情
+            		</h4>
+				</div>
+				<div class="modal-body col-3 col-xs-12 no-padder">
+					<div class="col-xs-12 list-div b-w">
+						<span class="text-1-5x">电站名称</span>
+						<span class="pull-right text-1-5x col-6"  id="stationnameStr"></span>
+					</div>
+					<div class="col-xs-12 list-div b-w">
+						<span class="text-1-5x">指派人</span>
+						<span class="pull-right text-1-5x col-6" id="distmanStr"></span>
+					</div>
+					<div class="col-xs-12 list-div b-w">
+						<span class="text-1-5x">受理人</span>
+						<span class="pull-right text-1-5x col-6" id="respmanStr"></span>
+					</div>
+					<div class="col-xs-12 list-div b-w">
+						<span class="text-1-5x">任务指派时间</span>
+						<span class="pull-right text-1-5x col-6" id="distdateStr"></span>
+					</div>
+					<div class="col-xs-12 list-div b-w">
+						<span class="text-1-5x">再次提醒时间</span>
+						<span class="pull-right text-1-5x col-6">
+							<span id="remindtimeStr"></span>小时
+						</span>
+					</div>
+					<div class="col-xs-12 list-div b-w">
+						<span class="text-1-5x">期待完成时间</span>
+						<span class="pull-right text-1-5x col-6" id="expectedtimeStr"></span>
+					</div>
+					<div class="col-xs-12 list-div b-w">
+						<label class="text-1-5x">实际处理时间</label>
+						<span class="pull-right text-1-5x col-6" id="finishdateStr"></span>
+					</div>
+					<div class="col-xs-12 list-div b-w">
+						<span class="text-1-5x">任务状态</span>
+						<span class="pull-right text-1-5x col-6" id="taskstatusStr"></span>
+					</div>
+						
+					<div class="col-xs-12 wrapper b-w">
+						<span class="text-1-5x">任务描述</span>
+						<span class="col-xs-12 no-padder text-1-5x col-6" id="taskcontentStr"></span>
+					</div>
+					<div class="col-xs-12 wrapper">
+						<span class="text-1-5x">处理情况说明</span>
+						<span class="col-xs-12 no-padder text-1-5x col-6" id="finishcontentStr"></span>
+					</div>
+					
+				<div class="form-group col-xs-12">
+                <div class="col-xs-12 no-padder imgfile" >
+                	<div class="fileimgsize col-xs-4 no-padder" id="imgdiv1" style="padding-right: 5px!important;" >
+	          			<img id="billImg5" class="fileImg5 fileimgsize col-xs-12 no-padder" name = "billImg5" src="http://placehold.it/150x95?text=图+片">
+          			</div>
+          			<div class="fileimgsize col-xs-4 no-padder" id="imgdiv2" style="padding-right: 5px!important;" >
+	          			<img id="billImg6" class="fileImg6 fileimgsize col-xs-12 no-padder" name = "billImg6" src="http://placehold.it/150x95?text=图+片">
+          			</div>
+          			<div class="fileimgsize col-xs-4 no-padder" id="imgdiv3" style="padding-right: 5px!important;" >
+	          			<img id="billImg7" class="fileImg7 fileimgsize col-xs-12 no-padder"  name = "billImg7"  src="http://placehold.it/150x95?text=图+片">
+          			</div>
+			 	</div>
+             </div>	
+			</div>
+			<!-- 	<div class="modal-footer">
+					<div class="form-group">
+						<div class="col-xs-12 text-center">
+							<button type="button" class="taskBtn btn w-xs"data-dismiss="modal">关闭</button>
+						</div>
+					</div>
+				</div> -->
+			</div>
+	</div>
+	</div>

@@ -1,0 +1,370 @@
+
+/**
+ * Config for the router
+ */
+
+var welComeUrl = "/login?deviceToken=" + deviceToken;;
+angular.module('app')
+  .run(['$rootScope', '$state', '$stateParams',
+      function ($rootScope,   $state,   $stateParams) {
+          $rootScope.$state = $state;
+          $rootScope.$stateParams = $stateParams;        
+      }
+    ]
+  )
+  .config([ '$stateProvider', '$urlRouterProvider',
+      function ($stateProvider,   $urlRouterProvider) {
+          $urlRouterProvider .otherwise(welComeUrl);
+          $stateProvider
+              .state('app', {
+                  abstract: true,
+                  url: '/app',
+                  templateUrl: 'tpl/app.html',
+						resolve : {
+							deps : ['$ocLazyLoad',
+								function(
+										$ocLazyLoad) {
+									return $ocLazyLoad
+											.load('toaster')
+								}]
+						}
+              })
+              //实时数据
+              .state('app.realStatistics', {
+                  url: '/realStatistics',
+                  templateUrl: "tpl/realStatistics/realStatisticsAll.html"
+                })
+                .state('app.realStatistics.stat', {
+                  url: '/realStat',
+                  templateUrl: "tpl/realStatistics/stat/staAll.html"
+                })
+                .state('app.realStatistics.equipment', {
+                  url: '/equipment',
+                  templateUrl: "tpl/realStatistics/stat/equipment.html"
+                })
+              .state('app.statistics', {
+                  url: '/statistics',
+                  templateUrl: "tpl/statistics/statisticsAll.html"
+                })
+                .state('app.statistics.staDay', {
+                	url: '/staDay',
+                	templateUrl: "tpl/statistics/stat/staDay.html",
+						resolve : {
+							deps : ['$ocLazyLoad',
+								function(
+										$ocLazyLoad) {
+									return $ocLazyLoad
+											.load('toaster')
+								}]
+						}
+                })
+                .state('app.statistics.staMon', {
+                	url: '/staDay',
+                	templateUrl: "tpl/statistics/stat/staMon.html"
+                })
+                .state('app.statistics.staYear', {
+                	url: '/staDay',
+                	templateUrl: "tpl/statistics/stat/staYear.html"
+                })
+                .state('app.statistics.staAll', {
+                	url: '/staDay',
+                	templateUrl: "tpl/statistics/stat/staAll.html",
+                	
+                })
+                   .state('app.dashboard-v1', {
+                  url: '/dashboard-v1',
+                  templateUrl: "tpl/app_dashboard_v1.html",
+                  resolve: {
+                      deps: ['$ocLazyLoad',
+                        function( $ocLazyLoad ){
+                          return $ocLazyLoad.load
+                          (['js/dist/echarts.js','js/controllers/toaster.js']);
+                      }]
+                    }
+                })
+               .state('app.dashboard-v2', {
+                  url: '/dashboard-v2',
+                  templateUrl: 'tpl/app_dashboard_v2.html',
+                  resolve: {
+                    deps: ['$ocLazyLoad',
+                      function( $ocLazyLoad ){
+                        return $ocLazyLoad.load
+                        (['js/dist/echarts.js','js/controllers/toaster.js']);
+                    }]
+                  }
+              })
+              .state('login', {
+            	  url: '/login',
+            	  templateUrl: 'tpl/login.html',
+            	  resolve: {
+                      deps: ['$ocLazyLoad',
+                        function( $ocLazyLoad ){
+                          return $ocLazyLoad.load
+                          (['js/controllers/toaster.js']);
+                      }]
+                    }
+              })
+              .state('forgetPwd', {
+            	  url: '/forgetPwd',
+            	  templateUrl: 'tpl/forgetPwd.html'
+            	  
+              })
+              .state('resetPWDSuc', {
+            	  url: '/resetPWDSuc',
+            	  templateUrl: 'tpl/resetPWDSuc.html'	  
+              })
+              .state('regist', {
+            	  url: '/regist',
+            	  templateUrl: 'tpl/regist.html'
+            		  
+              })
+              .state('registSuc', {
+            	  url: '/registSuc',
+            	  templateUrl: 'tpl/registSuc.html'	  
+              })
+              .state('faultList', {
+            	  url: '/faultList?comId&stationId',
+            	  templateUrl: 'tpl/faultList.html',
+            	  resolve: {
+                      deps: ['$ocLazyLoad',
+                             function( $ocLazyLoad){
+                               return $ocLazyLoad.load('toaster').then(
+                                   function(){
+                                      return $ocLazyLoad.load('ui.select','js/controllers/toaster.js');
+                                   }
+                               );
+                           }]
+                  }
+              })
+              .state('userList', {
+            	  url: '/userList',
+            	  templateUrl: 'tpl/userInfo/userList.html'
+              })
+              .state('stationConf', {
+            	  url: '/stationConf',
+            	  templateUrl: 'tpl/userInfo/stationConf.html'
+              })
+               .state('stationGroup', {
+            	  url: '/stationGroup',
+            	  templateUrl: 'tpl/userInfo/stationGroup.html',
+            	  resolve: {
+                      deps: ['$ocLazyLoad',
+                             function( $ocLazyLoad){
+                               return $ocLazyLoad.load('toaster').then(
+                                   function(){
+                                      return $ocLazyLoad.load('js/controllers/toaster.js');
+                                   }
+                               );
+                           }]
+                  }
+              })
+               .state('stationGroupDetail', {
+            	  url: '/stationGroupDetail?staId&stateName',
+            	  templateUrl: 'tpl/userInfo/stationGroupDetail.html'
+              })
+               .state('addstationDetail', {
+            	  url: '/addstationDetail?staId&stateName',
+            	  templateUrl: 'tpl/userInfo/addstationDetail.html',
+            	  resolve: {
+                      deps: ['$ocLazyLoad',
+                             function( $ocLazyLoad){
+                               return $ocLazyLoad.load('toaster').then(
+                                   function(){
+                                      return $ocLazyLoad.load('js/controllers/toaster.js');
+                                   }
+                               );
+                           }]
+                  }
+              })
+               .state('removeStation', {
+            	  url: '/removeStation?staId&stateName',
+            	  templateUrl: 'tpl/userInfo/removeStation.html',
+            	  resolve: {
+                      deps: ['$ocLazyLoad',
+                             function( $ocLazyLoad){
+                               return $ocLazyLoad.load('toaster').then(
+                                   function(){
+                                      return $ocLazyLoad.load('js/controllers/toaster.js');
+                                   }
+                               );
+                           }]
+                  }
+              })
+              .state('removeStationGroup', {
+            	  url: '/removeStationGroup?staId&stateName',
+            	  templateUrl: 'tpl/userInfo/removeStationGroup.html',
+            	  resolve: {
+            		  deps: ['$ocLazyLoad',
+            		         function( $ocLazyLoad){
+            			  return $ocLazyLoad.load('toaster').then(
+            					  function(){
+            						  return $ocLazyLoad.load('js/controllers/toaster.js');
+            					  }
+            			  );
+            		  }]
+            	  }
+              })
+              .state('resNoteSet', {
+            	  url: '/resNoteSet',
+            	  templateUrl: 'tpl/userInfo/resNoteSet.html'
+              })
+              .state('aboutNecloud', {
+            	  url: '/aboutNecloud',
+            	  templateUrl: 'tpl/userInfo/aboutNecloud.html'
+              })
+              .state('stationDetail', {
+            	  url: '/stationDetail',
+            	  templateUrl: 'tpl/userInfo/stationDetail.html'
+              })
+              .state('userInfo', {
+            	  url: '/userInfo',
+            	  templateUrl: 'tpl/userInfo/userInfo.html',
+            	  resolve: {
+                      deps: ['$ocLazyLoad',
+                             function( $ocLazyLoad){
+                               return $ocLazyLoad.load('toaster').then(
+                                   function(){
+                                      return $ocLazyLoad.load('js/controllers/toaster.js');
+                                   }
+                               );
+                           }]
+                       }
+                   })
+              .state('upPpassword', {
+            	  url: '/upPpassword',
+            	  templateUrl: 'tpl/userInfo/upPpassword.html',
+            	  resolve: {
+                      deps: ['$ocLazyLoad',
+                             function( $ocLazyLoad){
+                               return $ocLazyLoad.load('toaster').then(
+                                   function(){
+                                      return $ocLazyLoad.load('js/controllers/toaster.js');
+                                   }
+                               );
+                           }]
+                       }
+              })        
+              //消息列表
+               .state('noteList', {
+            	  url: '/noteList?li_index&keyWord',
+            	  templateUrl: 'tpl/message/noteList.html',
+            	  resolve: {
+                      deps: ['$ocLazyLoad',
+                             function( $ocLazyLoad){
+                               return $ocLazyLoad.load('toaster').then(
+                                   function(){
+                                      return $ocLazyLoad.load('js/controllers/toaster.js');
+                                   }
+                               );
+                           }]
+                  }
+              })
+                //消息列表
+               .state('noteSerach', {
+            	  url: '/noteSerach',
+            	  templateUrl: 'tpl/message/noteSerach.html'
+              })
+              .state('access', {
+                  url: '/access',
+                 /* template: '<div ui-view class=""></div>'*/
+               	  template: '<div ui-view class="col-xs-12 no-padder fade-in-right-big smooth" style="background-color:#fff"></div>',
+               	 resolve: {
+                     deps: ['$ocLazyLoad',
+                            function( $ocLazyLoad){
+                              return $ocLazyLoad.load('toaster').then(
+                                  function(){
+                                     return $ocLazyLoad.load('js/controllers/toaster.js');
+                                  }
+                              );
+                          }]
+                 }
+              }) 
+              //创建派单页
+               .state('access.faultTask', {
+            	  url: '/faultTask?li_index',
+            	  templateUrl: 'tpl/message/createTask.html',
+            	  resolve: {
+                      deps: ['$ocLazyLoad',
+                         function( $ocLazyLoad){
+                           return $ocLazyLoad.load('toaster').then(
+                               function(){
+                                  return $ocLazyLoad.load('ui.select');
+                               }
+                           );
+                       }]
+                       }
+                  })
+                 //创建故障详情页
+               .state('access.taskList', {
+            	  url: '/taskList?id&li_index',
+            	  templateUrl: 'tpl/message/taskList.html',
+            	  resolve: {
+                      deps: ['$ocLazyLoad',
+                         function( $ocLazyLoad){
+                           return $ocLazyLoad.load('toaster').then(
+                               function(){
+                                  return $ocLazyLoad.load('ui.select');
+                               }
+                           );
+                       }]
+                       }
+                  })
+              .state('showNoteContent', {
+            	  url: '/showNoteContent?id&li_index',
+            	  templateUrl: 'tpl/showNoteContent.html',
+            	  resolve: {
+                      deps: ['$ocLazyLoad',
+                             function( $ocLazyLoad){
+                               return $ocLazyLoad.load('toaster').then(
+                                   function(){
+                                      return $ocLazyLoad.load('js/controllers/toaster.js');
+                                   }
+                               );
+                           }]
+                       }
+              })
+               
+              .state('access.areaList', {
+                  url: '/areaList?comId',
+                  templateUrl: 'tpl/areaList.html'
+              })
+              .state('access.standList', {
+            	  url: '/standList?standId',
+            	  templateUrl: 'tpl/standList.html'
+              })
+             /* .state('access.faultTask', {
+            	  url: '/faultTask?faultId&li_index',
+            	  templateUrl: 'tpl/faultTask.html',
+            	  resolve: {
+                      deps: ['$ocLazyLoad',
+                         function( $ocLazyLoad){
+                           return $ocLazyLoad.load('toaster').then(
+                               function(){
+                                  return $ocLazyLoad.load('ui.select');
+                               }
+                           );
+                       }]
+                       }
+                  })*/
+              .state('access.faultDetails', {
+            	  url: '/faultDetails?faultId',
+            	  templateUrl: 'tpl/faultDetails.html'
+              })
+              .state('access.faultDetailsDo', {
+            	  url: '/faultDetailsDo?faultId&taskId&li_index',
+            	  templateUrl: 'tpl/faultDetailsDo.html',
+            	  resolve: {
+                      deps: ['$ocLazyLoad',
+                         function( $ocLazyLoad){
+                           return $ocLazyLoad.load('toaster').then(
+                               function(){
+                                  return $ocLazyLoad.load('js/controllers/toaster.js');
+                               }
+                           );
+                       }]
+                       }
+              })
+      }
+    ]
+  );
+var deviceToken = getParameter("deviceToken");//定义一个token

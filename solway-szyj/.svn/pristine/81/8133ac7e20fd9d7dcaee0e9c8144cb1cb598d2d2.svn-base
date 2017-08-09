@@ -1,0 +1,192 @@
+<script src="./js/mui.indexedlist.js"></script>
+<link href="./theme/default/css/mui.indexedlist.css" rel="stylesheet" />
+<style>
+	.form-control:focus {
+    border-color: transparent;
+}
+.mui-checkbox input[type='checkbox']:before {
+    content: "\f046";
+}
+.mui-radio input[type='radio']:before, .mui-checkbox input[type='checkbox']:before {
+    color: #fff;
+}
+.mui-checkbox input[type='checkbox']:checked:before {
+    content: "\f1db";
+}
+.mui-radio input[type='radio']:checked:before, .mui-checkbox input[type='checkbox']:checked:before {
+    color: #ccc!important;
+}
+</style>
+<div class="col-xs-12 no-padder"ng-controller="removeStationGroupCtrl">
+<div class="navbar-header bg-black app-header navbar ng-scope"id="distUserNav">
+	<ul class="nav col-xs-12 no-padder nav-top"  >
+          <li class="col-xs-3 no-padder" ui-sref-active="active">
+          	<a ui-sref="userList" class="text-1-6x  m-t-xs">
+          		取消
+          	</a>
+           </li>
+          <li class="col-xs-5 no-padder text-center">
+          	<a href="" class="text-1-8x m-t-xs">
+          		<span ng-bind="titleName"></span>
+          	</a>
+           </li>
+          <li class="col-xs-4 no-padder">   
+          	<a ng-show="statList.length>'0'" id='done' class="text-1-6x m-t-xs pull-right" ng-click="finishStita()">
+          		完成
+          	</a>
+          </li>
+        </ul>
+</div>
+		<header class="mui-bar mui-bar-nav hidden">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			
+		</header>
+		<div class="mui-content">
+			<div id='list' class="mui-indexed-list">
+			<!-- 这里是搜索 -->
+				<div class="mui-indexed-list-search mui-input-row mui-search hidden" >
+					<input type="search" class="mui-input-clear mui-indexed-list-search-input form-control" placeholder="搜索电站首字母或名称">
+				</div>
+				<!--<div class="col-xs-12">
+					<input type="search" class="form-control" placeholder="搜索电站首字母或名称">
+				</div>	-->
+				<center class="col-xs-12" ng-show="statList.length=='0'" style="margin-top:25%">
+					<img src="./theme/default/img/noGroup.png" style="width: 50%"/>
+				</center>
+				<div class="mui-indexed-list-bar hidden">
+					<a>A</a>
+					<a>B</a>
+					<a>C</a>
+					<a>D</a>
+					<a>E</a>
+					<a>F</a>
+					<a>G</a>
+					<a>H</a>
+					<a>I</a>
+					<a>J</a>
+					<a>K</a>
+					<a>L</a>
+					<a>M</a>
+					<a>N</a>
+					<a>O</a>
+					<a>P</a>
+					<a>Q</a>
+					<a>R</a>
+					<a>S</a>
+					<a>T</a>
+					<a>U</a>
+					<a>V</a>
+					<a>W</a>
+					<a>X</a>
+					<a>Y</a>
+					<a>Z</a>
+				</div>
+				<div class="mui-indexed-list-alert"></div>
+				<div class="mui-indexed-list-inner">
+					<div class="mui-indexed-list-empty-alert">暂无数据</div>
+					<ul class="mui-table-view">
+						<li data-group="A" class="mui-table-view-divider mui-indexed-list-group hidden" >A</li>
+						<li data-group="K" class="mui-table-view-divider mui-indexed-list-group hidden">K</li>
+						
+						<li ng-repeat="stat in statList" 
+							data-value="KHG" data-tags="KaShi" id="{{stat.powerstationid}}" class="mui-table-view-cell mui-indexed-list-item mui-checkbox mui-left">
+							<input type="checkbox"/><span ng-bind="stat.stationName"></span></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+<toaster-container toaster-options="{'position-class': 'toast-top-right', 'close-button':true}"></toaster-container>
+</div>
+<script>
+if(isAndroid){//判断安卓，修改顶部样式
+	$("#distUserNav").addClass("m-t-none");
+}
+app.controller('removeStationGroupCtrl', function ($scope, $http,$state,$stateParams,$rootScope,toaster) {
+	var header = document.querySelector('header.mui-bar');
+	var list = document.getElementById('list');
+	var done = document.getElementById('done');
+	
+	$scope.titleName=$stateParams.stateName
+
+	$http({
+		method : "POST",
+		url : ctx+"/userGroup/listPStations.htm",
+		params : {
+			groupId:$stateParams.staId
+		}
+		})
+		.success(function (msg) {
+			$scope.statList=msg.data
+			var count =  $scope.statList.length
+			var value = count ? "完成(" + count + ")" : "完成";
+			done.innerHTML =value
+			$scope.getRemoveSize()
+		}).error(function(msg){
+		});
+
+		$scope.finishStita=function(){
+			
+			var checkboxArray = [].slice.call(list.querySelectorAll('input[type="checkbox"]'));
+			var checkedValues = [];
+			checkboxArray.forEach(function(box) {
+				if (!(box.checked)) {
+					checkedValues.push($(box).parent().attr("id"));
+				}
+			});
+			if(checkedValues.length==0){
+				return false
+			}
+			$http({
+				method : "POST",
+				url : ctx+"/userGroup/deleteGroupRel.htm",
+				params : {
+					roleId:storage["roleId"],
+					groupId:$stateParams.staId,
+					pStatIds:checkedValues
+				}
+				})
+				.success(function (msg) {
+					if(msg.key=="0"){
+						toaster.pop("error", '', '网络错误');
+					}else if(msg.key=="1"){
+						toaster.pop("error", '', '不存在该组');
+					}
+					else if(msg.key=="2"){
+						toaster.pop("error", '', '删除失败');
+					}
+					else if(msg.key=="3"){
+						toaster.pop("error", '', '删除成功');
+						$state.go("stationGroupDetail", {
+							staId : $stateParams.staId,
+							stateName:$stateParams.stateName
+						});
+					}			
+				}).error(function(msg){
+					
+				});
+		}
+			mui.init();
+			$scope.getRemoveSize=function(){
+				mui.ready(function() {
+					list.style.height = (document.body.offsetHeight - header.offsetHeight) + 'px';
+
+					window.indexedList = new mui.IndexedList(list);
+					mui('.mui-indexed-list-inner').on('change', 'input', function() {
+						var count = $scope.statList.length-list.querySelectorAll('input[type="checkbox"]:checked').length;
+						var value = count ? "完成(" + count + ")" : "完成";
+						done.innerHTML = value;
+						if (count) {
+							if (done.classList.contains("mui-disabled")) {
+								done.classList.remove("mui-disabled");
+							}
+						} else {
+							if (!done.classList.contains("mui-disabled")) {
+								done.classList.add("mui-disabled");
+							}
+						}
+					});
+				});
+			}
+        });
+
+		</script>

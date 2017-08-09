@@ -1,0 +1,25 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "9064c91c-10ff-4309-bc46-e7c603b55e7b++3202",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+    "9064c91c-10ff-4309-bc46-e7c603b55e7b++3202" : {
+
+    }
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "9064c91c-10ff-4309-bc46-e7c603b55e7b++3202" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "D5AE7C02-2192-4D69-B97A-785AED132B72",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "9064c91c-10ff-4309-bc46-e7c603b55e7b++3202" : "NECloud-ios\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "Solway-cloud",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "Solway-cloud.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "svn:\/\/solway.svn-ip",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Subversion",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "9064c91c-10ff-4309-bc46-e7c603b55e7b++3202"
+    }
+  ]
+}

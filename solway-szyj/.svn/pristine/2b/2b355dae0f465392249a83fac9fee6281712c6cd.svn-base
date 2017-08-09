@@ -1,0 +1,39 @@
+<!-- 拒绝 -->
+<div class="modal  fade col-xs-12 no-padder halfModal" id="handle112" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+   <div class="modal-dialog col-xs-12 no-padder " style="width: 100%">
+     <div class="modal-content col-xs-12">
+			 <div class="modal-header n-b col-3 col-xs-12 no-padder">
+	               <button type="button" class="close close-img m-b-n-sm main-green" data-dismiss="modal" aria-hidden="true">
+                  <img src="theme/default/mg/icon/close.png">
+            </button>
+       		  </div>
+			<div class="modal-body col-3 col-xs-12">
+							<form class="bs-example form-horizontal" >
+							
+								<div class="form-group" >
+									<div class="col-xs-12 no-padder " id="OtherReason">
+										<label class="col-sm-3 control-label pull-left">拒绝原因</label>
+										<div class="col-sm-8">
+											<textarea id="handle112_reason"  rows="5" cols="10" 
+											 maxlength="50"name="taskcontent" 
+											 class="col-xs-12 padder-v-xsm bg-f7f7f7 text-1-2x ng-binding"></textarea>
+										</div>
+									</div>
+								</div>
+								<input type="hidden" id="handle112_id" value="">
+								<input type="hidden" id="handle112_topmessageId" value="">
+								
+								<div class="form-group">
+									<div class="col-xs-12 text-center" >
+										<button type="button" ng-click="handle112_save()" 
+											class="col-xs-offset-3 col-xs-6 pull-in btn b-t-main  btn-success">
+											<strong>保 存</strong>
+										</button>
+									</div>
+								</div>
+							</form>
+			</div>
+		</div>
+     	 </div><!-- /.modal-content -->
+		</div><!-- /.modal -->
+<!-- 模态框 -->

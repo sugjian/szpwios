@@ -1,0 +1,184 @@
+<div ng-controller="loadLineModelCtrl">
+	<div id="loadLineContainer" style="height:150px;"></div>
+</div>
+
+<script>
+app.controller('loadLineModelCtrl',function($scope, $http, $state,$rootScope) {
+	
+	$scope.$on("loadData",function(event, data){
+		var data = $scope.loadData;
+		var A = [],B=[],C=[],X = [];
+		if(data && data.length>0){
+			for(var i = 0;i<data.length;i++){
+				if(data[i]!= null){
+					A.push(data[i]['sgs_a_avg']);
+					B.push(data[i]['sgs_b_avg']);
+					C.push(data[i]['sgs_c_avg']);
+					if($scope.type == "day"){
+						X.push(parseInt(data[i]['time'].substring(11,13)) + "H");
+					}else if($scope.type == "month"){
+						X.push(parseInt(data[i]['time'].substring(8,10)) + "日");
+					}else if($scope.type == "year"){
+						X.push(parseInt(data[i]['time'].substring(5,7)) + "月");
+					}
+					
+				}else{
+					A.push(0);
+					B.push(0);
+					C.push(0);
+					X.push(0);
+				}
+			}
+			init(X,A,B,C);
+		}else{
+			init([],[],[],[]);
+		}
+	});
+	
+	
+	function init(xValue,yValue1,yValue2,yValue3){
+		var myChart = echarts.init(document.getElementById('loadLineContainer'));
+		option = {
+				title:{
+					text: '电流(A)',
+					x:'right',
+					y:'top' ,
+				    textStyle: {
+				        color: '#333',
+				        fontSize : 8,
+				        textAlign:'center'
+				    }
+				},
+				color : ['rgb(255,185,0)','rgb(21,197,125)','rgb(255,105,32)'],
+				legend: {
+			        data:['A相平均','B相平均','C相平均'],
+			        x : 'left',
+			        textStyle: {fontSize: 13}
+			    },
+				tooltip : {
+					 trigger: 'axis',
+					 zlevel:3,
+					 z:8,
+					 axisPointer:{
+						 type: 'line',
+						    lineStyle: {
+						        color: '#bbb',
+						        width: 1,
+						        type: 'solid'
+						    }
+					 } ,
+					 /*formatter: function (params,ticket,callback) {
+				            var res = params[0].name;
+						 	res += '<br/>' + "A相平均"+ ' : ' + (Number(params[0].value)).toFixed(2)+"A";
+						 	res += '<br/>' + "B相平均"+ ' : ' + (Number(params[1].value)).toFixed(2)+"A";
+						 	res += '<br/>' + "C相平均"+ ' : ' + (Number(params[2].value)).toFixed(2)+"A";
+				            return res;
+				      } */
+			    },
+				calculable : false,
+				grid : {
+					borderWidth : '0px',
+					x : '10px',
+					x2 : '30px',
+					y : "30px",
+					y2 : "25px"
+				},
+				dataZoom:{
+			    	type: 'inside',
+			        xAxisIndex: [0],
+			    },
+				xAxis : [ {
+					font : {
+						color : 'red'
+					},
+					axisTick : {
+						show : false
+					},
+					type : 'category',
+					axisLine : {
+						lineStyle : {
+							color : '#666'
+						}
+					},
+					splitLine : {
+						show : false,
+					},
+					
+					boundaryGap : false,
+					show: true,
+					data : xValue
+				} ],
+				yAxis : [{
+					axisLabel : {
+						textStyle : {
+							color : '#666',
+							fontSize : 12
+						}
+					},
+					
+					font : {
+						color : '#666'
+					},
+					position:"right",
+					axisLine : {
+						lineStyle : {
+							color : 'transparent',
+							width : 1
+						},
+						
+					},
+					type : 'value'
+				}],
+				series : [{
+					symbol : 'circle',
+					type : 'line',
+					name : 'A相平均',
+					smooth : true,
+					data : yValue1,
+					itemStyle : {
+						normal : {
+							lineStyle : {
+								color : 'rgb(255,185,0)',
+								width : 1
+							}
+						}
+					},
+				},{
+					symbol : 'circle',
+					type : 'line',
+					name : 'B相平均',
+					smooth : true,
+					data : yValue2,
+					itemStyle : {
+						normal : {
+							lineStyle : {
+								color : 'rgb(21,197,125)',
+								width : 1
+							}
+						}
+					},
+				},{
+					symbol : 'circle',
+					type : 'line',
+					name : 'C相平均',
+					smooth : true,
+					data : yValue3,
+					itemStyle : {
+						normal : {
+							lineStyle : {
+								color : 'rgb(255,105,32)',
+								width : 1
+							}
+						}
+					},
+				}]
+		};
+		myChart.setOption(option);
+	}
+	
+	
+	
+});
+	
+</script>
+		

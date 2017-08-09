@@ -1,0 +1,79 @@
+<link rel="stylesheet" type="text/css" href="theme/default/css/datePicker.css">
+    <script type="text/javascript" src="js/require/iscroll.js"></script>
+    <script type="text/javascript" src="js/datePicker.js"></script>
+ <style>
+	.nav-bottom-active{
+	    background-color: #1b262d;
+    	border-bottom: 1px solid #06bebd;
+    	color: #fff;
+    }
+</style>   
+<div class="col-xs-12 no-padder" ng-controller="staAllCtrl">
+	<div class="col-xs-12 no-padder">
+		<ul class="nav col-xs-12 no-padder text-center bg-black nav-black-jd m-b-sm m-t-n-md" >
+			<li class="active" ui-sref-active="active" >
+				<a ui-sref='app.statistics.staDay' class="wrapper" ng-click="changeDate('1')">
+					<span class="text-1-2x">日</span>
+				</a>
+			</li>
+			<li ui-sref-active="active">
+				<a ui-sref='app.statistics.staMon' class="wrapper" ng-click="changeDate('2')">
+					<span class="text-1-2x">月</span>
+				</a>
+			</li>
+			<li ui-sref-active="active">
+				<a ui-sref='app.statistics.staYear' class="wrapper" ng-click="changeDate('3')">
+					<span class="text-1-2x">年</span>
+				</a>
+			</li>
+			<li  ui-sref-active="active" >
+				<a ui-sref='app.statistics.staAll' class="wrapper" ng-click="changeDate('4')">
+					<span class="text-1-2x">累计</span>
+				</a>
+			</li>
+			 <li class="pull-right" >
+		          <div class="wrapper changeJt">
+					<i class="fa fa-angle-left map-jt text-2x" ng-click="dateLeft()"></i> 
+						<span>
+							<!-- <div id="expectedverifyCT" class="col-xs-12 control-label m-t-sm black-1 no-padder"></div> -->
+							<span id="changeTimeId1" class="text-1-6x" ng-bind="mapTimeDay| date:'yyyy/MM/dd'"></span> 
+							<span id="changeTimeId2" class="hidden text-1-6x" ng-bind="mapTimeMonth"></span> 
+							<span id="changeTimeId3" class="hidden text-1-6x m-l-sm m-r-sm" ng-bind="mapTimeYear"></span> 
+							<div id="changeTimeId4" class="hidden text-1-6x m-t-xs m-r-sm" ><span id="nowTimes"></span> - 至今</div> 
+						</span>
+					<i class="fa fa-angle-right map-jt text-2x"ng-click="dateRight()"  ng-class="{'col-0':dailyJt}"></i> 
+				   </div>
+			   </li>
+	</ul>
+	</div>
+<!-- 	<center class="col-xs-12" ng-show="rootStationId.length=='0'" style="margin-top:25%">
+		<img src="./theme/default/img/nostation.png" style="width: 50%"/>
+	</center> -->
+	<div id="statcontent"  class="col-xs-12 no-padder" ng-swipe-right="swipeRight()" ng-swipe-left="swipeLeft()"><div  class="col-xs-12 no-padder" ui-view ></div></div>
+	<!--公用模态框-->
+	<div  class="modal statModal col-xs-12 no-padder "  id="statModal" tabindex="-1" role="dialog"aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-lg m-n">
+			<div class="modal-content col-sm-12 no-padder">	
+				<!-- <a class="icon-close" data-dismiss="modal" ng-click="closeStatModal()">
+					<img src="./theme/default/img/close.png" style="width:23px;">
+				</a> -->
+					<div class="modal-body no-padder"  id="text" style="overflow-y: auto; overflow-x: hidden;">
+						<div id="statDataPageID" ng-include="statDataPage" /></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--模态框结束-->
+	<!--公用模态框-->
+	<div  class="modal statModal col-xs-12 no-padder"  id="statModal2" tabindex="-1" role="dialog"aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-lg m-n">
+			<div class="modal-content col-sm-12 no-padder">	
+					<div class="modal-body no-padder"  id="text" style="overflow-y: auto; overflow-x: hidden;">
+						<div id="statDataPageID2" ng-include="statDataPage2" /></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--模态框结束-->
+</div>
+<script src="js/controllers/statisticsAll.js"></script>

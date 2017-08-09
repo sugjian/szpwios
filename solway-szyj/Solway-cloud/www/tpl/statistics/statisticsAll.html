@@ -1,0 +1,23 @@
+<link rel="stylesheet" type="text/css" href="theme/default/css/datePicker.css">
+<link rel="stylesheet" type="text/css" href="theme/default/css/historyStatistics/statisticsAll.css">
+<script type="text/javascript" src="js/require/iscroll.js"></script>
+<script type="text/javascript" src="js/datePicker.js"></script>
+ <style>
+    #statcontent{
+	    animation-duration:1.5;   
+	    animation-delay: 0s;   
+	    animation-iteration-count: 1;   
+	    animation-timing-function:ease;
+	    -webkit-animation-duration:1.5s;   
+	     -webkit-animation-delay: 0s;   
+	     -webkit-animation-iteration-count: 1;   
+	}
+</style> 
+<div class="" ng-controller="staAllCtrl">
+	<span class="back-con" ng-show="showBack" ng-click="goBack()"><img alt="" src="theme/default/img/icon/top-back@2x.png" style="    width: 12px;"></span>
+	<div ng-include="'tpl/statistics/modal/dateHeader.html'"></div>
+	<!-- <div id="statcontent"  class="col-xs-12 no-padder" ng-swipe-right="swipeRight()" ng-swipe-left="swipeLeft()"><div  class="col-xs-12 no-padder" ui-view ></div></div> -->
+	<div ng-include="'tpl/statistics/stat/searchPage.html'" ng-show="searchPage"></div>
+	<div ng-include="'tpl/statistics/stat/staAll.html'" ng-hide="searchPage"></div>
+</div>
+<script src="js/controllers/historyStat/statisticsAll.js"></script>

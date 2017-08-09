@@ -1,0 +1,74 @@
+<link rel="stylesheet" href="theme/default/css/realStatistics/circuit.css">
+<link rel="stylesheet" href="theme/default/css/realStatistics/iotpower.css">
+<div ng-controller="circuitCtrl">
+	<div class="bg-black app-header navbar ng-scope" id="distUserNav">
+		<ul class="nav col-xs-12 no-padder nav-top"  >
+	          <li class="col-xs-2 no-padder">
+	          	<a ng-click="beback()">
+	          		<img src="./theme/default/img/icon/top-back@2x.png" class="v-middle img_goBack">
+	          	</a>
+	           </li>
+	          <li class="col-xs-8 no-padder text-center">
+	          		<a href="" class="text-1-8x">
+	          		{{bdzName}}
+	          		</a>
+	           </li>
+	           <li class="col-xs-2 no-padder text-right">
+	          	<a ng-click="goHistorySta()" class="text-1-3x">
+	          		<img alt="" src="./theme/default/img/icon/historical-statistics.png" style="width: 20px;">
+	          	</a>
+	           </li>
+	           
+        </ul>
+	</div>
+	
+	<div class="select">
+		<select id="dlxs"></select>
+	</div>
+	<div class="overflow-auto">
+		<div class="line-detail clearfix" >
+			<div class="pull-left">线路详情</div>
+			<div class="pull-right">
+				<span ng-click="goSmall()" class="text-1-3x">
+					<img src="theme/default/img/realStatistics/smaller.png">
+			    </span>
+			    <span ng-click="goBig()" class="text-1-3x">
+					<img src="theme/default/img/realStatistics/larger.png" ng-hide="largestFlag">
+					<img src="theme/default/img/realStatistics/largest.png"  ng-show="largestFlag">
+			    </span>
+			</div>
+		</div>
+		<div style="overflow-x: auto;height:320px;position:relative;">
+			<div  id ="svgDataCircuit"></div>
+			<div class="loader" id="loadFlagOver" ng-show="isDLXDataFinish == false" style="top:150px;">
+			    <div class="loader-inner ball-beat overview-load">
+			      <div></div>
+			      <div></div>
+			      <div></div>
+			    </div>
+		 	 </div>
+		</div>
+		<div class="curve-con">
+			<p>节点:<select id="nodes"></select></p>
+			<p>电流有效值</p>
+			<div ng-include="'tpl/realStatistics/model/currentCurve.html'"></div>
+		</div>
+		<!--<div class="curve-con" ng-hide ="bdzNo == '2'">
+			<p>线路温度</p>
+			<div ng-include="'tpl/realStatistics/model/temperatureCurve.html'"></div>
+		</div>-->
+		<div class="curve-con">
+			<p>谐波THD</p>
+			<div ng-include="'tpl/realStatistics/model/THDcurve.html'"></div>
+		</div>
+		<div class="curve-tip">
+			<span class="a" id="axiang" ><span></span>A相</span>
+			<span class="b" id="bxiang"><span></span>B相</span>
+			<span class="c" id="cxiang"><span></span>C相</span>
+		</div>
+	</div>
+</div>
+<script src="js/controllers/realStat/circuit.js"></script>
+<script>
+
+</script>

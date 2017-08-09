@@ -1,0 +1,64 @@
+<script type="text/javascript">
+
+var myScroll;
+loaded ()
+function loaded () {
+	myScroll = new IScroll('#picWrapper', {
+		scrollX: true,
+		scrollY: false,
+		momentum: false,
+		snap: true,
+		snapSpeed: 400,
+		keyBindings: true,
+		indicators: {
+			el: document.getElementById('indicator'),
+			resize: false
+		}
+	});
+}
+$("#viewport").css("height",document.body.offsetHeight-89)
+$(".slide").css("height",document.body.offsetHeight-89)
+$(".slide").css("width",document.body.offsetWidth-10)
+$("#scroller").css("width",document.body.offsetWidth*3-30)
+/* document.addEventListener('touchmove', function (e) { e.preventDefault(); }, false); */
+function re(){
+	myScroll. refresh()
+}
+</script>
+
+<!-- 图片模态框（Modal） -->
+<!-- <!-- navbar header -->
+<div id="indicator">
+	<div id="dotty"></div>
+</div>
+<div class="modal modal-full fade" id="picModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+   <div class="modal-dialog">
+      <div class="modal-content col-xs-12 no-padder">
+          <div class="modal-header col-3 col-xs-12">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                  <i class="fa fa-times"></i>
+            </button>
+            <h4 class="modal-title text-center" id="myModalLabel">
+              <span onclick="re()">图片预览</span>
+            </h4>
+         </div>
+         <div class="modal-body col-3 col-xs-12 no-padder"  id="viewport">
+			<div >
+				<div id="picWrapper" class="col-xs-12 no-padder" style="top:0px">
+					<div id="picscroller" class="col-xs-12 no-padder">
+						<div class="slide col-xs-12 no-padder">
+							<img class="col-xs-12 no-padder"  src="img/login.png">
+						</div>
+						<div class="slide col-xs-12 no-padder">
+							<img class="col-xs-12 no-padder"  src="img/bg.jpg">
+						</div>
+						<div class="slide col-xs-12 no-padder">
+							<img class="col-xs-12 no-padder"  src="img/login.png">
+						</div>
+					</div>
+				</div>
+			</div>
+     	 </div>
+    	</div><!-- /.modal-content -->
+	</div><!-- /.modal -->
+</div>

@@ -1,0 +1,437 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		627259B41ACD363A00135E67 /* dian@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 627259B31ACD363A00135E67 /* dian@2x.png */; };
+		A21EDA481AA8B82300FD3A4B /* sky@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = A21EDA471AA8B82300FD3A4B /* sky@2x.png */; };
+		A26A0EC31AA210D400D21770 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = A26A0EC21AA210D400D21770 /* main.m */; };
+		A26A0EC61AA210D400D21770 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = A26A0EC51AA210D400D21770 /* AppDelegate.m */; };
+		A2BE990F1AA36C6400282F39 /* return@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = A2BE990E1AA36C6400282F39 /* return@2x.png */; };
+		A2BE99121AA36EFC00282F39 /* BaseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A2BE99111AA36EFC00282F39 /* BaseViewController.m */; };
+		FD27BC4D1C0589C100025FD3 /* type.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD27BC4C1C0589C100025FD3 /* type.wav */; };
+		FD27BC531C058C7500025FD3 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FD27BC521C058C7500025FD3 /* CFNetwork.framework */; };
+		FD27BC561C058CD600025FD3 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = FD27BC551C058CD600025FD3 /* libsqlite3.tbd */; };
+		FD27BC581C058CE200025FD3 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = FD27BC571C058CE200025FD3 /* libz.tbd */; };
+		FD27BC5A1C058CF200025FD3 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FD27BC591C058CF200025FD3 /* SystemConfiguration.framework */; };
+		FD27BC5C1C058D0300025FD3 /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FD27BC5B1C058D0300025FD3 /* CoreTelephony.framework */; };
+		FD27BC5E1C058D1000025FD3 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FD27BC5D1C058D1000025FD3 /* AVFoundation.framework */; };
+		FD27BC601C058D1700025FD3 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FD27BC5F1C058D1700025FD3 /* CoreLocation.framework */; };
+		FD27BC621C058D1E00025FD3 /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FD27BC611C058D1E00025FD3 /* CoreBluetooth.framework */; };
+		FD900C311C72157D00562347 /* libGeTuiSdk-1.3.2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD900C301C72157D00562347 /* libGeTuiSdk-1.3.2.a */; };
+		FDD356FA1BFCA333003271C2 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FDD356F91BFCA333003271C2 /* Images.xcassets */; };
+		FDD3591F1BFD6858003271C2 /* www in Resources */ = {isa = PBXBuildFile; fileRef = FDD3591E1BFD6858003271C2 /* www */; };
+		FDDBDDA61C111FBC00BD9B18 /* WebViewJavascriptBridge.js.txt in Resources */ = {isa = PBXBuildFile; fileRef = FDDBDDA01C111FBC00BD9B18 /* WebViewJavascriptBridge.js.txt */; };
+		FDDBDDA71C111FBC00BD9B18 /* WebViewJavascriptBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = FDDBDDA11C111FBC00BD9B18 /* WebViewJavascriptBridge.m */; };
+		FDDBDDA81C111FBC00BD9B18 /* WebViewJavascriptBridgeBase.m in Sources */ = {isa = PBXBuildFile; fileRef = FDDBDDA31C111FBC00BD9B18 /* WebViewJavascriptBridgeBase.m */; };
+		FDDBDDA91C111FBC00BD9B18 /* WKWebViewJavascriptBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = FDDBDDA51C111FBC00BD9B18 /* WKWebViewJavascriptBridge.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		627259B31ACD363A00135E67 /* dian@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dian@2x.png"; sourceTree = "<group>"; };
+		A21EDA471AA8B82300FD3A4B /* sky@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sky@2x.png"; sourceTree = "<group>"; };
+		A26A0EBD1AA210D300D21770 /* Solway-cloud.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Solway-cloud.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A26A0EC11AA210D400D21770 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A26A0EC21AA210D400D21770 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		A26A0EC41AA210D400D21770 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		A26A0EC51AA210D400D21770 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		A2BE990E1AA36C6400282F39 /* return@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "return@2x.png"; sourceTree = "<group>"; };
+		A2BE99101AA36EFC00282F39 /* BaseViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseViewController.h; sourceTree = "<group>"; };
+		A2BE99111AA36EFC00282F39 /* BaseViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseViewController.m; sourceTree = "<group>"; };
+		FD27BC4C1C0589C100025FD3 /* type.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = type.wav; sourceTree = "<group>"; };
+		FD27BC521C058C7500025FD3 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
+		FD27BC551C058CD600025FD3 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
+		FD27BC571C058CE200025FD3 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
+		FD27BC591C058CF200025FD3 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		FD27BC5B1C058D0300025FD3 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
+		FD27BC5D1C058D1000025FD3 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		FD27BC5F1C058D1700025FD3 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
+		FD27BC611C058D1E00025FD3 /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
+		FD900C301C72157D00562347 /* libGeTuiSdk-1.3.2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libGeTuiSdk-1.3.2.a"; sourceTree = "<group>"; };
+		FD900C321C7215BC00562347 /* GeTuiSdk.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeTuiSdk.h; sourceTree = "<group>"; };
+		FDD356F91BFCA333003271C2 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		FDD3591E1BFD6858003271C2 /* www */ = {isa = PBXFileReference; lastKnownFileType = folder; path = www; sourceTree = "<group>"; };
+		FDDBDD9F1C111FBC00BD9B18 /* WebViewJavascriptBridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WebViewJavascriptBridge.h; sourceTree = "<group>"; };
+		FDDBDDA01C111FBC00BD9B18 /* WebViewJavascriptBridge.js.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = WebViewJavascriptBridge.js.txt; sourceTree = "<group>"; };
+		FDDBDDA11C111FBC00BD9B18 /* WebViewJavascriptBridge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WebViewJavascriptBridge.m; sourceTree = "<group>"; };
+		FDDBDDA21C111FBC00BD9B18 /* WebViewJavascriptBridgeBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WebViewJavascriptBridgeBase.h; sourceTree = "<group>"; };
+		FDDBDDA31C111FBC00BD9B18 /* WebViewJavascriptBridgeBase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WebViewJavascriptBridgeBase.m; sourceTree = "<group>"; };
+		FDDBDDA41C111FBC00BD9B18 /* WKWebViewJavascriptBridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WKWebViewJavascriptBridge.h; sourceTree = "<group>"; };
+		FDDBDDA51C111FBC00BD9B18 /* WKWebViewJavascriptBridge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WKWebViewJavascriptBridge.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A26A0EBA1AA210D300D21770 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FD27BC621C058D1E00025FD3 /* CoreBluetooth.framework in Frameworks */,
+				FD27BC601C058D1700025FD3 /* CoreLocation.framework in Frameworks */,
+				FD27BC5E1C058D1000025FD3 /* AVFoundation.framework in Frameworks */,
+				FD27BC5C1C058D0300025FD3 /* CoreTelephony.framework in Frameworks */,
+				FD27BC5A1C058CF200025FD3 /* SystemConfiguration.framework in Frameworks */,
+				FD27BC581C058CE200025FD3 /* libz.tbd in Frameworks */,
+				FD27BC561C058CD600025FD3 /* libsqlite3.tbd in Frameworks */,
+				FD900C311C72157D00562347 /* libGeTuiSdk-1.3.2.a in Frameworks */,
+				FD27BC531C058C7500025FD3 /* CFNetwork.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A26A0EB41AA210D300D21770 = {
+			isa = PBXGroup;
+			children = (
+				FD27BC541C058C8400025FD3 /* Frameworks */,
+				A26A0EBF1AA210D300D21770 /* Solway-cloud */,
+				A26A0EBE1AA210D300D21770 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A26A0EBE1AA210D300D21770 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A26A0EBD1AA210D300D21770 /* Solway-cloud.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A26A0EBF1AA210D300D21770 /* Solway-cloud */ = {
+			isa = PBXGroup;
+			children = (
+				FDDBDD9E1C111FBC00BD9B18 /* WebViewJavascriptBridge */,
+				FD27BC4E1C058B0400025FD3 /* GtSdkLib */,
+				FDD3591E1BFD6858003271C2 /* www */,
+				A26A0EFC1AA21F2500D21770 /* reources */,
+				A26A0EC41AA210D400D21770 /* AppDelegate.h */,
+				A26A0EC51AA210D400D21770 /* AppDelegate.m */,
+				A2BE99101AA36EFC00282F39 /* BaseViewController.h */,
+				A2BE99111AA36EFC00282F39 /* BaseViewController.m */,
+				FDD356F91BFCA333003271C2 /* Images.xcassets */,
+				A26A0EC01AA210D400D21770 /* Supporting Files */,
+			);
+			path = "Solway-cloud";
+			sourceTree = "<group>";
+		};
+		A26A0EC01AA210D400D21770 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				FD27BC4C1C0589C100025FD3 /* type.wav */,
+				A26A0EC11AA210D400D21770 /* Info.plist */,
+				A26A0EC21AA210D400D21770 /* main.m */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		A26A0EFC1AA21F2500D21770 /* reources */ = {
+			isa = PBXGroup;
+			children = (
+				A21EDA471AA8B82300FD3A4B /* sky@2x.png */,
+				627259B31ACD363A00135E67 /* dian@2x.png */,
+				A2BE990E1AA36C6400282F39 /* return@2x.png */,
+			);
+			path = reources;
+			sourceTree = "<group>";
+		};
+		FD27BC4E1C058B0400025FD3 /* GtSdkLib */ = {
+			isa = PBXGroup;
+			children = (
+				FD900C321C7215BC00562347 /* GeTuiSdk.h */,
+				FD900C301C72157D00562347 /* libGeTuiSdk-1.3.2.a */,
+			);
+			path = GtSdkLib;
+			sourceTree = "<group>";
+		};
+		FD27BC541C058C8400025FD3 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				FD27BC611C058D1E00025FD3 /* CoreBluetooth.framework */,
+				FD27BC5F1C058D1700025FD3 /* CoreLocation.framework */,
+				FD27BC5D1C058D1000025FD3 /* AVFoundation.framework */,
+				FD27BC5B1C058D0300025FD3 /* CoreTelephony.framework */,
+				FD27BC591C058CF200025FD3 /* SystemConfiguration.framework */,
+				FD27BC571C058CE200025FD3 /* libz.tbd */,
+				FD27BC551C058CD600025FD3 /* libsqlite3.tbd */,
+				FD27BC521C058C7500025FD3 /* CFNetwork.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		FDDBDD9E1C111FBC00BD9B18 /* WebViewJavascriptBridge */ = {
+			isa = PBXGroup;
+			children = (
+				FDDBDD9F1C111FBC00BD9B18 /* WebViewJavascriptBridge.h */,
+				FDDBDDA01C111FBC00BD9B18 /* WebViewJavascriptBridge.js.txt */,
+				FDDBDDA11C111FBC00BD9B18 /* WebViewJavascriptBridge.m */,
+				FDDBDDA21C111FBC00BD9B18 /* WebViewJavascriptBridgeBase.h */,
+				FDDBDDA31C111FBC00BD9B18 /* WebViewJavascriptBridgeBase.m */,
+				FDDBDDA41C111FBC00BD9B18 /* WKWebViewJavascriptBridge.h */,
+				FDDBDDA51C111FBC00BD9B18 /* WKWebViewJavascriptBridge.m */,
+			);
+			path = WebViewJavascriptBridge;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A26A0EBC1AA210D300D21770 /* Solway-cloud */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A26A0EE01AA210D400D21770 /* Build configuration list for PBXNativeTarget "Solway-cloud" */;
+			buildPhases = (
+				A26A0EB91AA210D300D21770 /* Sources */,
+				A26A0EBA1AA210D300D21770 /* Frameworks */,
+				A26A0EBB1AA210D300D21770 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Solway-cloud";
+			productName = "Solway-cloud";
+			productReference = A26A0EBD1AA210D300D21770 /* Solway-cloud.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A26A0EB51AA210D300D21770 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0710;
+				ORGANIZATIONNAME = huangzengsong;
+				TargetAttributes = {
+					A26A0EBC1AA210D300D21770 = {
+						CreatedOnToolsVersion = 6.1.1;
+						DevelopmentTeam = PVS682ZA99;
+						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+						};
+					};
+				};
+			};
+			buildConfigurationList = A26A0EB81AA210D300D21770 /* Build configuration list for PBXProject "Solway-cloud" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+				"zh-Hans",
+			);
+			mainGroup = A26A0EB41AA210D300D21770;
+			productRefGroup = A26A0EBE1AA210D300D21770 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A26A0EBC1AA210D300D21770 /* Solway-cloud */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A26A0EBB1AA210D300D21770 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FD27BC4D1C0589C100025FD3 /* type.wav in Resources */,
+				FDD356FA1BFCA333003271C2 /* Images.xcassets in Resources */,
+				A2BE990F1AA36C6400282F39 /* return@2x.png in Resources */,
+				A21EDA481AA8B82300FD3A4B /* sky@2x.png in Resources */,
+				FDDBDDA61C111FBC00BD9B18 /* WebViewJavascriptBridge.js.txt in Resources */,
+				FDD3591F1BFD6858003271C2 /* www in Resources */,
+				627259B41ACD363A00135E67 /* dian@2x.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A26A0EB91AA210D300D21770 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A26A0EC61AA210D400D21770 /* AppDelegate.m in Sources */,
+				FDDBDDA71C111FBC00BD9B18 /* WebViewJavascriptBridge.m in Sources */,
+				A2BE99121AA36EFC00282F39 /* BaseViewController.m in Sources */,
+				A26A0EC31AA210D400D21770 /* main.m in Sources */,
+				FDDBDDA81C111FBC00BD9B18 /* WebViewJavascriptBridgeBase.m in Sources */,
+				FDDBDDA91C111FBC00BD9B18 /* WKWebViewJavascriptBridge.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		A26A0EDE1AA210D400D21770 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PROVISIONING_PROFILE = "5f934069-792a-4b7e-9aba-5d592fa41513";
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		A26A0EDF1AA210D400D21770 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PROVISIONING_PROFILE = "5f934069-792a-4b7e-9aba-5d592fa41513";
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		A26A0EE11AA210D400D21770 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					"$(SRCROOT)/Solway-cloud/lib",
+				);
+				INFOPLIST_FILE = "Solway-cloud/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Solway-cloud/GtSdkLib",
+				);
+				ONLY_ACTIVE_ARCH = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = com.solway.necloud;
+				PRODUCT_NAME = "Solway-cloud";
+				PROVISIONING_PROFILE = "";
+				TARGETED_DEVICE_FAMILY = 1;
+				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/Solway-cloud/lib";
+				VALID_ARCHS = "armv7 armv7s arm64";
+			};
+			name = Debug;
+		};
+		A26A0EE21AA210D400D21770 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					"$(SRCROOT)/Solway-cloud/lib",
+				);
+				INFOPLIST_FILE = "Solway-cloud/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Solway-cloud/GtSdkLib",
+				);
+				ONLY_ACTIVE_ARCH = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = com.solway.necloud;
+				PRODUCT_NAME = "Solway-cloud";
+				PROVISIONING_PROFILE = "";
+				TARGETED_DEVICE_FAMILY = 1;
+				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/Solway-cloud/lib";
+				VALID_ARCHS = "armv7 armv7s arm64";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A26A0EB81AA210D300D21770 /* Build configuration list for PBXProject "Solway-cloud" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A26A0EDE1AA210D400D21770 /* Debug */,
+				A26A0EDF1AA210D400D21770 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A26A0EE01AA210D400D21770 /* Build configuration list for PBXNativeTarget "Solway-cloud" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A26A0EE11AA210D400D21770 /* Debug */,
+				A26A0EE21AA210D400D21770 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A26A0EB51AA210D300D21770 /* Project object */;
+}

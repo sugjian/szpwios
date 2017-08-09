@@ -1,0 +1,38 @@
+
+<style>
+.noteDetails02 span {
+	color: #666;
+}
+</style>
+<div class="modal fade modal-full" id="noteDetails02" tabindex="-1"
+	role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+			<div class="modal-content col-xs-12 no-padder" style="padding-bottom:30px!important">
+				<div class="modal-header col-3 col-xs-12 no-padder">
+					<button type="button" class="close close-img m-b-n-sm main-green" data-dismiss="modal" aria-hidden="true">
+                  		<img src="theme/default/img/icon/close.png">
+           			 </button>
+					 <h4 class="modal-title text-center m-t-sm" id="myModalLabel">
+            		   任务详情
+            		</h4>
+				</div>
+				<div class="modal-body col-3 col-xs-12 no-padder">
+					<div class="col-xs-12 list-div b-w ">
+					  <span class="text-1-5x">处理人</span>
+					  <span class="pull-right text-1-5x col-6" id="processUser02"></span>
+					</div>
+					<div class="col-xs-12 list-div b-w  ">
+						<span class="text-1-5x">处理方式</span>
+						<span class="pull-right text-1-5x col-6" id="processMethod02"></span>
+					</div>
+					<div class="col-xs-12 list-div b-w ">
+						<span class="text-1-5x">处理时间</span>
+						<span class="pull-right text-1-5x col-6" id="processTime02"></span>
+					</div>
+					<div class="col-xs-12 wrapper">
+						<span class="text-1-5x">不处理原因</span>
+						<span class="col-xs-12 no-padder text-1-5x col-6" id="notProceReason02"></span>
+					</div>
+				</div>
+			</div>
+	</div>

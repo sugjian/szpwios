@@ -1,0 +1,97 @@
+@CHARSET "UTF-8";
+.beback{     position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 99;
+    list-style: none;
+    height: 50px;
+    width: 50px;
+    text-align: center;
+    line-height: 50px;
+}
+.app-content{background:white;color:black;font-size:12px;}
+.detail-position{    font-size: 14px; text-align: center;margin: 10px auto;}
+/* .detail-position{    font-size: 14px; text-align: center;margin-bottom: 10px;height:30px;}
+.detail-position span{display:inline-block;}
+.triangle-left{width:0;height:0;border-top:15px solid rgb(37,172,179);border-right:15px solid rgb(37,172,179);border-left:15px solid transparent;border-bottom:15px solid transparent;}
+.triangle-right{width:0;height:0;border-top:15px solid rgb(37,172,179);border-left:15px solid rgb(37,172,179);border-right:15px solid transparent;border-bottom:15px solid transparent;}
+.square{} */
+.curve-tip{    margin: 10px 8px;border-top: 1px solid rgb(233,233,233); padding-top: 5px;}
+.curve-tip >span{    margin-right: 6px}
+.b{border:none;}
+.load-con .a >span{width:12px;height:12px;background:rgb(255,185,0);    display: inline-block;    vertical-align: text-bottom;margin-right: 6px;}
+.load-con .b >span{width:12px;height:12px;background:rgb(0,188,103);    display: inline-block;    vertical-align: text-bottom;margin-right: 6px;}
+.load-con .c >span{width:12px;height:12px;background:rgb(255,17,45);    display: inline-block;    vertical-align: text-bottom;margin-right: 6px;}
+.p-title{margin: 25px 0 0 16px;}
+.p-titleName{margin: 5px 0 0 16px;}
+#loadLine{height:80px;border-bottom:1px solid rgb(233,233,233);    margin: 0 8px;}
+.abc-btn >div{ margin-right: 10px;}
+.abc-btn a{color:black;width: 42px;height: 25px;    background-color: rgb(243,243,243);border: 1px solid rgb(227,227,227);    display: inline-block;
+    text-align: center;line-height: 25px;}
+.abc-btn a.active{    background-color: #e1e1e1; border: 1px solid #cacaca;}
+.curve-tip >span>span{width:8px;height:8px; display: inline-block;    vertical-align:baseline;margin-right:2px;}
+.harmonic-con .a>span {background:#7FBAFF}
+.harmonic-con .b>span{background:#434348}
+.harmonic-con .c>span{background:#8EEF79}
+.harmonic-con .d>span{background:#F9A454}
+.harmonic-con .e>span{background:#8082EC}
+.harmonic-con .f>span{background:#F35A7F}
+.harmonic-con .g>span{background:#E5D449}
+.statistics-con { margin: 40px 8px 15px;}  
+.statistics-con >div{width:49.8%;height:100px;color:white;    margin-bottom: 1.3px;}
+.statistics-con >div:first-child{margin-right:0.4%;}
+.statistics-con >div:nth-child(3){margin-right:0.4%;}
+.statistics-con .temperature{background:rgb(28,175,154)}
+.statistics-con .current{background:rgb(246,159,34)}
+.statistics-con .THD{background:rgb(255,88,66)}
+.statistics-con .average{background:rgb(86,169,2)}
+.statistics-con h1{font-size:12px;margin:8px 10px;}
+.statistics-con .value{font-size:12px;      margin: 3px auto;width: 60px;}
+.statistics-con .value>span{display:inline-block;}
+.statistics-con .unit{font-size:12px;text-align:center;}
+.alert-con{
+    position: fixed;
+    width: 100%;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    display: none;
+    right: 0;
+    z-index:9998;
+}
+#cover {
+    position: absolute;
+    width: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(70,70,70,0.5);
+}
+.content-con {
+    z-index: 9999;
+    position: absolute;
+    text-align: center;
+    width: 100%;
+    margin: 0 auto;
+    font-size: 12px;
+    background: white;
+    bottom: 0;
+}
+.alert-con .title{line-height:46px;font-size:18px;color:rgb(7,165,255);text-align:center;}
+.alert-con .close-con{position:absolute;right:0px;top:0px;width:46px;height:46px;text-align:center;display:inline-block;    line-height: 40px;}
+.table-con{border-top:1px solid rgb(126,206,244)}
+.yellow-word{color:#ffc13d;font-size:18px;}
+.green-word{color:#1ee522;font-size:18px;}
+.red-word{color:#ff1800;font-size:18px;}
+.table-con .pull-left{width:22%;height:50px;line-height:50px;text-align:center;border-right:1px solid rgb(233,233,233);border-bottom:1px solid rgb(233,233,233)}
+.table-con .pull-left.time {
+    line-height: normal;
+}
+.pull-left.time >div{vertical-align: middle;display: table-cell;}
+.table-con .pull-left.blue-word{width:34%;color:rgb(36,220,218);font-size:13px;text-align:left;text-indent:10px;}
+.common-word{font-size:12px;color:black;}
+.table-con .time{display:table;}
+.bg-black .nav > li > a:hover, .bg-black .nav > li > a:focus{
+    background:transparent;
+}

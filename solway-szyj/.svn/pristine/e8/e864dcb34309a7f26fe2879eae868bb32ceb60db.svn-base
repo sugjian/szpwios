@@ -1,0 +1,84 @@
+<!-- 消息详情模态框（Modal） -->
+<div class="modal modal-full fade" id="" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+   <div class="modal-dialog">
+      <div class="modal-content col-xs-12 no-padder">
+          <div class="modal-header col-3 col-xs-12">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                  <i class="fa fa-times"></i>
+            </button>
+            <h4 class="modal-title text-center" id="myModalLabel">
+               事件详情
+            </h4>
+         </div>
+         <div class="modal-body col-3 col-xs-12 no-padder">
+           <div class="col-xs-12 list-div b-w">
+				<span class="text-1-5x">关联电站</span>
+				<span class="pull-right text-1-5x col-6" >演示电站</span>
+			</div>
+           <div class="col-xs-12 list-div b-w">
+				<span class="text-1-5x">关联设备编号</span>
+				<span class="pull-right text-1-5x col-6" >演示电站</span>
+			</div>
+           <div class="col-xs-12 list-div b-w">
+				<span class="text-1-5x">关联电站</span>
+				<span class="pull-right text-1-5x col-6" >演示电站</span>
+			</div>
+           <div class="col-xs-12 list-div b-w">
+				<span class="text-1-5x">关联设备编号</span>
+				<span class="pull-right text-1-5x col-6" >演示电站</span>
+			</div>
+           <div class="col-xs-12 list-div b-w">
+				<span class="text-1-5x">关联电站</span>
+				<span class="pull-right text-1-5x col-6" >演示电站</span>
+			</div>
+           <div class="col-xs-12 list-div b-w">
+				<span class="text-1-5x">关联设备编号</span>
+				<span class="pull-right text-1-5x col-6" >演示电站</span>
+			</div>
+           <div class="col-xs-12 list-div b-w">
+				<span class="text-1-5x">关联电站</span>
+				<span class="pull-right text-1-5x col-6" >演示电站</span>
+			</div>
+           <div class="col-xs-12 list-div b-w">
+				<span class="text-1-5x">设备名</span>
+				<span class="pull-right text-1-5x col-6" >演示电站</span>
+			</div>
+           <div class="col-xs-12 list-div b-w">
+				<span class="text-1-5x">关联电站</span>
+				<span class="pull-right text-1-5x col-6" >演示电站</span>
+			</div>
+           <div class="col-xs-12 list-div b-w">
+				<span class="text-1-5x">关联电站</span>
+				<span class="pull-right text-1-5x col-6" >演示电站</span>
+			</div>
+           <div class="col-xs-12 list-div b-w">
+				<span class="text-1-5x">关联电站</span>
+				<span class="pull-right text-1-5x col-6" >演示电站</span>
+			</div>
+           <div class="col-xs-12 list-div b-w">
+				<span class="text-1-5x">关联电站</span>
+				<span class="pull-right text-1-5x col-6" >演示电站</span>
+			</div>
+           <div class="col-xs-12 list-div b-w">
+				<span class="text-1-5x">关联电站</span>
+				<span class="pull-right text-1-5x col-6" >演示电站</span>
+			</div>
+           <div class="col-xs-12 list-div b-w">
+				<span class="text-1-5x">关联电站</span>
+				<span class="pull-right text-1-5x col-6" >演示电站</span>
+			</div>
+         </div>
+        <!--  <div class="modal-footer">
+            <button type="button" class="btn btn-default" 
+               data-dismiss="modal">关闭
+            </button>
+            <button type="button" class="btn btn-primary">
+               提交更改
+            </button>
+         </div>  -->
+      </div><!-- /.modal-content -->
+</div><!-- /.modal -->
+</div>
+
+<!-- 模态框 -->
+

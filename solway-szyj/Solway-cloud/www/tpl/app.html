@@ -1,0 +1,174 @@
+<div class="mui-ios mui-ios-9 mui-ios-9-1 mui-fullscreen" ng-controller="statIndexCtrl">
+			<!--侧滑菜单-->
+			<!-- <div  class="modal statModal col-xs-12 no-padder " style="background: rgba(0, 0, 0,.3);" id="asideModal" tabindex="-1" role="dialog"aria-labelledby="myModalLabel" aria-hidden="true">
+				<div class="modal-dialog modal-lg m-n" style="width:300px">
+					<div class="modal-content col-sm-12 no-padder">	 -->
+						<!-- <a class="icon-close" data-dismiss="modal" ng-click="closeStatModal()">
+							<img src="./theme/default/img/close.png" style="width:23px;">
+						</a> -->
+						<!-- <div class="modal-body no-padder"  id="text" style="overflow-y: auto; overflow-x: hidden;">
+							<div data-ng-include=" 'tpl/blocks/aside.html' "> </div>
+						</div> -->
+					<!--</div>
+				</div>
+			</div>  -->
+			<!--侧滑菜单-->
+	
+		<div id="offCanvasWrapper" class="mui-off-canvas-wrap mui-draggable">
+			<!--侧滑菜单部分-->
+			<!-- <aside id="offCanvasSide" class="mui-off-canvas-left">
+				<div id="offCanvasSideScroll" class="mui-scroll-wrapper">
+					<div class="mui-scroll">
+						<div data-ng-include=" 'tpl/blocks/aside.html' "> </div>
+					</div>
+			</aside> -->
+			<!--主界面部分-->
+			<div class="mui-inner-wrap" >
+				<div id="offCanvasContentScroll" >
+					<div class="mui-scroll">
+							<!--导航开始 -->
+						     <div class="navbar-header col-xs-12 no-padder bg-black  m-t-none" id="distNav" style="height: 50px;">
+						       <div class="nav col-xs-12 no-padder nav-top">
+						        <li class="col-xs-2 no-padder">
+						          	<a class="m-t-xs"  onclick="showAside()">
+						          		<!-- <img style="width:20px" src="./theme/default/img/icon/left-list.png" /> -->
+						             </a>
+						          </li>
+						         <li class="col-xs-8 text-center no-padder" >
+						          	<a class="text-1-8x" >
+							          	<div class="loaderHead hidden" id="loadFlag">
+										    <div class="loader-inner ball-beat">
+										      <div></div>
+										      <div></div>
+										      <div></div>
+										    </div>
+									 	 </div>
+									 	 <span id="stataTitle"></span>
+								 	 </a>
+						          </li>
+						          <li class="col-xs-2 text-center no-padder m-t-xs" ng-show="refreshShow">
+						          		<a class="pull-right" ng-click="refresh()">
+						          			<img id="resImg"style="width:20px" src="./theme/default/img/icon/Refresh.png"/>
+						          		</a>
+						          </li>
+						        </ul>
+						      </div>
+						    </div>
+						    	<!--导航结束 -->
+								  <div class="app-content col-xs-12 no-padder">
+								    <div class="app-content-body" ui-view></div>
+								  </div> 
+								  <!-- /content -->
+								 <!-- navbar -->
+								 <div class="col-xs-12 no-padder">
+								 	<div data-ng-include=" 'tpl/blocks/footer.html' ">
+								  </div>
+								 </div>
+								  
+								  <!-- / navbar -->
+									</div>
+								</div>
+							</div>
+						</div>
+
+  <script>
+  
+  app.controller('statIndexCtrl',function($scope, $http, $state,$rootScope,toaster) {
+  		$scope.refresh=function(){
+  			$("#stataTitle").addClass("hidden");
+  			$("#loadFlag").removeClass("hidden")
+  			$("#resImg").addClass("hidden")
+  			$scope.$broadcast('loadData', 'child');
+  		} 
+  		//监听切换电站
+  		 $scope.$on("refStationIds",
+  			   function (event, msg) {
+  			 	/* if(JSON.parse(storage["powerStationId"]).length>1){
+  			 		$scope.$broadcast("refStaionIdMany", msg[1]);
+  			 	}else{
+  			 		$scope.$broadcast("refStaionIdOne", msg[1]);
+  			 	}
+  			    $scope.$broadcast("refStaionInfo", msg[0]); */
+  			  	
+  			});
+  		
+  		
+  		//监听切换视图
+  		 $scope.$on("refreshView",
+		    function (event, msg) {
+		    	$scope.$broadcast("refreshViewChild", msg); 
+		 	}
+  		 );
+  });
+  //开始刷新
+  function beginLoad(){
+	  $("#stataTitle").addClass("hidden");
+	  $("#loadFlag").removeClass("hidden");
+	  $("#resImg").addClass("hidden");
+  }
+  //结束刷新
+  function endLoad(){
+	  $("#loadFlag").addClass("hidden")
+	  $("#stataTitle").removeClass("hidden")
+	  $("#resImg").removeClass("hidden")
+  }
+   		if(isAndroid){//判断用户类型改变token 值
+	  		$("#distNav").addClass("m-t-none");
+		  }
+			/* function getLoginUser(){
+				$.ajax({
+					type:"post",
+					url:ctx+"Login/getLoginUser.htm",
+					data:{},
+					success:function(msg){
+						var name=null;
+						if(msg.dataScope==1){
+							name = msg.companyName
+						}else{
+							name = msg.pstationName				
+						}
+						$("#showName").html(name);
+					}
+				});
+			} */
+			//getLoginUser();
+			mui.init();
+			 //侧滑容器父节点
+			var offCanvasWrapper = mui('#offCanvasWrapper');
+			 //主界面容器
+			var offCanvasInner = offCanvasWrapper[0].querySelector('.app-content');
+			 //菜单容器
+			var offCanvasSide = document.getElementById("offCanvasSide");
+		
+			 //移动效果是否为整体移动
+			var moveTogether = true;
+			
+			 //主界面‘显示侧滑菜单’按钮的点击事件
+			function showAside(){
+				//offCanvasWrapper.offCanvas('show');
+				$("#asideModal").css("position", "fixed");
+				$("#asideModal").css("left", "-305px");
+				$('#asideModal').modal("show");
+				$("#asideModal").animate({
+					left: '0px'
+				}, 500, function() {
+				});
+			}
+
+			 //菜单界面，‘关闭侧滑菜单’按钮的点击事件
+			/* function closeAside(){
+				offCanvasWrapper.offCanvas('close');
+			}*/
+			//主界面和侧滑菜单界面均支持区域滚动；
+			mui('#offCanvasSideScroll').scroll();
+			//mui('#offCanvasContentScroll').scroll();
+			 //实现ios平台原生侧滑关闭页面；
+			if (mui.os.plus && mui.os.ios) {
+				mui.plusReady(function() { //5+ iOS暂时无法屏蔽popGesture时传递touch事件，故该demo直接屏蔽popGesture功能
+					plus.webview.currentWebview().setStyle({
+						'popGesture': 'none'
+					});
+				});
+			}
+		</script>
+  

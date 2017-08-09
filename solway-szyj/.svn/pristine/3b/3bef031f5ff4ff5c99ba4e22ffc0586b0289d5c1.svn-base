@@ -1,0 +1,259 @@
+<style>
+
+</style>
+<div class="col-xs-12 no-padder " ng-controller="calendar">
+<div class="navbar-header bg-black app-header navbar ng-scope" id="distUserNav">
+	<ul class="nav col-xs-12 no-padder nav-top"  >
+          <li class="col-xs-1 no-padder">
+         	 <a	 data-dismiss="modal" ng-click="closeStatModal()" ><img src="./theme/default/img/icon/top-back@2x.png" class="v-middle m-t-xs img_goBack"></a>
+          </li>
+           <li class="col-xs-10 no-padder text-center">
+          	<a  data-dismiss="modal" ng-click="closeStatModal()" class="text-1-8x">
+          		<span ng-bind="todayTimeForTitle"></span>光伏日历
+          	</a>
+           </li>
+          <li class="col-xs-3 no-padder">
+          	
+          </li>
+        </ul>
+</div>
+<!-- / navbar header -->
+<div class="col-xs-12 no-padder rollDiv"  style="margin-top:49px; padding-bottom:50px!important">
+	<div class="col-xs-12 no-padder">
+		<div ng-repeat="day in dayTitle" class="col-xs-7-d calendarTitle" >
+		<span ng-bind="day.title"></span>
+		</div>
+	</div>
+	<div class="col-xs-12 no-padder b-t-03">
+		<div ng-repeat="day in dayTitle" class="col-xs-7-d cal-mon" >
+			<div ng-if="$index==monFlag" ng-bind="nowMonth" ></div>
+		</div>
+	</div>
+	<div class="col-xs-12 no-padder">
+		<div ng-repeat="cal in calendarList" class="col-xs-7-d" 
+		ng-class="{'star1':cal.scoreRadiationIntensity<2,
+				   'star2':cal.scoreRadiationIntensity>=2&& cal.scoreRadiationIntensity<3,
+				  'star3':cal.scoreRadiationIntensity>=3&& cal.scoreRadiationIntensity<4 ,
+				  'star4':cal.scoreRadiationIntensity>=4&& cal.scoreRadiationIntensity<5,
+				  'star5':cal.scoreRadiationIntensity>=5}" >
+		<span ng-if="cal!=''" >
+			<div ng-click="showOneDay($index,cal.day)" id="cal{{$index}}">
+				<span ng-bind="cal.day| date:'dd'"></span>
+				<span ng-show="cal.weaterTag=='A'">
+				<p>晴</p>
+				</span>
+				<span ng-show="cal.weaterTag=='B'">
+					<p>阴</p>
+				</span>
+				<span  ng-show="cal.weaterTag=='C'">
+					<p>雨</p>
+				</span>
+				<span  ng-show="cal.weaterTag=='D'">
+					<p>雪</p>
+				</span>
+				<span  ng-show="cal.weaterTag=='E'">
+					<p>霾</p>
+				</span>
+				<span ng-show="cal.weaterTag=='X'">
+					<p>其它</p>
+				</span>
+			</div>
+			<span ng-show="cal.weaterTag=='A'">
+				<img src="./theme/default/img/icon/weather/q.png" class="weaPic">
+			</span>
+			<span ng-show="cal.weaterTag=='B'">
+				<img src="./theme/default/img/icon/weather/y.png" class="weaPic">
+			</span>
+			<span  ng-show="cal.weaterTag=='C'">
+				<img src="./theme/default/img/icon/weather/yu.png" class="weaPic">
+			</span>
+			<span  ng-show="cal.weaterTag=='D'">
+				<img src="./theme/default/img/icon/weather/x.png" class="weaPic">
+			</span>
+			<span  ng-show="cal.weaterTag=='E'">
+				<img src="./theme/default/img/icon/weather/m.png" class="weaPic">
+			</span>
+			<span ng-show="cal.weaterTag=='X'">
+				<img src="./theme/default/img/icon/weather/other.png" class="weaPic">
+			</span>
+		</span>
+	</div>
+	</div>
+	<div class="col-xs-12 no-padder" id="allData">
+		<div class="col-xs-6  cal-list-div padder-no m-b-1 bg-writer   b-r-black b-t-black">
+			<div class="col-xs-4 no-padder text-1-2x  opa-7">辐射总量</div>
+			<div class="col-xs-8 no-padder text-1-4x" >
+				<span ng-bind="calData.grossRadiationIntensity[1]|dataNullFilter" class="pull-right"></span>
+				<span ng-bind="calData.grossRadiationIntensity[0]|dataNullFilter" class="pull-right"></span>
+			</div>
+		</div>
+		<div class="col-xs-6  cal-list-div  padder-no m-b-1 bg-writer  b-t-black">
+			<div class="col-xs-4 text-1-2x  opa-7">日照小时</div>
+			<div class="col-xs-8 text-1-4x"><span ng-bind="calData.dayTimeHour|dataNullFilter"></span>h</div>
+		</div>
+		<div class="col-xs-12 no-padder">
+			<div class="col-xs-4  cal-list-div  m-b-1 bg-writer  b-t-black b-r-black">
+			
+			<img src="./theme/default/img/icon/weather/q.png" class="weaPic-sm m-t-n-xs">
+			<span class="text-1-2x m-t-xs opa-7">晴</span>
+			<span ng-bind="calData.sunny_count" class="text-1-6x pull-right"></span>
+			</div>
+			<div class="col-xs-4 cal-list-div  m-b-1 bg-writer   b-t-black b-r-black">
+				<img src="./theme/default/img/icon/weather/y.png" class="weaPic-sm m-t-n-xs">
+				<span  class="text-1-2x m-t-xs opa-7">阴</span><span ng-bind="calData.cloudy_count" class="text-1-6x pull-right"></span>
+			</div>
+			<div class="col-xs-4  cal-list-div  m-b-1 bg-writer   b-t-black ">
+				<img src="./theme/default/img/icon/weather/yu.png" class="weaPic-sm m-t-n-xs">
+				<span  class="text-1-2x m-t-xs opa-7">雨</span><span ng-bind="calData.rainy_count" class="text-1-6x pull-right"></span>
+			</div>
+		</div>
+		<div class="col-xs-12 no-padder">
+			<div class="col-xs-4  cal-list-div  m-b-1 bg-writer  b-t-black b-r-black">
+			<img src="./theme/default/img/icon/weather/x.png" class="weaPic-sm m-t-n-xs">
+			<span  class="text-1-2x m-t-xs opa-7">雪</span><span ng-bind="calData.snowy_count" class="text-1-6x pull-right"></span>
+			</div>
+			<div class="col-xs-4  cal-list-div  m-b-1 bg-writer  b-t-black b-r-black">
+				<img src="./theme/default/img/icon/weather/m.png" class="weaPic-sm m-t-n-xs">
+				<span  class="text-1-2x m-t-xs opa-7">霾</span><span ng-bind="calData.woomay_count" class="text-1-6x pull-right"></span>
+			</div>
+			<div class="col-xs-4  cal-list-div m-b-1 bg-writer  b-t-black ">
+				<img src="./theme/default/img/icon/weather/other.png" class="weaPic-sm m-t-n-xs">
+				<span  class="text-1-2x m-t-xs opa-7">其他</span><span ng-bind="calData.other_count" class="text-1-6x pull-right"></span>
+			</div>
+		</div>
+
+	</div>
+	<!-- 某一天数据 -->
+	<div class="col-xs-12 no-padder hidden" id="dayData">
+		<div class="col-xs-6  cal-list-div padder-no m-b-1 bg-writer   b-r-black b-t-black">
+			<div class="col-xs-3 no-padder text-1-2x  opa-7">辐射总量</div>
+			<div class="col-xs-9 no-padder text-1-4x" >
+				<span ng-bind="calDayData.grossRadiationIntensity[1]|dataNullFilter" class="pull-right"></span>
+				<span ng-bind="calDayData.grossRadiationIntensity[0]|dataNullFilter" class="pull-right"></span>
+			</div>
+		</div>
+		<div class="col-xs-6  cal-list-div  padder-no m-b-1 bg-writer  b-t-black">
+			<div class="col-xs-3 no-padder text-1-2x  opa-7">日照小时</div>
+			<div class="col-xs-9 text-1-4x"><span ng-bind="calDayData.dayTimeHour|dataNullFilter"></span>h</div>
+		</div>
+		<div class="col-xs-6  cal-list-div padder-no m-b-1 bg-writer   b-r-black b-t-black">
+				<div class="col-xs-4 no-padder text-1-2x  opa-7">日最大光照强度</div>
+			<div class="col-xs-8 no-padder text-1-4x" >
+				<span ng-bind="calDayData.maxLuminousIntensity[1]|dataNullFilter" class="pull-right"></span>
+				<span ng-bind="calDayData.maxLuminousIntensity[0]|dataNullFilter" class="pull-right"></span>
+			</div>
+		</div>
+		<div class="col-xs-6  cal-list-div  padder-no m-b-1 bg-writer  b-t-black">
+			<div class="col-xs-6 no-padder text-1-2x  opa-7">日最大光照时间</div>
+			<div class="col-xs-6 no-padder text-1-4x">
+			<span class="pull-right">
+					<span ng-bind="calDayData.maxLuminousIntensityTime|dataNullFilter"></span>h
+			</span>
+		
+			</div>
+		</div>
+		<div class="col-xs-12 no-padder">
+			<div class="col-xs-4  cal-list-div text-center m-b-1 bg-writer text-1-4x  b-t-black b-r-black">
+			<img src="./theme/default/img/icon/weather/fs.png" class="weaPic-sm m-t-n-xs">
+			<span ng-bind="calDayData.humidityAvg" ></span>m/s
+			</div>
+			<div class="col-xs-4  cal-list-div text-center  m-b-1 bg-writer text-1-4x b-t-black b-r-black">
+				<img src="./theme/default/img/icon/weather/wd.png" class="weaPic-sm m-t-n-xs" style="width:8px;">
+				<span ng-bind="calDayData.temperatureAvg" ></span>℃
+			</div>
+			<div class="col-xs-4  cal-list-div text-center  m-b-1 bg-writer text-1-4x b-t-black ">
+				<img src="./theme/default/img/icon/weather/sd.png" class="weaPic-sm m-t-n-xs" style="width:10px;">
+				<span ng-bind="calDayData.humidityAvg"></span>mm
+			</div>
+		</div>
+
+	</div>
+</div>
+	
+</div>
+<script>
+if(isAndroid){//判断安卓，修改顶部样式
+	$("#distUserNav").addClass("m-t-none");
+}
+$(".rollDiv").css("height",$(window).height())
+app.controller('calendar', function ($scope, $http,$state,$stateParams,$rootScope) {
+	//获得上一个月最后一天和当前月第一天周几
+	var dayNames = new Array('0',"1","2","3","4","5","6");  
+	var emptyArray=[];//光伏日历前面加空数组
+	$scope.calDayData
+	//点击某一天重新请求数据
+	$scope.showOneDay=function(obj,date){
+		$("#cal"+obj).parent().parent().siblings(). children().children().removeClass("calActive")
+		$("#cal"+obj).addClass("calActive")
+		$http({
+			method : "POST",
+			url : ctx+"MobileHmDeviceMonitor/getCalendarSolarPowerOneDay.htm",
+			params : {
+				'dateString':new Date(date).Format("yyyy/MM/dd"),
+				'powerStationId':JSON.parse(storage["powerStationId"])
+			}
+			})
+			.success(function (msg) {
+				$("#dayData").removeClass("hidden")
+				$("#allData").addClass("hidden")
+				$scope.calDayData=msg
+			}).error(function(msg){
+			});
+	}
+	$scope.dayTitle=[
+				  { "title": "日"},
+	              { "title": "一"},
+	              { "title": "二"},
+	              { "title": "三"},
+	              { "title": "四"},
+	              { "title": "五"},
+	              { "title": "六"},
+	              
+	              ]
+	//请求光伏日历数据
+	$scope.getCalendar=function(){
+		$http({
+			method : "POST",
+			url : ctx+"MobileHmDeviceMonitor/getCalendarSolarPower.htm",
+			params : {
+				'dateString':$scope.mapTimeMonth,
+				'powerStationId':JSON.parse(storage["powerStationId"])
+			}
+			})
+			.success(function (msg) {
+				$scope.calData=msg
+				$scope.calendarList=emptyArray.concat(msg.dayList)
+			}).error(function(msg){
+			});
+	}
+	
+	$scope.getLastDay=function(year,month1){
+		month=month1-1
+	    var new_year = year;    //取当前的年份          
+	    var new_month = month++;//取下一个月的第一天，方便计算（最后一天不固定）          
+	    if(month>12) {         
+	     new_month -=12;        //月份减          
+	     new_year++;            //年份增          
+	    }         
+	    var new_date = new Date(new_year,new_month,1);                //取当年当月中的第一天    
+	    
+	    //周几添加几个空格 a.unshift()
+	    var empData=dayNames[new_date.getDay()];
+	    $scope.monFlag=empData
+	    for(var i=0;i<empData;i++){
+	    	var o={} ;
+	    	emptyArray.push(o)
+	    }
+	    $scope.getCalendar();
+	   // return (new Date(new_date.getTime()-1000*60*60*24)).getDate();//获取当月最后一天日期          
+	} 
+	//标题的时间
+	$scope.todayTimeForTitle=new Date($scope.mapTimeMonth + "/01").Format("yyyy年MM月")
+
+	var monDate=($scope.mapTimeMonth).split("/")
+	$scope.getLastDay(monDate[0],monDate[1])
+	$scope.nowMonth=monDate[1]+"月"
+});
+
+
+</script>

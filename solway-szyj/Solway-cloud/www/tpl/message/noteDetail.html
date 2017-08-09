@@ -1,0 +1,144 @@
+<!-- navbar header -->
+<link rel="stylesheet" href="theme/default/css/message/noteDetail.css">
+<link rel="stylesheet" href="theme/default/css/realStatistics/iotpower.css">
+<div ng-controller="noteDetailCtrl">
+	<div class="navbar-header bg-black app-header navbar ng-scope"
+		id="distNoteNav" style="border-bottom: 1px solid #16212a;">
+		<ul class="nav col-xs-12 no-padder nav-top">
+			<li class="col-xs-4" ui-sref-active="active">
+			<a ng-click="goBackNoteList()">
+				<img src="theme/default/img/icon/top-back@2x.png" class="v-middle m-t-xs img_goBack">
+			</a>
+			</li>
+			<li class="col-xs-4 no-padder text-center text-1-8x " style="line-height: 50px;">
+				<a class="col-xs-12 no-padder"  href="javascript:;" class="text-1-2x">报警详情</a>
+			</li>
+		</ul> 
+	</div>
+	<!-- / navbar header -->
+	<div class="real-tab">
+		<ul class="clearfix text-center bg-black" >
+			<li  ng-class="{'active':isActive == 'info'}"  class="pull-left" >
+				<a  class="wrapper" ng-click="changeTab('info')">
+					<span class="text-1-2x">故障信息</span>
+				</a>
+			</li>
+			<li ng-class="{'active':isActive == 'graph'}" class="pull-right">
+				<a  class="wrapper" ng-click="changeTab('graph')">
+					<span class="text-1-2x">故障波形</span>
+				</a>
+			</li>
+		</ul>
+	</div>
+	<div class="overflow-auto clearfix">
+		<div ng-show="isActive == 'info'" class="clearfix">
+			<div data-ng-include="'tpl/blocks/confirm.html'"></div>
+			<div class="info-con col-xs-12 no-padder clearfix">
+				<div class="col-xs-1 no-padder">
+					<img alt="" src="theme/default/img/message/info.png" style="width: 15px;margin-right: 10px;">
+				</div>
+				<div class="col-xs-11 no-padder">
+					<p class="position">{{infoData.remark|dataNullFilter}}</p>
+					<div class="clearfix">
+						<div class="pull-left">
+							<p class="time">{{time|dataNullFilter}}</p>
+							<p class="alarm">{{infoData.result|dataNullFilter}}</p>
+						</div>
+						<div class="pull-right">
+							<div class="fault-icon">
+								<img alt="" ng-src="{{alarmTypeImg}}">
+							</div>
+						</div>
+					</div>
+					
+					
+				</div>
+			</div>
+			<div class="suggestion-con col-xs-12 no-padder clearfix">
+				<div class="col-xs-1 no-padder">
+					<img alt="" src="theme/default/img/message/alarm.png" style="width: 15px;margin-right: 10px;">
+				</div>
+				<div class="col-xs-11 no-padder">
+					<p class="position">报警处理意见</p>
+					<p class="time" >{{alarmSuggestion|dataNullFilter}}</p>
+				</div>
+			</div>
+			<div class="handle-con col-xs-12 no-padder clearfix" style="    border-bottom: 1px solid rgb(40,54,64);" >
+				<div class="col-xs-1 no-padder clearfix">
+					<img alt="" src="theme/default/img/message/handle.png" style="width: 15px;margin-right: 10px;">
+				</div>
+				<div class="col-xs-11 no-padder clearfix">
+					<p class="position"><span>报警处理</span>
+						<a class="resolve" ng-click="showAlarmPosition()">警报位置</a>
+						<a ng-if="infoData.status == 0" class="resolve" ng-click="resolveAlarmFun()" ng-class="{'disabledColor':maintenanceData.length==0}">解除警报</a>
+					</p>
+					<div style="background: rgb(233,233,233);padding: 5px 0 0 5px;margin-bottom: 5px;">
+						<p class="circle-con alarm-grey"><span class="circle"></span>故障发生</p>
+						<p class="time" style="margin-left: 16px;">{{time|dataNullFilter}}</p>
+					</div>
+					<div ng-repeat="item in maintenanceData"  style="background: rgb(233,233,233);;padding: 5px 0 0 5px;margin-bottom: 5px;">
+						<p class="circle-con" ng-class="{true:'alarm-red',false:'alarm-green'}[item.status == 0]"><span class="circle"></span>{{item.comment|dataNullFilter}}</p>
+						<p class="time" style="margin-left: 16px;">{{item.creator|dataNullFilter}}</p>
+						<p class="time" style="margin-left: 16px;">{{item.createTime |dataNullFilter| cleanTimeTZ}}</p>
+					</div>
+				</div>
+			</div>
+			<div class="line-detail clearfix" >
+				<div class="pull-right">
+					<span ng-click="goSmall()" class="text-1-3x">
+						<img src="theme/default/img/realStatistics/smaller.png">
+				    </span>
+				    <span ng-click="goBig()" class="text-1-3x">
+						<img src="theme/default/img/realStatistics/larger.png" ng-hide="largestFlag">
+						<img src="theme/default/img/realStatistics/largest.png"  ng-show="largestFlag">
+				    </span>
+				</div>
+			</div>
+			<div class="handle-con col-xs-12 no-padder clearfix" style="postion:relative;">
+				<div class="loader" id="loadFlagOver" ng-show="loading == true" style="top:70px;" >
+				    <div class="loader-inner ball-beat overview-load">
+				      <div></div>
+				      <div></div>
+				      <div></div>
+				    </div>
+			 	</div>
+				<div class="svg" id ="svgDataCircuit" style="overflow-x: auto;height:320px"></div>
+			</div>
+			
+		</div>
+		<div ng-show="isActive == 'graph'">
+			<div ng-include="alarmTypeCurve"></div>
+		</div>
+	</div>
+	<div class="alert-con">
+		<div class="cover">
+		</div>
+		<div class="content-con">
+			<div class="clearfix">
+				<span class="close-con" ng-click="closeAlert()"><img src="theme/default/img/historyStatistics/close.png" style="width: 30px;"></span>
+			</div>
+			<div class="fill-content"><textarea placeholder="请 填 写 处 理 记 录" ng-model="fillRecords"></textarea></div>
+			<div class="confirm-btn"><a ng-click="commitRecord()">确 认</a></div>
+		</div>
+	</div>
+	<div class="alert-pos-con">
+		<div class="cover">
+		</div>
+		<div class="content-con">
+			<div class="clearfix">
+				<span class="close-con" ng-click="closeAlert()"><img src="theme/default/img/historyStatistics/close.png" style="width: 30px;"></span>
+			</div>
+			<div class="">
+				<div class="pos-con"><img alt="" src="theme/default/img/message/pos.png" style="margin-right:12px;width:13px;">报警地点</div>
+				<p style="padding:15px 0 15px 40px;">{{infoData.remark|dataNullFilter}}</p>
+				<div id="alarmPosMap"></div>
+			</div>
+		</div>
+	</div>
+	<div class="note-footer" ng-click="fillRecord()" ng-hide="infoData.status == '1'">填 写 处 理 记 录</div>
+</div>
+<script src="js/controllers/message/noteDetailCtrl.js"></script>
+<!-- 页脚 -->
+<script>
+	
+</script>

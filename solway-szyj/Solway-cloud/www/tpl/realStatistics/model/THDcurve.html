@@ -1,0 +1,231 @@
+<div class="overflow-auto"  ng-controller="THDModelCtrl" >
+	<div id="THDline" style="height:150px;"></div>
+</div>
+
+<script>
+var myChartTHD = echarts.init(document.getElementById('THDline'));
+app.controller('THDModelCtrl',function($scope, $http, $state,$rootScope) {
+	
+	/* var xValue = ["3:00","4:00","5:00","6:00","7:00","8:00","9:00","10:00","11:00","12:00","13:00","14:00"];
+	var yValue1 = ["12","4","6","3","5","5","10","19","1","30","5","19"];
+	var yValue2 = ["5","10","19","1","30","6","3","5","5","10","19","1"];
+	var yValue3 = ["20","34","13","20","18","10","19","1","30","6","3","5"]; */
+	var A = [],B=[],C=[],x = [];
+	$scope.$on("THD",function(event, data,xTime,cdata){
+		if(cdata){
+			var op = myChartTHD.getOption();
+			//op.series[cdata.x].type = cdata.ctype;
+			if(!op.legend[0].selected){
+				op.legend[0].selected = {};
+			}
+			if(cdata.ctype == 'none'){
+				if(cdata.x===0){
+					op.legend[0].selected['A相'] = false;
+				}else if(cdata.x===1){
+					op.legend[0].selected['B相'] = false;
+				}else if(cdata.x===2){
+					op.legend[0].selected['C相'] = false;
+				}
+			}else{
+				if(cdata.x===0){
+					op.legend[0].selected['A相'] = true
+				}else if(cdata.x===1){
+					op.legend[0].selected['B相'] = true;
+				}else if(cdata.x===2){
+					op.legend[0].selected['C相'] = true;
+				}
+			}
+			myChartTHD.setOption(op);
+		}else{
+			A = [],B=[],C=[],x = [];
+			if(data && data.length>0){
+				for(var i = 0;i<data.length;i++){
+					if(data[i]){
+						if(data[i][0] != null){
+							A.push(data[i][0]);
+						}else{
+							A.push("-");
+						}
+						if(data[i][1] != null){
+							B.push(data[i][1]);
+						}else{
+							B.push("-");
+						}
+						if(data[i][2] != null){
+							C.push(data[i][2]);
+						}else{
+							C.push("-");
+						}
+					}else{
+						A.push("-");
+						B.push("-");
+						C.push("-");
+					}
+					
+				}
+				if(xTime && xTime.length>0){
+					for(var i = 0;i<xTime.length;i++){
+						
+							x.push(xTime[i].substring(11,16));
+							
+					}
+					
+				}
+				init(x,A,B,C);
+			}else{
+				init([],[],[],[]);
+			}
+		}
+		
+	});
+	
+	function init(xValue,yValue1,yValue2,yValue3){
+		option = {
+				title:{
+					text: '百分比(%)',
+					x:'right',
+					y:'top' ,
+				    textStyle: {
+				        color: '#333',
+				        fontSize : 10,
+				        textAlign:'center'
+				    }
+				},
+				grid : {
+					borderWidth : '0px',
+					x : '18px',
+					x2 : '35px',
+					y : "30px",
+					y2 : "25px"
+				},
+				legend:{
+					show:false,
+				},
+				tooltip : {
+					 trigger: 'axis',
+					 confine:true,
+					 /*formatter: function (params,ticket,callback) {
+				            var res = params[0].name;
+				            if(params[0]){
+							 	res += '<br/>' + params[0].seriesName+"相"+ ' : ' + (Number(params[0].value)).toFixed(2)+" %";
+				            }
+				            if(params[1]){
+							 	res += '<br/>' + params[1].seriesName+"相"+ ' : ' + (Number(params[1].value)).toFixed(2)+" %";
+				            }
+				            if(params[2]){
+							 	res += '<br/>' + params[2].seriesName+"相"+ ' : ' + (Number(params[2].value)).toFixed(2)+" %";
+				            }
+				            return res;
+				      } */
+			    },
+				dataZoom:{
+			    	type: 'inside',
+			        xAxisIndex: [0],
+			    },
+				xAxis : [ {
+					font : {
+						color : 'red'
+					},
+					axisTick : {
+						show : false
+					},
+					type : 'category',
+					axisLine : {
+						lineStyle : {
+							color : '#666'
+						}
+					},
+					splitLine : {
+						show : false,
+					},
+					
+					boundaryGap : false,
+					show: true,
+					data : xValue
+				} ],
+				yAxis : [{
+					axisLabel : {
+						textStyle : {
+							color : '#666',
+							fontSize : 12
+						}
+					},
+					
+					font : {
+						color : '#666'
+					},
+					position:"right",
+					axisLine : {
+						lineStyle : {
+							color : 'transparent',
+							width : 1
+						},
+						
+					},
+					type : 'value'
+				}],
+				series : [{
+					symbol : 'none',
+					type : 'line',
+					name:'A相',
+					itemStyle : {
+						normal : {
+							color : 'rgb(255,185,0)',
+							areaStyle : {
+								color : 'transparent'
+							},
+							lineStyle : {
+								color : 'rgb(255,185,0)',
+								width : 1
+							}
+						}
+					},
+					//connectNulls : true,
+					data : yValue1
+				},{
+					symbol : 'none',
+					type : 'line',
+					name:'B相',
+					itemStyle : {
+						normal : {
+							color : 'rgb(21,197,125)',
+							areaStyle : {
+								color : 'transparent'
+							},
+							lineStyle : {
+								color : 'rgb(21,197,125)',
+								width : 1
+							}
+						}
+					},
+					//connectNulls : true,
+					data : yValue2
+				},{
+					symbol : 'none',
+					type : 'line',
+					name:'C相',
+					itemStyle : {
+						normal : {
+							color : 'rgb(255,105,32)',
+							areaStyle : {
+								color : 'transparent'
+							},
+							lineStyle : {
+								color : 'rgb(255,105,32)',
+								width : 1
+							}
+						}
+					},
+					//connectNulls : true,
+					data : yValue3
+				}]
+		};
+		myChartTHD.setOption(option,true);
+	}
+	
+	
+	
+});
+	
+</script>
+		

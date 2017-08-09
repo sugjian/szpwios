@@ -1,0 +1,922 @@
+<style>
+.app {
+	background-color: #fff !important;
+}
+</style>
+<script src="js/data-format.js" type="text/javascript"></script>
+<div ng-controller="taskListCtrl">
+
+	<!-- 预览图片详情 -->
+	<div ng-include="'tpl/message/picContent.html'"></div>
+
+	<!--不处理-->
+	<div ng-include="'tpl/message/modal/handle03.html'"></div>
+
+	<!--指派给他人处理  -->
+	<div ng-include="'tpl/message/modal/handle01.html'"></div>
+
+	<!--撤回处理页-->
+	<div ng-include="'tpl/message/modal/goRecall.html'"></div>
+
+	<!--拒绝页-->
+	<div ng-include="'tpl/message/modal/handle112.html'"></div>
+
+	<!--记录维修情况-->
+	<div ng-include="'tpl/message/modal/handle2.html'"></div>
+
+	<!-- 查看事件日志详情 -->
+	<div ng-include="'tpl/message/modal/notedetails00.html'"></div>
+	<!-- 查看任务详情 -->
+	<div ng-include="'tpl/message/modal/notedetails01.html'"></div>
+	<!-- 查看事件处理详情 -->
+	<div ng-include="'tpl/message/modal/notedetails02.html'"></div>
+
+	<div class="navbar-header bg-black app-header navbar ng-scope"
+		id="distNoteContNav" style="top:-20px;">
+		<ul class="nav col-xs-12 no-padder nav-top" style="height:68px;">
+			<li class="col-xs-3 no-padder" ui-sref-active="active" style="margin-top:20px;">
+				<a ng-click="goBackNoteList()">
+					<img src="./theme/default/img/icon/top-back@2x.png" class="v-middle m-t-xs img_goBack">
+				</a>
+			</li>
+			<li class="col-xs-6 no-padder text-center" style="margin-top:20px;">
+				<a href=""class="text-2x"> 故障报警 </a>
+			</li>
+			<li class="col-xs-3 no-padder"></li>
+		</ul>
+		<div class="col-xs-12 f-task-div">
+			<div class="col-xs-10 no-padder text-1-4x">
+				<span ng-bind="faultList[0].content|limitTo:25"></span>
+				<span ng-if="faultList[0].content.length >25">...</span>
+			</div>
+			<div class="col-xs-2 no-padder">
+				<span class="font-h3 pull-right black-1"> <span
+					class="text-1-3x handle1 handle1-bg"
+					ng-if="faultList[0].handstatus=='00'">待确认</span> <span
+					class="text-1-3x handle1 handle1-bg"
+					ng-if="faultList[0].handstatus=='01'">待受理</span> <span
+					class="text-1-3x handle2 handle2-bg"
+					ng-if="faultList[0].handstatus=='02'">待处理</span> <span
+					class="text-1-3x handle3 handle3-bg"
+					ng-if="faultList[0].handstatus=='03'">已关闭</span>
+					<span class="text-1-3x handle3 handle3-bg"ng-if="faultList[0].handstatus=='04'">被确认</span>
+				</span>
+			</div>
+		</div>
+	</div>
+	<div class="hbox hbox-auto-xs hbox-auto-sm"
+		ng-init="app.settings.asideFolded = false;  app.settings.asideDock = false;">
+		<div ng-repeat="note in faultList" class="col-xs-12 col-3" id="taskList"style=" padding-top:35px">
+			<!-- ng-class="{'ownDiv':note.senduserid ==${sessionScope.USER.userId},'taskListDiv':note.senduserid !=${sessionScope.USER.userId}}"  -->
+			<div class="col-xs-12 text-center padder-v " ng-show="note.parentid!=null && note.parentid!=faultList[0].id && $index==1">
+				<small class="text-muted inline m-b-sm m-l-sm m-r-sm font-h6">
+				以下为 <span ng-bind="note.sendusername" style="color: #000000"/> 处理进展 [当前状态:
+					<small ng-if="note.through_handstatus=='00'" class="handle1">待确认</small>
+					<small ng-if="note.through_handstatus=='01'" class="handle1">待受理</small>
+					<small ng-if="note.through_handstatus=='02'" class="handle2">待处理</small>
+					<small ng-if="note.through_handstatus=='03'" class="handle3">已关闭</small>
+				]
+				</small>
+				<abbr class="col-xs-12" style="border-bottom-color:#98a6ad; border-bottom-style:dashed;" title="华丽的分割线"/>
+			</div>
+
+			<div class="col-xs-11 taskListDiv"ng-class="{'ownDiv':note.senduserid ==userId,'taskListDiv':note.senduserid !=userId}"
+
+				ng-click="noteDetails({{note.id}},{{note.busitype}},{{note.busino}})">
+
+
+				<div class="col-xs-12 padder-v padder-no">
+					<div class="col-xs-12 no-padder  default-col">
+						<div class="col-xs-12 no-padder text-1-7x">
+							<span ng-show="note.senduserid!=null">
+								<img ng-show="note.senduserid ==userId"src="./theme/default/img/icon/people_whiter.png" class="zoom-5 m-t-n m-r-xs">
+								<img ng-show="note.senduserid !=userId" src="./theme/default/img/icon/people.png" class=" zoom-5 m-t-n m-r-xs">
+							</span>
+							<span ng-show="note.senduserid==null">
+								<img src="./theme/default/img/icon/gear.png" class="zoom-5 m-t-n m-r-xs">
+							</span>
+							<span ng-bind="note.sendusername"></span>
+
+							<span class="pull-right default-col"class="col-6 m-t-xs" style="font-size: 13px;">
+								<span class="m-r-xs"ng-bind="note.cretime|date:'yyyy-MM-dd HH:mm'" ></span>
+								<span  ng-show="note.recusername!=null">
+									接收人：<span ng-bind="note.recusername"></span>
+								</span>
+
+							</span>
+						</div>
+						<div class="col-xs-12 no-padder m-t-xs default-col">
+
+						</div>
+					</div>
+					<div class="col-xs-12 no-padder text-1-5x">
+						<span data-ng-bind-html="note.content"></span>
+						<!-- <span ng-if="note.content.length >42">...</span> -->
+					</div>
+					<div class="col-xs-12 no-padder text-1-5x m-t-xs">
+						<img class="col-xs-3 padder-xs zoomImg" ng-src="{{note.img1}}"
+							ng-show="note.img1 != null" ng-click="zoomPic('note.img1')" />
+						<img class="col-xs-3 padder-xs zoomImg" ng-src="{{note.img1}}"
+							ng-show="note.img1 != null" ng-click="zoomPic('note.img1')" />
+						<img class="col-xs-3 padder-xs zoomImg" ng-src="{{note.img1}}"
+							ng-show="note.img1 != null" ng-click="zoomPic('note.img1')" />
+					</div>
+				</div>
+				<div class="navbar navbar-fixed-bottom ">
+				<div ng-show="faultList[0].through_handstatus!='04'">
+
+					<!-- 事件通知 -->
+					<div class="col-xs-12 no-padder "ng-if="note.busitype=='00'">
+						<button ng-click="doHandle({{note.busino}})" ng-if="note.handstatus=='00'&& $index==faultList.length-1 "
+						class="col-xs-12 pull-in btn b-t-d btn-success padder-v">确认</button>
+					</div>
+					
+					<!-- 企业邀请 -->
+					<div class="col-xs-12 no-padder pull-right m-r" ng-if="note.busitype=='03'">
+				         <span ng-if="note.handstatus=='00'&& note.recuserid == userId && $index==faultList.length-1" >
+				              	<a ng-click="companyInviteHandle(note.busino,note.id,1)" class="col-xs-6 pull-in btn b-t-main  btn-success padder-v" >接受邀请</a>
+				              	<a ng-click="companyInviteHandle(note.busino,note.id,0)" class="col-xs-6 pull-in btn  btn-success-full padder-v" >拒绝邀请</a>
+				         </span>
+				         <!-- <a ng-click="companyInviteHandle(note.busino,note.parentid,2)" class="pull-right btn btn-sm taskBtn m-t-n-xs" 
+							ng-if="note.handstatus=='00'&& note.senduserid == ${sessionScope.USER.userId} && $index==faultList.length-1" >
+							  撤回邀请
+						 </a> -->
+				     </div>
+				     
+					<!-- 事件类型为派工 -->
+					<div class="col-xs-12 no-padder pull-right"ng-if="note.busitype=='01'">
+						<span ng-if="note.taskStatus=='00'&& note.recuserid == userId && $index==faultList.length-1 && $index>0">
+							<button ng-click="handle111(note.busino,note.parentid)"class="col-xs-6 pull-in btn b-t-main  btn-success padder-v">受理</button>
+							<button ng-click="handle112(note.busino,note.parentid)"class="col-xs-6 pull-in btn  btn-success-full padder-v">拒绝</button>
+						</span>
+
+						<!-- 撤回 -->
+						<button ng-click="handle11(note.busino,note.parentid)"class="col-xs-12 pull-in btn b-t-d btn-success padder-v"
+							ng-if="note.taskStatus=='00'&& note.senduserid == userId && $index==faultList.length-1 && $index>0">撤回</button>
+
+						<!-- 记录维修情况 -->
+						<button ng-click="handle2(note.busino,note.parentid)"class="col-xs-12 pull-in btn b-t-d btn-success padder-v"
+							ng-if="note.taskStatus=='01'&& note.senduserid == userId && $index==faultList.length-1 && $index>0" >记录处理情况</button>
+
+
+						<!-- 手动派工 -->
+						<span ng-if="note.taskStatus=='00'&& note.recuserid == userId && $index==faultList.length-1 && $index==0" >
+				              <button ng-click="handle111(note.busino,note.id)"class="col-xs-6 pull-in btn b-t-main  btn-success padder-v">受理</button>
+							  <button ng-click="handle112(note.busino,note.id)"class="col-xs-6 pull-in btn  btn-success-full padder-v">拒绝</button>
+				         </span>
+						 <button ng-click="handle11(note.busino,note.id)"class="col-xs-12 pull-in btn b-t-d btn-success padder-v"
+							ng-if="note.taskStatus=='00'&& note.senduserid == userId && $index==faultList.length-1 && $index==0">撤回
+						</button>
+						<button ng-click="handle2(note.busino,note.id)"class="col-xs-12 pull-in btn b-t-d btn-success padder-v"
+							ng-if="note.taskStatus=='01'&& note.senduserid == userId && $index==faultList.length-1 && $index==0" >记录处理情况
+						</button>
+
+
+						<!-- 再次处理 -->
+						<button ng-if="(faultList[0].handstatus=='00' && $index==faultList.length-1 && note.senduserid == userId && note.taskStatus=='04') || (faultList[0].handstatus=='00' && $index==faultList.length-1 && note.recuserid == userId && note.taskStatus!='04')"
+						 	class="col-xs-12 pull-in btn b-t-d btn-success padder-v" ng-click="doHandle(faultList[0].busino)" >
+				             再次确认
+	           			</button>
+
+					</div>
+				</div>
+			</div>
+			</div>
+		</div>
+	<center id="lastTask" class="col-xs-12 text-1-5x col-6" style="padding-bottom: 60px;">
+		<span ng-bind="usedTilte"></span>
+		<span class="m-r-xs m-l-sm handle1" ng-bind="usedDate"></span>
+	</center>
+	</div>
+</div>
+<!-- <toaster-container
+	toaster-options="{'position-class': 'toast-full-width', 'close-button':true,>
+</toaster-container> -->
+  <toaster-container toaster-options="{'position-class': 'toast-top-full-width', 'close-button':true}"></toaster-container>
+<!-- 图片模态框 -->
+
+<script type="text/javascript">
+
+if(isAndroid){//判断安卓，修改顶部样式
+	 $("#distNoteContNav").addClass("m-t-none");
+}
+
+//点击不同按钮打开不同的对话框
+var controlPopove=function(muiId){
+	mui('#'+muiId).popover('toggle');
+}
+function showBtn(cont,muiId){
+	$("#taskBtn").html(cont)
+	$("#taskBtn").removeClass("hidden")
+	$('#taskBtn').on('click', function () {
+		controlPopove(muiId)
+    });
+}
+app.controller('taskListCtrl',function($scope, $http,$stateParams,$state,toaster,$location,$anchorScroll) {
+
+	promptObj=$scope.getPrompt = function(type,title,message){
+        toaster.pop(type,title,message);
+    };
+	//默认滚动到最后一条
+	$scope.goto = function () {
+        $location.hash("lastTask");
+        $anchorScroll();
+    }
+	$scope.goto();
+
+	$.ajax({
+		type : "POST",
+		url : ctx + "Login/getLoginUser.htm",
+		success : function(msg) {
+			$scope.userId = msg.userId;
+		}
+	});
+	//查看详情
+	$scope.noteDetails=function(messageId,busitype,busino){
+
+			//计算手机屏幕高度
+			var screenHeight=document.body.clientHeight;
+
+			if(busitype=='00'){
+
+				$scope.getEventDetailById(busino);
+				//$scope.getMessageDetailById(messageId);
+
+				$('#noteDetails00 .modal-body').css("height",screenHeight-120)
+				$('#noteDetails00').modal({backdrop: 'static', keyboard: false});
+				 event.stopPropagation();
+			}else if(busitype=='01'){
+				$scope.getTaskDetailById(busino);
+				$('#noteDetails01 .modal-body').css("height",screenHeight-120)
+				//$scope.getMessageDetailById(messageId);
+				$('#noteDetails01').modal({backdrop: 'static', keyboard: false});
+				 event.stopPropagation();
+			}else if(busitype=='02'){
+				$scope.getEventHandleDetailById(busino);
+				$('#noteDetails02 .modal-body').css("height",screenHeight-120)
+				//$scope.getMessageDetailById(messageId);
+				$('#noteDetails02').modal({backdrop: 'static', keyboard: false});
+				 event.stopPropagation();
+			}
+
+	}
+
+	$scope.getEventDetailById=function(eventid){
+		$http({method:"POST",url:ctx+"FaultHand/getFaultAlarmById.htm",params:{id:eventid}})
+		.success(function (msg) {
+			$("#stationDiv00").text(msg.pstationname);
+			$("#deviceTypeSp00").text((msg.devicetypeStr==null||msg.devicetypeStr=="") ?"-":msg.devicetypeStr);
+			$("#deviceNameSp00").text((msg.devicename==null||msg.devicename=="") ?"-":msg.devicename);
+			if(msg.faultlevelStr){
+				$("#faultLevelSp00").text(msg.faultlevelStr);
+			}else if(msg.eventType==-9){
+				$("#faultLevelSp00").text("通讯中断");
+			}
+			$("#faultStatusSp00").text(msg.sysstatusStr);
+			$("#sStartTime00").text(msg.sysrptdateStr);
+			$("#dStartTime00").text(msg.dStartTimeStr);
+			$("#dEndTime00").text(msg.dEndTimeStr);
+			$("#faultLevelTd00").text((msg.faultlevelStr==null||msg.faultlevelStr=="") ?"-":msg.faultlevelStr);
+			$("#devicenameTd00").text((msg.devicename==null||msg.devicename=="") ?"-":msg.devicename);
+			$("#faultcodeTd00").text((msg.eventCode==null||msg.eventCode=="") ?"-":msg.eventCode);
+			$("#faultclassTd00").text((msg.faultclassStr==null||msg.faultclassStr=="") ?"-":msg.faultclassStr);
+			$("#faultdescTd00").text((msg.eventDesc==null||msg.eventDesc=="") ?"-":msg.eventDesc);
+
+			//msg.handStatus = '04';
+		});
+	}
+	//企业邀请处理
+	$scope.companyInviteHandle=function(id,topmessageId,type){
+		$http({
+			method : "POST",
+			url : ctx+"authComUserRel/handleCompanyInvite.htm",
+			params : {
+				'inviteId':id,
+				'topMesId':topmessageId,
+				'isAccept':type
+			}
+		}).success(function(msg) {
+			if(msg.result){
+				promptObj('success','',msg.infoMsg);
+			}else{
+				promptObj('error','',msg.infoMsg);
+			}
+			//刷新列表
+			$scope.getFulatList()
+		});
+
+	}
+	$scope.getTaskDetailById=function(taskid){
+		$http({method:"POST",url:ctx+"Optask/selectById.htm",params:{id:taskid}})
+		.success(function (msg) {
+
+			console.log(msg)
+			if(msg.pstationname){
+				$("#stationnameStr").text(msg.pstationname);
+			}else{
+				$("#stationnameStr").text("");
+			}
+			if(msg.distManName){
+				$("#distmanStr").text(msg.distManName);
+			}else{
+				$("#distmanStr").text("");
+			}
+			if(msg.respManName){
+				$("#respmanStr").text(msg.respManName);
+			}else{
+				$("#respmanStr").text("");
+			}
+			if(msg.distdate){
+				$("#distdateStr").text(dateFormat(new Date(msg.distdate)));
+			}else{
+				$("#distdateStr").text("");
+			}
+			if(msg.expectedtime){
+				$("#expectedtimeStr").text(dateFormat(new Date(msg.expectedtime)));
+			}else{
+				$("#expectedtimeStr").text("");
+			}
+			if(msg.remindtime){
+				$("#remindtimeStr").text(msg.remindtime);
+			}else{
+				$("#remindtimeStr").text("");
+			}
+			if(msg.taskcontent){
+				$("#taskcontentStr").text(msg.taskcontent);
+			}else{
+				$("#taskcontentStr").text("");
+			}
+			if(msg.taskstatusStr){
+				$("#taskstatusStr").text(msg.taskstatusStr);
+			}else{
+				$("#taskstatusStr").text("");
+			}
+			if(msg.finishcontent){
+				$("#finishcontentStr").text(msg.finishcontent);
+			}else{
+				$("#finishcontentStr").text("");
+			}
+			if(msg.finishdate){
+				$("#finishdateStr").text(dateFormat(new Date(msg.finishdate)));
+			}else{
+				$("#finishdateStr").text("");
+			}
+
+			if(msg.refimage1){
+				$("#billImg5").attr("src",ctx+"document/faultHand/"+msg.refimage1);
+			}else{
+				$("#imgdiv1").remove();
+			}
+			if(msg.refimage2){
+				$("#billImg6").attr("src",ctx+"document/faultHand/"+msg.refimage2);
+			}else{
+				$("#imgdiv2").remove();
+			}
+			if(msg.refimage3){
+				$("#billImg7").attr("src",ctx+"document/faultHand/"+msg.refimage3);
+			}else{
+				$("#imgdiv3").remove();
+			}
+		});
+	}
+
+	function dateFormat(date) {
+		var time = new Date(date).Format("yyyy-MM-dd hh:mm");
+		return time;
+	}
+
+	$scope.getEventHandleDetailById=function(ehid){
+		$http({method:"POST",url:ctx+"EventHandle/getEventHandleDetailById.htm",params:{id:ehid}})
+		.success(function (msg) {
+			$("#processUser02").text(msg.real_name);
+			$("#processMethod02").text(msg.processmethodStr);
+			$("#processTime02").text(msg.processtimeStr);
+			console.log(msg.notprocereason_desc+"#$%")
+			$("#notProceReason02").text(msg.notprocereason_desc);
+
+		});
+	}
+	$scope.goBackNoteList=function(){
+		$state.go("noteList",{li_index:$stateParams.li_index});//不处理状态 跳转到 历史
+	}
+
+	//预览图片
+	$scope.zoomPic=function(src){
+		//$('#picModal').modal({backdrop: 'static', keyboard: false});
+		 event.stopPropagation();
+	}
+	//$("#taskList").css("height",document.body.offsetHeight-92);
+
+
+	//去处理
+	$scope.doHandle=function(busino){
+		$scope.busino=busino;
+		controlPopove("doTask");
+		event.stopPropagation();
+	}
+
+	//hand01处理
+	//根据事件日志id得到用户
+	$scope.pstationId = 0;
+	$scope.getUserList=function(eventid){
+		$scope.managerd01 = {};
+		$scope.manager01 = null;
+		$http({method:"POST",url:ctx+"DeviceLog/selectDeviceById.htm",params:{id:eventid}})
+		.success(function (result) {
+			$scope.pstationId = result.pstationid;
+			$http({method:"POST",url:ctx+"AdminUser/selectAllNoSelf.htm",params:{sid:result.pstationid}})
+			.success(function (result) {
+		    	 $scope.manager01 = result;
+		    	 for(var i=0,len=$scope.manager01.length;i<len;i++){
+					 if($scope.manager01[i].userId==  $("#respman").val()){
+						$scope.managerd01.selected= { realName: $scope.manager01[i].realName,userId:$scope.manager01[i].userId};
+					 }
+				 }
+		    	 $scope.managerChange01= function () {
+		    		 $("#respmanverify").html("");
+			         $("#respman").val(angular.copy($scope.managerd01.selected.userId));
+				}
+			});
+		});
+
+
+	}
+	//派给他人处理
+	$scope.handle01=function(){
+		$('#respmanDiv').show();
+		$scope.getUserList($scope.busino);
+		controlPopove('doTask')
+		$('#handle01').modal({backdrop: 'static', keyboard: false});
+	}
+
+	//派给自己处理
+	$scope.handle02=function(busiNo){
+		$scope.managerd01 = {};
+		$scope.manager01 = null;
+		$('#respman').val(-1);
+		$('#respmanDiv').hide();
+		controlPopove('doTask')
+		$('#handle01').modal({backdrop: 'static', keyboard: false});
+	}
+	function getFaultNohandReason(){
+		$("#noHandReasonUl").empty();
+		$.ajax({
+			type:"post",
+			url:ctx+"FaultHand/getFaultNohandReason.htm",
+			//data:{"treeLevel":level,"parentId":parentId},
+			dataType : "json",
+			async: false,
+			success:function(msg){
+				for(var i=0;i<msg.length;i++){
+					if(i == 0){
+						$("#noHandReasonUl").append('<option  value="'+msg[i].id+'"onclick="checkRadioFalse()"><a> '+msg[i].dictName+'</a> </option>');
+					}else{
+						$("#noHandReasonUl").append('<option value="'+msg[i].id+'" onclick="checkRadioFalse()"><a> '+msg[i].dictName+'</a> </option>');
+					}
+				}
+				$("#noHandReasonUl").append('<option value="0" onclick="checkRadio()"><a> '+"其它原因"+'</a></option>');
+			}
+		});
+	}
+
+	//不处理
+	$scope.handle03=function(){
+		controlPopove('doTask')
+		clearHandle03Info();
+		getFaultNohandReason();
+		$('#handle03').modal({backdrop: 'static', keyboard: false});
+	}
+	//不处理
+	$scope.saveHandle03Form=function(){
+		//保存不处理原因
+		//radio 选中处理
+		var status=0;
+	/* 	var ridaolen = document.handle03EditForms.reasonIds.length;
+		for (var i = 0; i < ridaolen; i++) {
+			if (document.handle03EditForms.reasonIds[i].checked) {
+				status = document.handle03EditForms.reasonIds[i].value;
+				break;
+			}
+		} */
+
+		var taskcontent = $("#noHandReasonUl").find("option:selected").val();
+		if(taskcontent=="0"){
+			if($("#taskcontent03").val()!=""){
+				status=$("#noHandReasonUl").find("option:selected").val();
+			}else{
+				$("#taskcontentverify03").html("<font class='pull-left' color='#FF0000'>非空</font>");
+				return false
+			}
+			}
+
+			console.log('notprocereason'+status+
+					'otherreason'+$("#taskcontent03").val()+
+					'topmessageId'+$scope.faultList[0].id+
+					'eventid'+$scope.faultList[0].busino)
+			//保存任务单
+			$http({
+				method : "POST",
+				url : ctx+"EventHandle/eventNoHandle.htm",
+				params : {
+					'notprocereason':status,
+					'otherreason':$("#taskcontent03").val(),
+					'topmessageId':$scope.faultList[0].id,
+					'eventid':$scope.faultList[0].busino,
+				}
+			}).success(function(msg) {
+				if(msg.result){
+					promptObj('success','',msg.infoMsg);
+				}else{
+					promptObj('error','',msg.infoMsg);
+				}
+				//刷新列表
+				$scope.getFulatList()
+			});
+
+			$('#handle03').modal('hide')
+	//	alert("不处理");
+
+	}
+	//指派他人处理
+	$scope.saveHandle01Form=function(){
+		var respman=$("#respman").val();
+		var expectedtime=$("#expectedtime").val();
+		var taskcontent=$("#taskcontent").val();
+
+		if(respman && expectedtime && taskcontent){
+			//保存任务单
+			console.log($("#respman").val()+"$$"+$scope.pstationId+"再次提醒"+$("#remindTime01").val()
+			+""+$scope.faultList[0].busino)
+			$http({
+				method : "POST",
+				url : ctx+"EventHandle/eventHandle.htm",
+				params : {
+					'respman':$("#respman").val(),
+					'pstationid':$scope.pstationId,
+					'topmessageId':$scope.faultList[0].id,
+					'expectedtime':$("#expectedtime").val(),
+					"remindtime":$("#remindTime01").val(),
+					'taskcontent':$("#taskcontent").val(),
+					'eventid':$scope.faultList[0].busino,
+				}
+			}).success(function(msg) {
+				if(msg.result){
+					promptObj('success','',msg.infoMsg);
+				}else{
+					promptObj('error','',msg.infoMsg);
+				}
+				//刷新列表
+				$scope.getFulatList()
+			});
+			$('#handle01').modal('hide');
+		}else{
+			if(!respman){
+				$("#respmanverify").html("<font color='#FF0000'>非空</font>");
+			}else{
+				$("#respmanverify").html("");
+			}
+
+			if(!expectedtime){
+				$("#expectedverify").html("<font color='#FF0000'>非空</font>");
+			}else{
+				$("#expectedverify").html("");
+			}
+
+			if(!taskcontent){
+				$("#taskcontentverify").html("<font color='#FF0000'>非空</font>");
+			}else{
+				$("#taskcontentverify").html("");
+			}
+		}
+	}
+
+	//撤回
+	var handler11_id;
+	var handle11_topmessageId;
+	$scope.handle11=function(id,topmessageId){
+		//alert("我其实不是撤回")
+		//$('#handle11_reason').val("");
+		handler11_id=id;
+		handle11_topmessageId=topmessageId;
+		controlPopove("recall");
+		event.stopPropagation();
+	}
+	//撤回点击
+	$scope.handle11_do=function(){
+		//alert("我才是撤回")
+		/* var reason = $('#handle11_reason').val();
+		if(!reason){
+			$("#handle11_reasonverify").html("<font color='#FF0000'>非空</font>");
+			return false;
+		}
+		$("#handle11_reasonverify").html("");  */
+		$http({
+			method : "POST",
+			url : ctx + "Optask/recallTask.htm",
+			params : {
+				'id':handler11_id,
+				'topmessageId':handle11_topmessageId,
+				'reason':"我是移动端撤回"
+			}
+		}).success(function(msg) {
+			if(msg.result){
+				promptObj('success','',msg.infoMsg);
+			}else{
+				promptObj('error','',msg.infoMsg);
+			}
+			controlPopove('recall')
+			//刷新列表
+			$scope.getFulatList()
+		});
+	}
+	/*
+	* C4 接口
+	*/
+	//受理
+	$scope.handle111=function(id,topmessageId){
+		event.stopPropagation();
+		$http({
+			method : "POST",
+			url : ctx+"Optask/acceptTask.htm",
+			params : {
+				'id':id,
+				'topmessageId':topmessageId
+			}
+		}).success(function(msg) {
+			if(msg.result){
+				promptObj('success','',msg.infoMsg);
+			}else{
+				promptObj('error','',msg.infoMsg);
+			}
+			//刷新列表
+			$scope.getFulatList()
+		});
+	}
+
+	//拒绝
+	var handle112_id;
+	var handle112_topmessageId;
+	$scope.handle112=function(id,topmessageId){
+		event.stopPropagation();
+		handle112_id=id;
+		handle112_topmessageId=topmessageId;
+		controlPopove("refuse");
+	}
+	$scope.handle112_save=function(){
+		//alert("我才是拒绝")
+		/* var reason = $('#handle112_reason').val();
+		if(!reason){
+			$("#handle112_reasonverify").html("<font color='#FF0000'>非空</font>");
+			return false;
+		}
+		$("#handle112_reasonverify").html("");  */
+		$http({
+			method : "POST",
+			url : ctx+"Optask/rejectTask.htm",
+			params : {
+				'id':handle112_id,
+				'topmessageId':handle112_topmessageId,
+				'reason':"移动版本的拒绝原因"
+			}
+		}).success(function(msg) {
+			if(msg.result){
+				promptObj('success','',msg.infoMsg);
+			}else{
+				promptObj('error','',msg.infoMsg);
+			}
+			controlPopove('refuse')
+			//刷新列表
+			$scope.getFulatList()
+		});
+	}
+
+	//记录维修情况
+	var handle2_topmessageId;
+	var handle2Id;
+	$scope.handle2=function(id,topmessageId){
+
+		//alert("我是记录维修情况")
+		$('#handle2_content').val("");
+		$('#handle2_finishdate').val("");
+		$scope.handle2_finishdates=new Date();
+			/* $('#handle2_finishdates').html(new Date().toLocaleDateString())  */
+		$('#handle2_topmessageId').val(topmessageId)
+		$('#handle2_id').val(id)
+		//clearHandle02Info();
+		$('#handle2').modal({backdrop: 'static', keyboard: false});
+		 event.stopPropagation();
+	}
+
+	$scope.handle2_save=function(finishedStatus){
+		$(".clearData").val();
+		var finishdate = $('#handle2_finishdates').html();
+		console.log(finishdate+"时间1")
+
+		$("#handle2_finishdateverify").html("");
+		var content = $('#handle2_content').val();
+		if(!content){
+			$("#handle2_contentverify").html("<font color='#FF0000'>非空</font>");
+			return false;
+		}
+		$("#handle2_contentverify").html("");
+
+		var eventid=$scope.faultList[0].busino;
+		if($scope.faultList[0].busitype=='01'){
+			eventid=null;
+		}
+		/* var finishdate = $('#handle2_finishdate').val();
+		if(!finishdate){
+			$("#handle2_finishdateverify").html("<font color='#FF0000'>非空</font>");
+			return false;
+		} */
+		$("#handle2_finishdateverify").html("");
+		var content = $('#handle2_content').val();
+		if(!content){
+			$("#handle2_contentverify").html("<font color='#FF0000'>非空</font>");
+			return false;
+		}
+		$("#handle2_contentverify").html("");
+		$.ajax({
+			type:"post",
+			url:ctx+"Optask/finishTask.htm",
+			data:{
+				'id':$('#handle2_id').val(),
+				'topmessageId':$('#handle2_topmessageId').val(),
+				'finishdate':finishdate,
+				'taskstatus':'02',
+				'finishedstatus':finishedStatus,
+				'isMobile':'1',//是否为手机端上传图片，1 是手机端
+				// 'refimage1':$('#upimage1').val(),
+				//'refimage2':$('#upimage2').val(),
+				//'refimage3':$('#upimage3').val(),
+				"imgList1":imgArray[0],
+				"imgList2":imgArray[1],
+				"imgList3":imgArray[2],
+				'finishcontent':$('#handle2_content').val(),
+				'eventid':eventid
+				},
+			success:function(msg){
+				if(msg.result){
+					promptObj('success','',msg.infoMsg);
+				}else{
+					promptObj('error','',msg.infoMsg);
+				}
+				$('#handle2').modal('hide');
+				//刷新列表
+				$scope.getFulatList()
+
+			}
+		})
+
+	}
+
+
+	//没有修好
+	$scope.saveForm=function(finishedStatus){
+		$(".clearData").val();
+
+		var finishdate = $('#handle2_finishdates').html();
+		console.log(finishdate+"时间")
+		/* if(!finishdate){
+			$("#handle2_finishdateverify").html("<font color='#FF0000'>非空</font>");
+			return false;
+		} */
+		$("#handle2_finishdateverify").html("");
+		var content = $('#handle2_content').val();
+		if(!content){
+			$("#handle2_contentverify").html("<font color='#FF0000'>非空</font>");
+			return false;
+		}
+		$("#handle2_contentverify").html("");
+
+		$("#id").val($('#handle2_id').val());
+		$("#topmessageId").val($('#handle2_topmessageId').val());
+		$("#finishdate").val(finishdate);
+		$("#taskstatus").val('02');
+		$("#finishdate").val($('#handle2_finishdate').val());
+		$("#finishedstatus").val(finishedStatus);
+		$("#finishcontent").val($('#handle2_content').val());
+		var eventid=$scope.faultList[0].busino;
+		if($scope.faultList[0].busitype=='01'){
+			eventid=null;
+		}
+		$("#eventid").val(eventid);
+
+
+		if($("#picture2").val()==""){
+			$("#picture2").attr("disabled","disabled");
+		}
+		if($("#picture1").val()==""){
+			$("#picture1").attr("disabled","disabled");
+		}
+		if($("#picture0").val()==""){
+			$("#picture0").attr("disabled","disabled");
+		}
+		/* $("#editForms").trigger("submit");
+		$('#handle2').modal('hide'); */
+		$.ajax({
+			type:"post",
+			url:ctx+"Optask/finishTask.htm",
+			data:{
+				'id':$('#handle2_id').val(),
+				'topmessageId':$('#handle2_topmessageId').val(),
+				'finishdate':$('#handle2_finishdate').val(),
+				'taskstatus':'02',
+				'finishedstatus':finishedStatus,
+				'isMobile':'1',//是否为手机端上传图片，1 是手机端
+				// 'refimage1':$('#upimage1').val(),
+				//'refimage2':$('#upimage2').val(),
+				//'refimage3':$('#upimage3').val(),
+				"imgList1":imgArray[0],
+				"imgList2":imgArray[1],
+				"imgList3":imgArray[2],
+				'finishcontent':$('#handle2_content').val(),
+				'eventid':eventid
+				},
+			success:function(msg){
+				if(msg.result){
+					promptObj('success','',msg.infoMsg);
+				}else{
+					promptObj('error','',msg.infoMsg);
+				}
+				$('#handle2').modal('hide');
+				//刷新列表
+				$scope.getFulatList()
+
+			}
+		})
+	}
+
+	//获得故障报警的列表
+	$scope.getFulatList=function(){
+		$http.get(ctx+"BaseMessage/getTopBaseMessageDetail.htm", {
+			params : {
+				'pageIndex'	:0,
+				'pageSize'	:10,
+				'parentid':$stateParams.id,
+			}
+		}).success(function(result) {
+			var readids="";
+			$scope.faultList=result.data;
+			//判断状态来获得时间
+			if($scope.faultList[0].handstatus=='03'){
+				$scope.usedTilte="共耗时"
+				$scope.usedDate=$scope.countTime($scope.faultList[0].cretime,$scope.faultList[result.data.length-1].cretime);
+			}else{
+				$scope.usedTilte="已耗时"
+				$scope.usedDate=$scope.countTime($scope.faultList[0].cretime,(new Date).getTime());
+			}
+			for(var i=0;i<result.data.length;i++){
+				if(result.data[i].readstatus=="0"&&result.data[i].recuserid == $scope.userId){
+					readids=readids+result.data[i].id+",";
+				}
+				//将所有的未读状态转化为已读状态
+				$http({
+						method : "POST",
+						url : ctx+"BaseMessage/readBaseMessages.htm",
+						params : {
+							'ids':readids
+						}
+					}).success(function(result) {
+					});
+			}
+		});
+	}
+	$scope.getFulatList();
+
+	$scope.countTime=function(time1,time2){
+		var countDate;
+		var date1=time1;  //开始时间
+		var date2=time2;    //结束时间
+		var date3=date2-date1  //时间差的毫秒数
+
+		//计算出相差天数
+		var days=Math.floor(date3/(24*3600*1000))
+
+		//计算出小时数
+		var leave1=date3%(24*3600*1000)    //计算天数后剩余的毫秒数
+		var hours=Math.floor(leave1/(3600*1000))
+		//计算相差分钟数
+		var leave2=leave1%(3600*1000)        //计算小时数后剩余的毫秒数
+		var minutes=Math.floor(leave2/(60*1000))
+
+		//计算相差秒数
+		var leave3=leave2%(60*1000)      //计算分钟数后剩余的毫秒数
+		var seconds=Math.round(leave3/1000);
+		if(date3<=0){
+			countDate="0 分钟 0 秒";
+		}else{
+			if(days=="0"){
+				if(hours=="0"){
+					countDate=minutes+" 分钟"+seconds+" 秒"
+				}else{
+					countDate=hours+"小时 "+minutes+" 分钟"+seconds+" 秒"
+				}
+			}else{
+				countDate=days+"天 "+hours+"小时 "+minutes+" 分钟"+seconds+" 秒"
+			}
+		}
+		return countDate;
+	}
+});
+</script>

@@ -1,0 +1,343 @@
+<!-- navbar header -->
+<link rel="stylesheet" href="theme/default/css/message/messageList.css">
+<div class="hbox hbox-auto-xs hbox-auto-sm">
+	<div ng-controller="basemessageListCtrl">
+		<div class="navbar-header bg-black app-header navbar ng-scope"
+			id="distNoteNav" style="border-bottom: 1px solid #16212a;">
+			<ul class="nav col-xs-12 no-padder nav-top">
+				<li class="col-xs-4" ui-sref-active="active">
+				</li>
+				<li class="col-xs-4 no-padder text-center">
+					<select id="systems" class="text-1-8x"></select>
+				</li>
+				<!-- 搜索 -->
+				<li class="col-xs-4 ">
+					<div class="pull-right text-1-8x" ng-click="searchNote()" ng-show="isSearchNote" style="width:50px;text-align:center;line-height:50px;"><i class="iocn icon-magnifier" style="vertical-align: middle;"></i></div>
+				</li>
+			</ul> 
+		</div>
+		<!-- / navbar header -->
+		<div id="noteWrapper">
+			<div id="scroller">
+				<div id="scroller-pullDown">
+					<span id="pullDown-msg" class="pull-down-msg"> 
+					<img src="./theme/default/img/loading.gif" style="width: 16px;" class="m-r-xs" />加载中..
+					</span>
+				</div>
+				<div id="scroller-content">
+					<div class="tab-content tab-bordered" id="noteList" style="color:white;">
+						<div class="tab-panel">
+							<img src="./theme/default/img/nodata.png" class="tipImg hidden" id="tipImg">
+							<div class="col-xs-12 bg-writer no-padder">
+							
+								<div  class="col-xs-12 " ng-repeat="note in basemessage" ng-click="noteDetail({{note.id}},{{note.dcuId}})">
+									<div class="col-xs-12 padder-v padder-no b-w" style="height:100px;">
+										<div class="col-xs-6 no-padder ">
+											<span class="text-1-7x opa-7">
+												<img src="./theme/default/img/icon/gear.png" class="zoom-5 m-t-n m-r-xs">
+											</span>
+											<span class="fault-name">{{note.result}}</span>
+										</div>
+										<div class="col-xs-6 no-padder fault-status">
+											<span class="pull-right opa-8">
+												<span class="m-r-xs">{{note.time | cleanTimeTZ}}</span>
+												<span ng-class="{true:'handle2',false:'handle3'}[note.status == 0]">
+													{{faultMap[note.status]}}
+												</span>
+											</span>
+										</div>
+										<div class="col-xs-11 no-padder opa-5 text-1-5x fault-description">
+											<span>{{note.remark}}</span>
+										</div>
+										<div class="col-xs-1 no-padder" ng-if="note.readStatus == '0'">
+											<span class="pull-right badge bg-danger" >!</span>
+										</div>
+									</div>
+								</div>
+								
+								<div id="flagDiv" class="col-xs-12 no-padder"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div data-ng-include=" 'tpl/message/noteSearch.html' " class="noteSearchPage"></div>
+		<div data-ng-include=" 'tpl/message/noteDetail.html' " class="noteDetailPage detail-total"></div>
+	</div>
+</div>
+<div data-ng-include=" 'tpl/blocks/footer.html' "></div>
+<toaster-container
+	toaster-options="{'position-class': 'toast-top-full-width', 'close-button':true}">
+</toaster-container>
+<!-- 页脚 -->
+<script>
+	app.controller('basemessageListCtrl',function($scope, $http, $state, $stateParams, toaster) {
+		
+		//从故障提示进入
+		var pAlarmId = $stateParams.alarmId;
+		var pSysId = $stateParams.sysId;
+		
+		//页码初始化
+		$scope.faultMap = {0:"未处理",1:"已处理"};
+		var powerSupplys = JSON.parse(storage["powerSupplysMap"]);
+		var userName = storage["userName"];
+		$scope.basemessage = [];
+		
+		var page = 0;
+		var totalPage = 0;
+		
+		var isFinish = true;
+		toaster.pop("wait", '', '正在加载...');
+		$scope.getNoteList = function(changeSystems) {
+			if(changeSystems == "changeSystems"){
+				//先恢复到原始状态
+				$scope.basemessage = [];
+				page = 0;
+				totalPage = 0;
+				isFinish = true;
+			}
+			if((page>=totalPage&&totalPage!=0) || !isFinish){
+				return false;
+			}
+			isFinish = false;
+			toaster.pop("wait", '', '正在加载...');
+			$http({
+				method : "GET",
+				url :  $scope.currentAddress+"api/v1/alarm/search_alarmlist",
+				params : {
+					'userId':$scope.userId,
+					'gdjId':$scope.gdjId,
+					'bdzId':$scope.bdzId,
+					'dlxId':$scope.dlxId,
+					'alarmType':$scope.alarmType,
+					'status':$scope.status,
+					'start': page,
+					'limit':8,
+					'startTime':$scope.startTime,
+					'endTime':$scope.endTime
+				},
+				timeout : 20000
+			}).success(function(result) {
+				
+				page = page + 8;
+				totalPage = result.total;
+				var uau = "";
+				if (result.data && result.data.length>0) {
+					var reda = result.data;
+					//当为二级报警时特殊处理
+					for(var k=0;k<reda.length;k++){
+						var ac = alarmConfigMap[reda[k].alarmType];
+						uau +="" + $scope.currentAddress +","+reda[k].id +","+ userName;
+						if(k!=(reda.length-1)){
+							uau +="=";
+						}
+						var node = overViewData[$scope.sysId].nodesMap[reda[k].dcuId];
+						var bdzName = overViewData[$scope.sysId].substationsMap[node.bdzId].name;
+						var dlxnode = overViewData[$scope.sysId].powerLinesMap[node.dlxId];
+						if(ac && ac.alarmLevel == 2){
+							reda[k].result = ac.alarmDetail;
+							var dlxName = dlxnode.name;
+							reda[k].remark = bdzName + dlxName + '，杆塔' + node.dxgNo;
+						}
+						//特殊处理  20170316
+						if(reda[k].alarmType == 12 && node.type == 2){
+							var mxName = overViewData[$scope.sysId].parentPowerLinesMap[dlxnode.mxId].name;
+							reda[k].remark = bdzName + mxName + '，  ' + node.dxgNo;
+						}
+					}
+					$scope.basemessage = $scope.basemessage.concat(reda);
+					if (document.body.offsetHeight - 92 > ($scope.basemessage.length * 100 + 60)) {
+						$("#noteList").height(document.body.offsetHeight - 92);
+					} else {
+						$("#noteList").height($scope.basemessage.length * 100 + 60);
+					} 
+				}
+				if($scope.basemessage.length<=0){
+					$("#tipImg").removeClass("hidden");
+					page = 0;
+					totalPage=0;
+				}else{
+					$("#tipImg").addClass("hidden")
+				}
+				isFinish = true;
+				toaster.setBody("更新完成");
+				toaster.clear();
+				myScroll.refresh();
+				$http({
+					method : "GET",
+					url : ctx+"solway/selectMessageStatusList",
+					params : {
+						'uau':uau
+					},
+					timeout : 20000
+				})
+				.success(function (msg) {
+					for(var k=0;k<$scope.basemessage.length;k++){
+						if(msg.data[$scope.currentAddress +"-"+$scope.basemessage[k].id +"-"+ userName] === '0'){
+							$scope.basemessage[k]['readStatus'] = '0';
+						}
+					}
+				});
+			}).error(function() {
+				toaster.setBody("更新完成");
+				toaster.clear();
+				myScroll.refresh();
+			});
+		}
+				
+		//查询页面的传参
+		$scope.$on("params",function(e,data){
+			if(data.sysId){
+				
+				$scope.startTime = data.startTime;
+				$scope.endTime = data.endTime;
+				$scope.sysId = data.sysId;
+				
+				$scope.currentAddress = powerSupplys[$scope.sysId].address;
+				$scope.userId = powerSupplys[$scope.sysId].userId;
+				$scope.gdjId = powerSupplys[$scope.sysId].gdjId;
+				
+				$scope.bdzId = (data.bdzId)=='-1'?null:data.bdzId;
+				$scope.dlxId = (data.dlxId)=='-1'?null:data.dlxId;
+				$scope.status = (data.status)=='-1'?null:data.status;
+				
+				$scope.userId = data.userId;
+				$scope.alarmType = data.alarmType;
+				
+				/*if(overViewData){
+					$("#systems").empty();
+					angular.forEach(overViewData,function(data,index){
+						if($scope.sysId && (index == $scope.sysId)){
+							$("#systems").append("<option value='"+index+"' selected = 'selected'>"+data.name+"</option>");
+						}else{
+							$("#systems").append("<option value='"+index+"'>"+data.name+"</option>");
+						}
+						
+					});
+					
+				}else{
+					alert("加载数据失败");
+				}*/
+				$("#systems").val($scope.sysId);
+				$scope.currentAddress = powerSupplys[$scope.sysId].address;
+				$scope.getNoteList("changeSystems");  //开始查询数据
+			}
+		});
+		$scope.isSearchNote = true;
+		init(pSysId , pAlarmId);  //首次直接进页面
+		function init(pSysId , pAlarmId){
+			if(Object.keys(overViewData).length > 0){
+				angular.forEach(overViewData,function(data,index){
+					if($scope.sysId && (index == $scope.sysId)){
+						$("#systems").append("<option value='"+index+"' selected = 'selected'>"+data.name+"</option>");
+					}else{
+						$("#systems").append("<option value='"+index+"'>"+data.name+"</option>");
+					}
+					
+				});
+				
+			}else{
+				$scope.isSearchNote = false;
+				return ;
+				//alert("加载数据失败");
+			}
+			
+			if(pSysId && pAlarmId){
+				$(".noteDetailPage").show();
+				$scope.sysId = pSysId;
+				$("#systems").val($scope.sysId);
+				$scope.currentAddress = powerSupplys[$scope.sysId].address;
+				$http({
+					method : "GET",
+					url :  $scope.currentAddress+"api/v1/alarm",
+					params : {
+						'alarmId':pAlarmId
+					},
+					timeout : 20000
+				}).success(function(result) {
+					if(result.code == "0" && result.message == "ok"){
+						$scope.noteDetail(pAlarmId,result.data.dcuId);
+					}
+				}).error(function() {
+					
+				});
+				
+				
+			}else if(pSysId){
+				$("#systems").val(pSysId);
+			}
+			$scope.sysId = $("#systems").val();
+			$scope.currentAddress = powerSupplys[$scope.sysId].address;
+			$scope.userId = powerSupplys[$scope.sysId].userId;
+			$scope.gdjId = powerSupplys[$scope.sysId].gdjId;
+			$scope.alarmType = "100,101";
+			
+			var date = new Date();
+			var currentM = date.getMonth();
+			$scope.startTime = (new Date(date.setMonth(currentM-1))).format("yyyy-MM-dd HH:mm:ss"),
+			$scope.endTime = (new Date()).format("yyyy-MM-dd HH:mm:ss");
+			
+			$scope.getNoteList();  //第一次进入装载数据
+		}
+		
+		$("#systems").change(function(){
+			$state.go("noteList",{sysId:$("#systems").val()},{reload:true})
+			
+			/*$scope.sysId = $("#systems").val();
+			$scope.$broadcast("sysId",$scope.sysId);
+			$scope.currentAddress = powerSupplys[$("#systems").val()].address;
+			$scope.userId = powerSupplys[$scope.sysId].userId;
+			$scope.gdjId = powerSupplys[$scope.sysId].gdjId;
+			
+			$scope.alarmType = "100,101";
+			var date = new Date();
+			var currentM = date.getMonth();
+			$scope.startTime = (new Date(date.setMonth(currentM-1))).format("yyyy-MM-dd HH:mm:ss"),
+			$scope.endTime = (new Date()).format("yyyy-MM-dd HH:mm:ss");
+			
+			$scope.getNoteList("changeSystems");*/
+			
+		});
+		
+		
+		//下拉刷新
+		var myScroll
+		myScroll = new IScroll('#noteWrapper', {
+			probeType : 3,
+			mouseWheel : true,
+			click : true//是否屏蔽点击事件
+		});
+		
+		myScroll.on("slideDown", function() {
+			if (this.y > 60) {
+				$scope.basemessage = [];
+				page = 0;
+				totalPage = 0;
+				$scope.getNoteList();
+			}
+		});
+		
+		//上拉加载新数据
+		myScroll.on("slideUp", function() {
+			$scope.getNoteList();
+		});
+
+		//跳转至详情页
+		$scope.noteDetail = function(ID,dcuId) {
+			var params = {id : ID,sysId:$scope.sysId,dcuId:dcuId};
+			$(".noteDetailPage").show();
+			//$scope.messageView = "noteDetail";
+			$scope.$broadcast('showNoteDetail', params);
+			//$state.go("noteDetail",params);
+		}
+		//跳转至查询页
+		$scope.searchNote = function() {
+			//$state.go("noteSearch",{sysId:$scope.sysId});
+			//$scope.$broadcast("sysId",$scope.sysId);
+			$(".noteSearchPage").show();
+			//$scope.messageView = "searchNote";
+		}
+		
+	});
+</script>

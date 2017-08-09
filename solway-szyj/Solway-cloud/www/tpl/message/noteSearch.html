@@ -1,0 +1,373 @@
+<!-- navbar header -->
+<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap-datetimepicker.min.css" />
+<link rel="stylesheet" href="theme/default/css/message/noteSearch.css">
+<script src="vendor/bootstrap/js/bootstrap-datetimepicker.js" type="text/javascript"></script>
+<script src="vendor/bootstrap/js/bootstrap-datetimepicker.zh-CN.js" type="text/javascript"></script>
+<script src="js/data-format.js" type="text/javascript"></script>
+<div ng-controller="noteListSearchCtrl" style="width: 100%;z-index: 9999;position: fixed;    background: rgb(28,43,54);">
+	<div class="navbar-header bg-black app-header navbar ng-scope"
+		id="distNoteNav" style="border-bottom: 1px solid #16212a;">
+		<ul class="nav col-xs-12 no-padder nav-top">
+			<li class="col-xs-4" ui-sref-active="active">
+			<a ng-click="goBackNoteList()">
+				<img src="theme/default/img/icon/top-back@2x.png" class="v-middle m-t-xs img_goBack">
+			</a>
+			</li>
+			<li class="col-xs-4 no-padder text-center">
+				<span class="col-xs-12  no-padder text-2x m-t-sm" ng-init="falultTab.activeTab=1">
+					<a class="col-xs-12 no-padder"  href="javascript:;" class="text-1-2x">报警查询</a>
+				</span>
+			</li>
+			<!-- 搜索 -->
+			<li class="col-xs-4 ">
+			</li>
+		</ul> 
+	</div>
+	<!-- / navbar header -->
+	<div class="real-tab">
+		<ul class="clearfix text-center bg-black" >
+			<li  ng-class="{'active':isActive == 'fast'}"  class="pull-left" >
+				<a  class="wrapper" ng-click="changeTab('fast')">
+					<span class="text-1-2x">快速查询时间</span>
+				</a>
+			</li>
+			<li ng-class="{'active':isActive == 'selfDefined'}" class="pull-right">
+				<a  class="wrapper" ng-click="changeTab('selfDefined')">
+					<span class="text-1-2x">自定义查询时间</span>
+				</a>
+			</li>
+		</ul>
+	</div>
+	<div class="overflow-auto">
+		<div ng-show="isActive == 'fast'" class="fast-search clearfix">
+			<div class="pull-left fast-time" ng-click="fastSearchTime('day')"><a >24小时</a></div>
+			<div class="pull-left fast-time" ng-click="fastSearchTime('week')"><a >一周</a></div>
+			<div class="pull-left fast-time active" ng-click="fastSearchTime('month')"><a >一月</a></div>
+			<div class="pull-left fast-time" ng-click="fastSearchTime('')"><a >全部</a></div>
+		</div>
+		<div ng-show="isActive == 'selfDefined'" class="selfDefined-search clearfix" style="font-size:12px">
+			<div class="pull-left fast-time">
+				<span>起始时间</span>
+				<span id="changeTimeIdTimer-begin" data-link-field="day-begin">
+					<input type="hidden" id="day-begin" value="" />
+					<span id="showDate-day-begin" class="" ng-bind="beginDate | date:'yyyy-MM-dd'"></span>
+				</span>
+			</div>
+			<div class="pull-left fast-time"><span>结束时间</span>
+				<span id="changeTimeIdTimer-end" data-link-field="day-end">
+					<input type="hidden" id="day-end" value="" />
+					<span id="showDate-day-end" class="" ng-bind="endDate | date:'yyyy-MM-dd'"></span>
+				</span>
+			</div>
+		</div>
+		<div class="select-con">
+			<div><select id="gdj"></select></div>
+			<div><select id="bdz"><option value="-1">全部变电站</option></select></div>
+			<div><select id="dlx"><option value="-1">全部电力线</option></select></select></div>
+			<div class="clearfix alarmLevel" ng-click="showAlarmLevel()" ng-class="{'arrowActive':arrowPos == 'down'}">
+				<div class="pull-left">已选{{selectedNumbers}}项报警类型</div>
+				<div class="pull-right"></div>
+			</div>
+			<div class="alarmLevelCon" ng-show=" arrowPos == 'down'">
+				<div class="level-title">
+					<label  id="firstLevelAll1" class="active" ng-click="selectAll(1,1,'firstLevelAll1')">一级报警</label>
+				</div>
+				<ul class="level-content">
+					<li ng-repeat="i in firstLevelList" class="item">
+						<label id="item{{i.id}}" name="{{i.id}}"  class="firstLevel1 active" ng-click="selectAll(1,2,{{i.id}})">{{i.value}}</label>
+			        </li>
+				</ul>
+				<div class="level-title">
+					<label id="firstLevelAll2"  ng-click="selectAll(2,1,'firstLevelAll2')">二级报警</label>
+				</div>
+				<ul class="level-content">
+					<li ng-repeat="i in secondLevelList" class="item">
+						<label id="item{{i.id}}"  name="{{i.id}}" class="firstLevel2" ng-click="selectAll(2,2,{{i.id}})">{{i.value}}</label>
+			        </li>
+				</ul>
+			</div>
+			<div><select id="status"><option value="-1">全部处理状态</option><option value="0">未处理</option><option value="1">已处理</option></select></div>
+		</div>
+		<div class="search-btn"><input type="button" ng-click="searchNote()" value="立  即  查  询"></div>
+	</div>
+	
+</div>
+
+<!-- 页脚 -->
+<script>
+	app.controller('noteListSearchCtrl',function($scope, $http, $state, $stateParams) {
+		var windowH = $(window).height();
+		$(".overflow-auto").height(windowH-165);
+		$scope.selectAll= function(p,level,id){
+			if(level == 1){
+				var isact = $("#" + id).hasClass("active");
+				if(isact){
+					$("#" + id).removeClass("active");
+					$(".firstLevel" + p).removeClass("active");
+				}else{
+					$("#" + id).addClass("active");
+					$(".firstLevel" + p).addClass("active");
+				}
+			}else{
+				var isact = $("#item" + id).hasClass("active");
+				if(isact){
+					$("#item" + id).removeClass("active");
+					$("#firstLevelAll" + p).removeClass("active");
+				}else{
+					$("#item" + id).addClass("active");
+					var isall = true;
+					$(".firstLevel" + p).each(function(){
+						var isc = $(this).hasClass("active");
+						if(!isc){
+							isall = false;
+							//break;
+						}
+					});
+					if(isall){
+						$("#firstLevelAll" + p).addClass("active");
+					}
+				}
+				
+			}
+			var num=0;
+			$scope.totalSelectedAlarm = [];
+			$(".firstLevel1").each(function(){
+				if($(this).hasClass("active")) {
+					$scope.totalSelectedAlarm.push($(this).attr('name'));
+				}
+			});
+			$(".firstLevel2").each(function(){
+				if($(this).hasClass("active")) {
+					$scope.totalSelectedAlarm.push($(this).attr('name'));
+				}
+			});
+			console.log($scope.totalSelectedAlarm);
+			$scope.selectedNumbers = $scope.totalSelectedAlarm.length;
+		}
+		//父页面的传参
+		$scope.$on("sysId",function(e,data){
+			$scope.sysId = data;
+			init();
+		});
+		//切换快速，与按时间查询
+		$scope.changeTab= function(tabType){
+			if(tabType == 'selfDefined'){
+				$scope.isActive = 'selfDefined';
+			}else{
+				$scope.isActive = 'fast';
+			}
+		}
+		//报警显示框
+		$scope.showAlarmLevel = function(){
+			if($scope.arrowPos == "right"){
+				$scope.arrowPos = "down";
+			}else{
+				$scope.arrowPos = "right";
+			}
+		}
+		
+		
+		$scope.fastSearchTime = function(type){
+			//快速时间查询
+			var date = new Date();
+			if(type == "day"){
+				$scope.startTime = new Date(date.setDate(date.getDate()-1)).format("yyyy-MM-dd HH:mm:ss");
+				$scope.endTime = new Date().format("yyyy-MM-dd HH:mm:ss");
+			}else if(type == "week"){
+				$scope.startTime = new Date(date.setDate(date.getDate()-7)).format("yyyy-MM-dd HH:mm:ss");
+				$scope.endTime = new Date().format("yyyy-MM-dd HH:mm:ss");
+			}else if(type == "month"){
+				$scope.startTime = new Date(date.setMonth(date.getMonth()-1)).format("yyyy-MM-dd HH:mm:ss");
+				$scope.endTime = new Date().format("yyyy-MM-dd HH:mm:ss");
+			}else if(type == ""){
+				$scope.startTime = "";
+				$scope.endTime = "";
+			}
+		}
+		$("#gdj").change(function(){
+			$("#bdz").empty();
+			$("#dlx").empty();
+			$scope.sysId = $("#gdj").val();
+			$("#bdz").append("<option value='-1'>全部变电站</option>");
+			if($scope.sysId){
+				$scope.substations = $scope.overViewData[$scope.sysId].substationsMap;
+				angular.forEach($scope.substations,function(data,index){
+					$("#bdz").append("<option value='"+index+"'>"+data.name+"</option>");
+				});
+			}
+			$scope.bdzId = $("#bdz").val();
+			$("#bdz").trigger("change");
+		});
+		
+		$("#bdz").change(function(){
+			$("#dlx").empty();
+			$scope.bdzId = $("#bdz").val();
+			$("#dlx").append("<option value='-1'>全部电力线</option>");
+			if($scope.bdzId && $scope.bdzId != '-1'){
+				$scope.powerLines = $scope.substations[$scope.bdzId].powerLines;
+				for(var i = 0;i<$scope.powerLines.length;i++){
+					$("#dlx").append("<option value='"+$scope.powerLines[i].id+"'>"+$scope.powerLines[i].name+"</option>");
+				}
+			}
+			$scope.dlxId = $("#dlx").val();
+		});
+		
+		$("#dlx").change(function(){
+			$scope.dlxId = $("#dlx").val();
+		});
+		
+		init();
+		function init(){
+			//$scope.userId = JSON.parse(storage["powerSupplysMap"])[$scope.sysId].userId;
+			//$scope.gdjId = JSON.parse(storage["powerSupplysMap"])[$scope.sysId].gdjId;
+			$scope.overViewData = overViewData;
+			if($scope.overViewData && Object.keys(overViewData).length > 0){
+				$("#gdj").empty();
+				angular.forEach($scope.overViewData,function(data,index){
+					if(index == $scope.sysId){
+						$("#gdj").append("<option value='"+index+"' selected = 'selected'>"+data.name+"</option>");
+					}else{
+						$("#gdj").append("<option value='"+index+"' >"+data.name+"</option>");
+					}
+				});
+			}else{
+				return;
+			}
+			//初始化变电站列表
+			$("#gdj").trigger("change");
+			$scope.isActive = "fast";//默认显示快速查询tab
+			$scope.arrowPos = "right";//默认报警一行，显示向右箭头
+			//获取当前时间
+			var date = new Date();
+			var currentM = date.getMonth();
+			date.setMonth(currentM-1)
+			$scope.beginDate = date.format("yyyy-MM-dd");
+			$scope.endDate   = new Date().format("yyyy-MM-dd");
+			date = new Date();
+			date.setMonth(date.getMonth()-1)
+			$scope.startTime = date.format("yyyy-MM-dd HH:mm:ss");
+			$scope.endTime = new Date().format("yyyy-MM-dd HH:mm:ss");
+			//获取一级和二级警报列表
+			$scope.firstLevelList = [];
+			$scope.secondLevelList = [];
+			if(alarmConfig){
+				var atList = $scope.alarmType.split(",");
+				$scope.selectedNumbers = atList.length;
+				$scope.firstChecked = atList;
+				$scope.totalSelectedAlarm = atList;
+				$scope.first_select_all = true;
+				for(var i = 0;i<alarmConfig.length;i++){
+					var mv = {};
+					if(alarmConfig[i].alarmLevel == '1'){
+						mv["id"] = alarmConfig[i].alarmType;
+						mv["value"] = alarmConfig[i].alarmDetail;
+						if(atList.indexOf(mv["id"]) > -1){
+							mv["checked"] = true;
+						}
+						$scope.firstLevelList.push(mv);
+					}else if(alarmConfig[i].alarmLevel == '2'){
+						mv["id"] = alarmConfig[i].alarmType;
+						mv["value"] = alarmConfig[i].alarmDetail;
+						if(atList.indexOf(mv["id"]) > -1){
+							mv["checked"] = true;
+						}
+						$scope.secondLevelList.push(mv);
+					}
+				}
+			}else{
+				$scope.selectedNumbers = 0;
+			}
+			
+			/*$scope.firstLevelList = [
+			               {'id': 101,'value':'单项短路故障1'},
+			               {'id': 102,'value':'单项短路故障2'},
+			               {'id': 103,'value':'单项短路故障4'},
+			               {'id': 104,'value':'单项短路故障5'},
+			               {'id': 105,'value':'单项短路故障5'}
+			           ];
+			$scope.secondLevelList = [
+						               {'id': 1,'value':'温度超过上限1'},
+						               {'id': 2,'value':'温度超过上限2'},
+						               {'id': 3,'value':'温度超过上限4'},
+						               {'id': 4,'value':'温度超过上限5'},
+						               {'id':5,'value':'温度超过上限5'}
+						           ];*/
+			//$scope.selectedNumbers = 0;
+		}
+		$(".fast-time").click(function(){
+			$(this).addClass("active").siblings().removeClass("active");
+		});
+	    
+		$scope.goBackNoteList=function(){
+			//$state.go("noteList");
+			$(".noteSearchPage").hide();
+		}
+		
+		var rightDay = new Date();
+		rightDay.setDate(rightDay.getDate());
+		$scope.today = rightDay;
+		
+		//时间控件,点击时触发
+		$("#changeTimeIdTimer-begin").datetimepicker({
+			language : 'zh-CN',
+			format : "yyyy-mm-dd",
+			minView : 2,
+			autoclose : true,
+			todayBtn : true,
+			endDate : $scope.today,
+			initialDate : $scope.beginDate,
+			pickerPosition : "bottom-right"
+		});
+		
+		//选择完日期，关闭时触发（日）
+		$("#changeTimeIdTimer-begin").on('hide',function(ev) {
+			var stringTime = $("#day-begin").val();
+			if(stringTime){
+				var timestamp = Date.parse(getDateForStringDate(stringTime));
+				$scope.mapTimeDay = new Date(timestamp);
+				$("#showDate-day-begin").text(new Date(timestamp).Format("yyyy-MM-dd"));
+				$scope.beginDate = new Date(timestamp).Format("yyyy-MM-dd");
+			}
+		});
+				
+		$("#changeTimeIdTimer-end").datetimepicker({
+			language : 'zh-CN',
+			format : "yyyy-mm-dd",
+			minView : 2,
+			autoclose : true,
+			todayBtn : true,
+			endDate : $scope.today,
+			initialDate : $scope.endDate,
+			pickerPosition : "bottom-right"
+		});
+		
+		//选择完日期，关闭时触发（日）
+		$("#changeTimeIdTimer-end").on('hide',function(ev) {
+			var stringTime = $("#day-end").val();
+			if(stringTime){
+				var timestamp = Date.parse(getDateForStringDate(stringTime));
+				$scope.mapTimeDay = new Date(timestamp);
+				$("#showDate-day-end").text(new Date(timestamp).Format("yyyy-MM-dd"));
+				$scope.endDate = new Date(timestamp).Format("yyyy-MM-dd");
+			}
+		
+		});
+		
+		//开始查询，跳转
+		$scope.searchNote = function(){
+			var st = $scope.startTime;
+			var et = $scope.endTime;
+			if($scope.isActive == 'selfDefined'){
+				st = $scope.beginDate +" 00:00:00";
+				et = $scope.endDate +" 23:59:59";
+			}
+			var params = {startTime:st,endTime:et,userId:$scope.userId,sysId:$scope.sysId,gdjId:$scope.gdjId,bdzId:$scope.bdzId,dlxId:$scope.dlxId,
+					alarmType:$scope.totalSelectedAlarm.join(","),status:$("#status").val()};
+			//$state.go("noteList",params);
+			$(".noteSearchPage").hide();
+			//$scope.messageView = "noteList";
+			$scope.$emit("params",params);
+		}
+	})
+	
+</script>

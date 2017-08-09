@@ -1,0 +1,39 @@
+@CHARSET "UTF-8";
+.confirm-ctrl{
+	    position: fixed;
+    width: 100%;
+    left: 0;
+    top: 0;
+    bottom: 0;display:none;
+    right: 0;
+    z-index:100;
+}
+#cover{
+	 z-index: 1000;position: absolute;
+    width: 100%;
+    top:0;
+    left: 0;
+    right:0;
+    bottom:0;
+    background: rgba(70,70,70,0.5);
+}
+.confirm-con{    z-index: 9999;position: absolute;
+    border: 1px solid rgb(187,188,190);
+    line-height: 38px;
+    text-align: center;
+    width: 215px;
+    margin: 0 auto;
+    border-radius: 15px;
+    font-size: 12px;
+    top: 50%;
+    left: 50%;
+    background: rgb(233,233,233);}
+.confirm-con .cancel {
+    font-size: 13px;
+    color: rgb(154,154,154);
+}
+.confirm-con .delete {
+    font-size: 13px;
+    color: rgb(44,166,218);
+}
+.alertContent{    border-bottom: 1px solid rgb(189,189,189); line-height: 60px;margin: 0 15px;}

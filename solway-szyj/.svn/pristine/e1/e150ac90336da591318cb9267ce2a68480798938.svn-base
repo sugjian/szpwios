@@ -1,0 +1,140 @@
+<!-- navbar header -->
+<div class="col-xs-12 no-padder" ng-controller="ModSelfInfoCtrl">
+<div class="navbar-header bg-black app-header navbar ng-scope" id="distUserInfoNav">
+	<ul class="nav col-xs-12 no-padder nav-top" >
+           <li class="col-xs-3 no-padder" ui-sref-active="active">
+          	<a ui-sref="userList" class="text-1-6x  m-t-xs">
+          		取消
+          	</a>
+           </li>
+          <li class="col-xs-6 no-padder text-center">
+          	<a href="" class="text-1-8x  m-t-xs">
+          		维护账号信息
+          	</a>
+           </li>
+          <li class="col-xs-3 no-padder"  ng-click="saveFormForUserMod();">
+          	<a class="text-1-6x  m-t-xs pull-right">
+  		 		完成
+  		 	</a>
+          </li>
+        </ul>
+</div>
+<!-- / navbar header -->
+	<div class="col-xs-12  bg-writer no-padder m-b-xs" >
+		<form class="col-xs-12 no-padder m-t-md form-horizontal" id="editFormForUserMod" name="editFormForUserMod">
+          <input type="hidden" name="userId" value="" id="userId" class="formData">
+          <input type="hidden" name="roleIdS" id="roleIdS" class="formData" value="">
+          <div class="col-xs-12  list-div  padder-no m-b-1 bg-writer">
+              <label class="text-1-5x col-xs-6 opa-7  ">账号</label>
+              <div class="col-xs-6" >
+              <input type="text" readonly="readonly" id="userName" class="m-t-xs form-control-n-b form-control formData" style="height: 40px;">
+              </div>
+            </div>
+          <div class="col-xs-12  list-div  padder-no m-b-1 bg-writer">             
+              <label class="text-1-5x col-xs-6" >姓名</label>
+              <div class="col-xs-6">
+               <input type="text" id="realName" name="realName" class="m-t-xs form-control-n-b form-control formData" onfocus="clearObj('nameError')"style="height: 40px;">
+               <span class="warn hidden" id="nameError">姓名不能为空</span>
+              </div>
+            </div>
+             <div class="col-xs-12  list-div  padder-no m-b-1 bg-writer m-t-sm"> 
+               <label class="text-1-5x col-xs-6">备选联系方式</label>
+              <div class="col-xs-6">
+ 					<input type="text" id="tel" name="tel" class="form-control formData m-t-xs form-control-n-b" onfocus="clearObj('telError')"style="height: 40px;">
+ 					<span class="warn hidden" id="telError">请输入正确的手机号码</span>
+              </div>
+            </div>
+             <div class="col-xs-12  list-div  padder-no m-b-1 bg-writer">             
+              <label class="text-1-5x col-xs-6">邮箱</label>
+              <div class="col-xs-6">
+                   <input type="text" id="email" name="email" class="form-control formData m-t-xs form-control-n-b" onfocus="clearObj('emailError')"style="height: 40px;">
+                   <span class="warn hidden" id="emailError">请输入正确的邮箱</span>
+              </div>
+            </div>
+          </form>
+   			 </div>
+   			 <toaster-container toaster-options="{'position-class': 'toast-top-right', 'close-button':true}"></toaster-container>
+   			 </div>
+<script>
+if(isAndroid){//判断安卓，修改顶部样式
+	$("#distUserInfoNav").addClass("m-t-none");
+}
+function clearObj(obj){
+	$("#"+obj).addClass("hidden")
+}
+app.controller('ModSelfInfoCtrl',function($scope, $http,$state,toaster) {
+		  /*   $scope.pop = function(){
+		        toaster.pop($scope.toaster.type, $scope.toaster.title, $scope.toaster.text);
+		    }; */
+	//根据当前登陆用户获取电站数据
+	$scope.getLoginUserPS = function(id) {
+		$http.get(ctx + "Login/getLoginUser.htm")
+				.success(
+						function(msg) {
+							$("#userId").val(msg.userId);
+							$("#userName").val(msg.userName);
+							$("#realName").val(msg.realName);
+							$("#isManager").val(msg.isManager);
+							$("#userType").val(msg.userType);
+							$("#tel").val(msg.tel);
+							$("#email").val(msg.email);
+							$("#pstationid").val(msg.pstationid);
+							$("#roleId").val(msg.roleId);
+							$("#companyid").val(msg.companyid);
+							$("#companyName").val(msg.companyName);
+							$("#pstationNameForMod").val(msg.pstationName);
+							if(msg.isManager==1){				 	
+								$("#isManager").val("是");
+					 		}else{
+					 			$("#isManager").val("否");
+					 		}
+							if(msg.userType==1){				 	
+								$("#userType").val("个人会员");
+						 	}else if(msg.userType==2){
+						 		$("#userType").val("企业会员");
+						 	}
+						}).error(function(response) {
+				});
+
+	};
+	$scope.getLoginUserPS();
+	$scope.saveFormForUserMod = function(){
+		if(!$("#realName").val()){
+			$("#nameError").removeClass("hidden");
+			return false;
+		}
+		var ph = /(^[0-9]{3,4}\-[0-9]{7,8}$)|(^[0-9]{7,8}$)|(^\([0-9]{3,4}\)[0-9]{7,8}$)|(^[0-9]{3,4}\-[0-9]{7,8}\-[0-9]{1,4}$)|(^0{0,1}13[0-9]{9}$)|(^0{0,1}15[0-9]{9}$)|(^0{0,1}18[0-9]{9}$)/;
+		if(!ph.test($("#tel").val())){
+			$("#telError").removeClass("hidden");
+			return false
+		}
+		
+		var filter  = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+		 if (!filter.test($("#email").val())){
+			 $("#emailError").removeClass("hidden");
+			 return false;
+		 }
+		 
+		$http({
+			method : "POST",
+			url :ctx+"AdminUser/updateDataSelectiveMobile.htm",
+			contentType:'utf-8',
+			params:{
+				"userId":$.trim($("#userId").val()),
+				"realName":encodeURIComponent($.trim($("#realName").val())),
+				"tel":$.trim($("#tel").val()),
+				"email":$.trim($("#email").val())
+			}
+		}).success(function(result) {
+			if(result.respStatus==1){
+				toaster.pop('success', '', result.message);
+				$state.go("userList");
+ 			} else {
+				toaster.pop('error', '', result.message);
+			}
+		}).error(function(){
+			toaster.pop('error', '', '修改个人信息失败!');
+		});
+	}
+});
+</script>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>FEFD6F3F-F6E2-4A8C-86B7-E3F3D8FB863B</string>
+	<key>IDESourceControlProjectName</key>
+	<string>HaiGouWang</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>a7914a20-3c1b-0244-9baa-021cc94eb74a</key>
+		<string>https://192.168.1.254/svn/Higou</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>trunk/HigouForiOS/HaiGouWang/HaiGouWang.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>a7914a20-3c1b-0244-9baa-021cc94eb74a</key>
+		<string>../../../../..</string>
+	</dict>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>a7914a20-3c1b-0244-9baa-021cc94eb74a</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.subversion</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>a7914a20-3c1b-0244-9baa-021cc94eb74a</string>
+			<key>IDESourceControlWCCName</key>
+			<string>Higou</string>
+		</dict>
+	</array>
+</dict>
+</plist>

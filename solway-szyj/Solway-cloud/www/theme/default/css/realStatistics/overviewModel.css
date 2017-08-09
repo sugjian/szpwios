@@ -1,0 +1,32 @@
+@CHARSET "UTF-8";
+.overview-load{text-align:center;}
+.overview-load > div {
+    background-color: rgb(255,59,42);
+}
+h3.h-title{font-size:17px;margin-top:23px;padding-bottom:10px;border-bottom:1px solid rgb(123,120,120);padding-left:5px;}
+.statistics{position:relative;}
+.statistics .pull-left{width:50%;height:193px;}
+.all-normal{background:url("../../img/realStatistics/realsta-allnormal.png") no-repeat;width:128px;height:128px;background-size: cover;text-align: center;line-height: 128px;margin: 32px auto;font-size:15px;}
+.station-num {text-align:center;}
+.station-num .num{font-size:45px;margin-top:50px;}
+.station-num .num-tip{font-size:15px;}
+.alarm-list{}
+.alarm-list .no-list{}
+.no-list >div{text-align:center;    margin: 40px 0 15px;}
+.no-list >div>img{width:73px;}
+.no-list >p{text-align:center;font-size:12px;    margin-bottom: 30px;}
+.has-list{margin-bottom:20px;}
+.alarm{margin:8px 5px;background:rgb(234,237,238);font-size:14px;}
+.tr1{line-height:35px;}
+.tr1 span{    background: red;padding: 5px 10px;border-radius: 15px;color: white;    margin-left: 25%;}
+.tr2{line-height:30px;font-size:12px;    height: 73px;}
+.tr2 .col-xs-4{border-right:1px solid rgb(184,190,192);text-align:center;color:rgb(92,94,95);}
+.tr2 .col-xs-4:last-child{border-right:none;}
+.tr2 span{color:black;}
+.tr2 .remark{    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; line-height: 20px;}
+.tr3{line-height:30px;font-size:12px;}
+.alarm-circle{background:url("../../img/realStatistics/warn-all.png") no-repeat;width:128px;height:128px;background-size: cover;text-align: center;margin: 32px auto;font-size:12px;    padding: 30px 0;}
+hr{    margin: 1px auto; width: 70px;    color: rgb(177,177,177);background: rgb(177,177,177);height: 1px;line-height: 1px;}
+.alarm-color{color:rgb(255,27,55)}
+.normal-color{background-image: -webkit-gradient(linear, 0 0, right 0, from(rgb(1,210,195)), to(rgb(98,229,173)));-webkit-background-clip: text;-webkit-text-fill-color: transparent;}
+p{margin:0}

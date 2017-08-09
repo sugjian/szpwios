@@ -1,0 +1,252 @@
+<div class="overflow-auto"  ng-controller="parentLineCurveCtrl" >
+	<div id="parentLineCurve" style="height:150px;"></div>
+</div>
+
+<script>
+var myChartT = echarts.init(document.getElementById('parentLineCurve'));
+app.controller('parentLineCurveCtrl',function($scope, $http, $state,$rootScope) {
+	
+	$scope.powerSupplysMap = JSON.parse(storage["powerSupplysMap"]);
+	$scope.$on("parentLineChange",function(event){
+		$scope.getparentLineData();
+	});
+	$scope.getparentLineData = function(){
+		var hasZeroVData = 'no';
+		var num=0;
+		var address= $scope.powerSupplysMap[$scope.psysId].address;
+		//得到母线节点
+		$scope.nodes = overViewData[$scope.psysId].substationsMap[$scope.pbdzId].zeroNodes;
+		$scope.muNodes = [];
+		$scope.muNodesName = [];
+		if($scope.nodes && $scope.nodes.length > 0){
+			for(var i =0;i< $scope.nodes.length;i++){
+				if($scope.nodes[i].type == '2'){
+					$scope.muNodes.push($scope.nodes[i].deviceId);
+					$scope.muNodesName.push(overViewData[$scope.psysId].parentPowerLinesMap[$scope.nodes[i].mxId].name);
+				}
+			}
+		}
+		myChartT.clear();
+		if($scope.muNodes.length == 0){
+			//myChartT = echarts.init(document.getElementById('parentLineCurve'));
+			$scope.$emit('zeroVDataJudge',{"isZeroVData":'no'});
+			return;
+		}else{
+			//myChartT = echarts.init(document.getElementById('parentLineCurve'));
+		}
+		
+		var successResults = [];//存储接口返回值
+		var date = new Date();
+		var currentD = date.getDate()-1;
+		var lastDate = new Date(date.setDate(currentD));
+		for(var k=0;k<$scope.muNodes.length;k++){
+			
+			(function(k){
+				$http({
+					type: "GET",
+					url: address+"api/v1/dcu/current",
+					timeout : 20000,
+					params : {
+						'dcu_id':$scope.muNodes[k],
+						'startTime':lastDate.format("yyyy-MM-dd HH:mm:ss"),
+						'endTime':(new Date()).format("yyyy-MM-dd HH:mm:ss"),
+						'type' : 'current'
+					}
+				})
+				.success(function (result) {
+					successResults[k] = result;
+					num++;
+					if(num == $scope.muNodes.length){
+						var allMuNodes = [];
+						for(var j = 0;j<successResults.length;j++){
+							var current = [];
+							var xTime = [];
+							if(successResults[j].code == "0" && successResults[j].total >0){
+								 var data = successResults[j].data;
+								 if(data.length > 0){
+									 hasZeroVData = 'yes';
+								 }
+								 for(var i = 0;i<data.length;i++){
+									 if(data[i].current[1] != null){
+										 current.push(data[i].current[1]);
+									 }else{
+										 current.push("-");
+									 }
+									 xTime.push(replaceTimeTZ(data[i].time));
+								 }
+							 }
+							allMuNodes.push(current);
+						}
+						if(hasZeroVData == 'yes'){
+							init(xTime,$scope.muNodesName,allMuNodes);
+						}
+						
+						$scope.$emit('zeroVDataJudge',{"isZeroVData":'yes',"hasZeroVData":hasZeroVData});
+					}
+				}).error(function (result) {
+					successResults[k] = result;
+					num++;
+					if(num == $scope.muNodes.length){
+						var allMuNodes = [];
+						for(var j = 0;j<successResults.length;j++){
+							var current = [];
+							var xTime = [];
+							allMuNodes.push(current);
+						}
+						if(hasZeroVData == 'yes'){
+							init(xTime,$scope.muNodesName,allMuNodes);
+						}
+						$scope.$emit('zeroVDataJudge',{"isZeroVData":'yes',"hasZeroVData":hasZeroVData});
+					}
+				});
+			})(k);
+		}  
+		
+	}
+	$scope.getparentLineData();
+	var A = [],x = [];
+	$scope.initParentLineData = function(data,name,xTime){
+		A = [],x = [];
+		if(data && data.length>0){
+			for(var i = 0;i<data.length;i++){
+				var A2 =[];
+				for(var j = 0;j<data[i].length;j++){
+					if(data[i][j] != null){
+						A2.push(data[i][j]);
+					}else{
+						A2.push("-");
+					}
+				}
+				A.push(A2);
+			}
+			if(xTime && xTime.length>0){
+				for(var i = 0;i<xTime.length;i++){
+					x.push(replaceTimeTZ(xTime[i]));
+				}
+			}
+			init(x,name,A);
+		}else{
+			init([],[],[]);
+		}
+		
+	};
+	function init(xValue,xName,yValue1){
+		option = {
+				title:{
+					text: '电压(V)',
+					x:'right',
+					y:'top' ,
+				    textStyle: {
+				        color: '#333',
+				        fontSize : 10,
+				        textAlign:'center'
+				    }
+				},
+				legend: {
+			        data:xName,
+			        x : 'left'
+			    },
+			    tooltip : {
+					 trigger: 'axis',
+					 confine:true,
+					 axisPointer:{
+						 type: 'line',
+						    lineStyle: {
+						        color: '#bbb',
+						        width: 1,
+						        type: 'solid'
+						    }
+					 } ,
+					 
+			    },
+				calculable : false,
+				grid : {
+					borderWidth : '0px',
+					x : '20px',
+					x2 : '50px',
+					y : "30px",
+					y2 : "25px"
+				},
+				dataZoom:{
+			    	type: 'inside',
+			        xAxisIndex: [0],
+			    },
+				xAxis : [ {
+					font : {
+						color : 'red'
+					},
+					axisTick : {
+						show : false
+					},
+					type : 'category',
+					axisLine : {
+						lineStyle : {
+							color : '#666'
+						}
+					},
+					splitLine : {
+						show : false,
+					},
+				     axisLabel: {
+				        formatter: function (value){
+				        	return (value+"").substring(11,16);
+				        }
+				     },
+					boundaryGap : false,
+					show: true,
+					data : xValue
+				} ],
+				yAxis : [{
+					axisLabel : {
+						textStyle : {
+							color : '#666',
+							fontSize : 12
+						}
+					},
+					
+					font : {
+						color : '#666'
+					},
+					position:"right",
+					axisLine : {
+						lineStyle : {
+							color : 'transparent',
+							width : 1
+						},
+						
+					},
+					type : 'value'
+				}],
+				series : []
+		};
+		if(yValue1!=null&&yValue1.length>0){
+			for(var i=0;i<yValue1.length;i++){
+				var da = yValue1[i];
+				option.series[i]={
+					name:xName[i],
+					type : 'line',
+					itemStyle : {
+						normal : {
+							areaStyle : {
+								color : 'transparent'
+							},
+							lineStyle : {
+								width : 1
+							}
+						}
+					},
+					symbol : 'none',
+					smooth: 'true',
+					data : da
+				};
+			}
+		}
+		myChartT.setOption(option,true);
+	}
+	
+	
+	
+});
+	
+</script>
+		

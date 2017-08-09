@@ -1,0 +1,301 @@
+<div class="col-xs-12 no-padder"  ng-controller="staMonCtrl" >
+<div class="navbar-header bg-black app-header navbar ng-scope"  id="distUserNav">
+	<ul class="nav col-xs-12 no-padder nav-top"  >
+          <li class="col-xs-1 no-padder">
+         	 <a	 data-dismiss="modal" ng-click="closeStatModal()" ><img src="./theme/default/img/icon/top-back@2x.png" class="v-middle m-t-xs img_goBack"></a>
+          </li>
+          <li class="col-xs-10 no-padder text-center">
+          	<a  data-dismiss="modal" ng-click="closeStatModal()" class="text-1-8x">
+          		<span ng-bind="todayTimeForTitle"></span>功率曲线
+          	</a>
+           </li>
+          <li class="col-xs-1 no-padder">
+          	
+          </li>
+        </ul>
+</div>
+<div class="col-xs-12 no-padder"style="margin-top:50px;">
+	 <ul class="nav col-xs-12 no-padder nav-bottom" >
+	  	<li class="text-center "  ng-repeat="data in analData">
+		  	<a class="text-1-8x span" id="{{$index}}span" ng-class="{'active  ':{{$index}}=='2'}" 
+		  	ng-click="changeData(data.realData,$index)">
+		  	 <span ng-bind="data.titleData"></span>
+		  	 <span ng-show="data.titleData!=''">日</span>
+		  	</a>
+	   	</li>
+	</ul>
+	<div class="col-xs-12 wrapper-xs points" >
+			<div class="col-xs-4 no-padder text-center">
+				<i class="fa fa-circle" style="color: #92aaff"></i> <span
+					class="col-9 m-r-xs text-1-1x">应发功率<small>(kW)</small></span>
+
+				</span>
+			</div>
+			<div class="col-xs-4 no-padder text-center">
+				<i class="fa fa-circle" style="color: #f56669"></i> <span
+					class="col-9 m-r-xs text-1-1x">实发功率<small>(kW)</small></span> 
+			</div>
+			<div class="col-xs-4 no-padder text-center">
+				<span class="pull-right"> <i class="fa fa-circle"
+					style="color: #efb800"></i> <span class="col-9 text-1-1x">光照强度(W/㎡)</span>
+				</span>
+			</div>
+	</div>
+	<div class="col-xs-12 no-padder ">
+		<div class="col-xs-12 no-padder rollDiv">
+				<div class="col-xs-12 text-center m-t-xs"id="loadFlags">
+			 	</div>
+			<div id="ssglqxm" style="height:1000px;width:405px;"></div>
+		</div>
+	</div>
+
+</div>
+</div>
+<script>
+	if(isAndroid){//判断安卓，修改顶部样式
+		$("#distUserNav").addClass("m-t-none");
+	}
+	$(".rollDiv").css("height",$(window).height()-150)
+	var myChart
+	app.controller('staMonCtrl',function($scope, $http, $state,$rootScope) {
+			var isDay=new Date().getDate()
+			
+			
+			//得到当前月时间
+			$scope.analData=$scope.getDayData($scope.mapTimeDay)
+			//标题的时间
+			$scope.todayTimeForTitle=new Date($scope.analData[2].realData).Format("yyyy年MM月dd日")
+			//向后台发送时间请求
+			$scope.todayTimeForJson=new Date($scope.analData[2].realData).Format("yyyy/MM/dd/")
+		
+			//切换时间
+			$scope.changeData=function(nowData,obj){
+				myChart.clear();
+				$.showLoading(loadFlags)
+				$("#"+obj+"span").parent().siblings().children().removeClass("active animated fadeInLeft")
+				$("#"+obj+"span").addClass("active");
+				$scope.getstaDayPowerData(nowData)
+			}
+		
+			$scope.getstaDayPowerData=function(nowData){
+				//标题的时间
+				$scope.todayTimeForTitle=new Date(nowData).Format("yyyy年MM月dd日")
+				//向后台发送时间请求
+				$scope.todayTimeForJson=new Date(nowData).Format("yyyy/MM/dd")
+				$http({
+					method : "POST",
+					url : ctx+"MobileHmDeviceMonitor/getDayChartPower.htm",
+					params : {
+						'userId':1,
+						'dateString':$scope.todayTimeForJson,
+						'powerStationId':JSON.parse(storage["powerStationId"])
+					}
+					})
+					.success(function (msg) {
+						if(msg.echarts_xaxisTime==null){
+							getPowerVModal([],[],[],[])
+						}else{
+							$("#ssglqxm").height((msg.echarts_xaxisTime.length/60)*100)
+							$("#ssglqxm").width($(window).width())
+							getPowerVModal(msg.echarts_xaxisTime,msg.echarts_predictPower,msg.echarts_power,msg.echarts_luminousIntensity);
+						}
+					}).error(function(msg){
+					});
+			
+			}
+			$scope.getstaDayPowerData($scope.analData[2].realData)
+	});
+	function getPowerVModal(echarts_xaxisTime,echarts_predictPower,echarts_power,echarts_luminousIntensity) {
+		 myChart = echarts.init(document.getElementById('ssglqxm'));	
+		$.hideLoading(loadFlags)
+			window.addEventListener("resize", function() {
+				myChart.resize();
+			});
+			option = {
+					addDataAnimation:false,
+					tooltip : {
+						 trigger: 'axis',
+						 axisPointer:{
+							 type: 'line',
+							    lineStyle: {
+							        color: '#bbb',
+							        width: 1,
+							        type: 'solid'
+							    }
+						 } ,
+						 formatter: function (params,ticket,callback) {
+					            var res = params[0].name;
+					            console.log(params)
+					            for (var i = 0, l = params.length; i < l; i++) {
+					            	if(params[i].value!=""&&!isNaN(params[i].value)){
+					            		console.log((parseFloat((params[i]).value)).toFixed(1))
+					            		console.log((parseFloat((params[i]).value)).toFixed(1))
+					                	res += '<br/>' + params[i].seriesName + ' : ' + (parseFloat((params[i]).value)).toFixed(1);
+					                	/*if(i==1){
+					                		res += powerVstr.name2;
+					                	}else{
+					                		res += powerVstr.name1;
+					                	}*/
+					            	} else if(params[i].value==""){
+					                	res += '<br/>' + params[i].seriesName + ' : N/A';
+					            	}
+					            }
+					            return res;
+					      } 
+				    },
+				    noDataLoadingOption:{
+				        text : '暂无数据',
+				        effect :function(params,callback){
+				        	return "暂无数据"
+				        }
+				    },
+					calculable : true,
+					grid : {
+						borderWidth : '0px',
+						x : '40px',
+						x2 : '55px',
+						y : "30px",
+						y2 : "30px"
+					},
+					yAxis : [ {
+						font : {
+							color : '#fff'
+						},
+						position : 'left',
+						type : 'category',
+						axisLine : {
+							lineStyle : {
+								color : 'transparent'
+							}
+						},
+						axisLabel : {
+							//rotate:-180,
+							interval:59,
+							axisLabel : 5,
+							margin:20,
+							textStyle : {
+								align : 'center',
+								color : 'rgba(144, 168, 252,0.4)',
+								fontSize : 13
+							}
+						},
+						splitLine : {
+							show : true,
+							lineStyle : {
+								color : '#444'//分割线颜色
+							}
+						},
+						boundaryGap : false,
+						data :(echarts_xaxisTime).reverse()
+					} ],
+					xAxis : [ {
+						axisLabel : {
+							textStyle : {
+								color : 'rgba(144, 168, 252,0.4)',
+								fontSize : 12
+							}
+						},
+						nameLocation:'start',
+						font : {
+							
+							color : '#666'
+						},
+						position : 'top',//X 轴显示的方位
+						axisLine : {
+							lineStyle : {
+								color : '#666',
+								width : 1
+							}
+						},
+						splitLine : {
+							show : false
+						},
+						type : 'value'
+					}, {
+						show:false,
+						axisLabel : {
+							textStyle : {
+								color : 'rgba(144, 168, 252,0.4)',
+								fontSize : 12
+							}
+						},
+						nameLocation:'start',
+						font : {
+							color : '#666'
+						},
+						position : 'top',//X 轴显示的方位
+						axisLine : {
+							lineStyle : {
+								color : '#666',
+								width : 1
+							}
+						},
+						splitLine : {
+							show : false
+						},
+						type : 'value'
+						}  ],
+					series : [  {
+						symbol : 'none',
+						name : '应发功率',
+						type : 'line',
+						
+						z : 1,
+						itemStyle : {
+							normal : {
+								color : '#90a8fc',
+								areaStyle : {
+									color : 'transparent'
+								},
+								lineStyle : {
+								/* 	type : 'none',
+									width:2, */
+									color : '#92aaff',
+									width : 2
+								}
+							}
+						},
+						data :  (echarts_predictPower).reverse()
+					},{
+						name : '实发功率',
+						type : 'line',
+						z : 1,
+						itemStyle : {
+							normal : {
+								areaStyle : {
+									color : '#f56669'
+								},
+								lineStyle : {
+									color : '#f56669',
+									width : 1
+								}
+							}
+						},
+						symbol : 'none',
+						data : (echarts_power).reverse()
+					}, {
+						name : '光照强度',
+						type : 'line',
+						xAxisIndex :1,
+						z : 2,
+						itemStyle : {
+							normal : {
+								areaStyle : {
+									color : 'transparent'
+								},
+								lineStyle : {
+									type : 'dotted',
+									color : '#ffc700',
+									width : 1
+								}
+							}
+						},
+						symbol : 'none',
+						data : (echarts_luminousIntensity).reverse()
+					}
+					]
+				};
+			myChart.setOption(option);
+	}
+</script>
+		

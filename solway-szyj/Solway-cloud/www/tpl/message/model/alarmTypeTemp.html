@@ -1,0 +1,297 @@
+<style>
+.curves{    border-top: 1px solid rgb(207,207,207);
+    margin-top: 10px;
+    padding-top: 10px;}
+    h4{text-indent:10px;}
+    p.nodeName{ text-indent:0;   border-bottom: 1px solid rgb(217,217,217);
+    margin: 3px 15px 10px;
+    padding-bottom: 10px;}
+</style>
+<div class="overflow-auto"  ng-controller="alarmTempModelCtrl" >
+	<div ng-repeat="item in dataArr" class="tempLineClass"  on-finish-render-filters>
+		<p class="nodeName">故障节点：{{nodeNames[$index]|dataNullFilter}}</p>
+		<!-- <p style="text-indent:17px;">温度波形</p> -->
+		<div id="tempLine{{$index}}" style="height:150px;margin:0;"></div>
+	</div>
+	<div class="loader" id="loadFlagOver" ng-show="loading == true" style="top:110px;">
+	    <div class="loader-inner ball-beat overview-load">
+	      <div></div>
+	      <div></div>
+	      <div></div>
+	    </div>
+ 	</div>
+</div>
+
+<script>
+app.directive('onFinishRenderFilters', function ($timeout) {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attr) {
+            if (scope.$last === true) {
+                $timeout(function() {
+                    scope.$emit('ngRepeatFinished');
+                });
+            }
+        }
+    };
+});
+app.controller('alarmTempModelCtrl',function($scope, $http, $state,$rootScope) {
+	
+	$scope.$on("currentAlarm",function(e,data){
+		if(data){
+			//该节点数据是否请求过，
+			//if($scope.s_alarmId == data.alarmId) return;
+			
+			$scope.address = data.address;
+			//$scope.dcu_ids = data.dcu_ids.split(",");
+			//电流温度异常 用dcuId
+			$scope.dcu_ids = [data.dcuId];
+			$scope.s_sysId = data.sysId;
+			$scope.time = data.time;
+			
+			$(".tempLineClass").html("");
+			$scope.dataArr = [];
+			
+			var timeStr = getDateForStringDate($scope.time).getTime()/1000;
+			var startStr = parseInt(timeStr)-parseInt(60*60*12);
+			$scope.startTime = new Date(startStr*1000).Format("yyyy-MM-dd hh:mm:ss");//故障时刻的前12个小时点
+			
+			var endStr = parseInt(timeStr)+parseInt(60*60*12);
+			$scope.endTime = new Date(endStr*1000).Format("yyyy-MM-dd hh:mm:ss");//故障时刻的后12个小时点
+			$(".curves").empty();
+			getData();
+		}
+		
+	});
+	
+	function getData(){
+		$scope.loading = true;
+		var dataArr = [];
+		var num = 0;
+		
+		if($scope.dcu_ids.length == 0){
+			$scope.loading = false;
+		}
+		
+		for(var i=0;i<$scope.dcu_ids.length;i++){
+			(function(i){	
+				$http({
+					type: "GET",
+					url: $scope.address+"api/v1/dcu/current",
+					timeout : 20000,
+					params : {
+						'dcu_id':$scope.dcu_ids[i],
+						'startTime':$scope.startTime,
+						'endTime':$scope.endTime,
+						'type' : 'temp'
+					}
+				})
+				.success(function (result) {
+					if(result.code == "0" && result.message == "ok"){
+						dataArr.push(result.data);
+					}
+					num++;
+					if(num == $scope.dcu_ids.length){
+						$scope.dataArr = dataArr;
+						$scope.loading = false;
+					}
+				}).error(function (result) {
+					$scope.loading = false;
+				});
+			})(i);
+		}
+		$scope.nodeNames = [];
+		for(var i = 0;i<$scope.dcu_ids.length;i++){
+			var nodeId = $scope.dcu_ids[i];
+			var node = overViewData[$scope.s_sysId].nodesMap[nodeId];
+			var lineName = overViewData[$scope.s_sysId].powerLinesMap[node.dlxId].name;
+			if(node.name){
+				$scope.nodeNames.push(lineName + "-" + node.name);
+			}else{
+				$scope.nodeNames.push(lineName);
+			}
+		}
+	}
+	$scope.$on('ngRepeatFinished', function (ngRepeatFinishedEvent) {
+		var list = $scope.dataArr;
+		for(var i = 0;i<list.length;i++){
+			var currentData = list[i];
+			var X=[],A=[],B=[],C=[];
+			for(var j = 0;j<currentData.length;j++){
+				X.push(replaceTimeTZ(currentData[j].time.substring(11,16)));
+				if(currentData[j].temp[0] == null){
+					A.push("-");
+				}else{
+					A.push(currentData[j].temp[0]);
+				}
+				if(currentData[j].temp[1] == null){
+					B.push("-");
+				}else{
+					B.push(currentData[j].temp[1]);
+				}
+				if(currentData[j].temp[2] == null){
+					C.push("-");
+				}else{
+					C.push(currentData[j].temp[2]);
+				}
+			}
+			init(i,X,A,B,C);
+		}
+	});
+	
+	function init(i,xValue,a,b,c){
+		var myChart = echarts.init(document.getElementById('tempLine'+i));
+		option = {
+				title:{
+					text: '温度(℃)',
+					x:'right',
+					y:'top' ,
+				    textStyle: {
+				        color: '#333',
+				        fontSize : 10,
+				        textAlign:'center'
+				    }
+				},
+				tooltip : {
+					 trigger: 'axis',
+					 zlevel:3,
+					 z:8,
+					 axisPointer:{
+						 type: 'line',
+						    lineStyle: {
+						        color: '#bbb',
+						        width: 1,
+						        type: 'solid'
+						    }
+					 } ,
+					 /*formatter: function (params,ticket,callback) {
+				            var res = params[0].name;
+						 	res += '<br/>' + "A相"+ ' : ' + (Number(params[0].value)).toFixed(2)+"℃";
+						 	res += '<br/>' + "B相"+ ' : ' + (Number(params[1].value)).toFixed(2)+"℃";
+						 	res += '<br/>' + "C相"+ ' : ' + (Number(params[2].value)).toFixed(2)+"℃";
+				            return res;
+				      } */
+			    },
+				legend: {
+			        data:['A相','B相','C相'],
+			        x : '10',
+			        itemWidth : 5,
+			        itemHeight : 15,
+			        itemGap : 6
+			    },
+				calculable : false,
+				grid : {
+					borderWidth : '0px',
+					x : '20px',
+					x2 : '40px',
+					y : "30px",
+					y2 : "25px"
+				},
+				dataZoom:{
+			    	type: 'inside',
+			        xAxisIndex: [0],
+			    },
+				xAxis : [ {
+					font : {
+						color : 'red'
+					},
+					axisTick : {
+						show : false
+					},
+					type : 'category',
+					axisLine : {
+						lineStyle : {
+							color : '#666'
+						}
+					},
+					splitLine : {
+						show : false,
+					},
+					
+					boundaryGap : false,
+					show: true,
+					data : xValue
+				} ],
+				yAxis : [{
+					axisLabel : {
+						textStyle : {
+							color : '#666',
+							fontSize : 12
+						}
+					},
+					
+					font : {
+						color : '#666'
+					},
+					position:"right",
+					axisLine : {
+						lineStyle : {
+							color : 'transparent',
+							width : 1
+						},
+						
+					},
+					type : 'value'
+				}],
+				series : [{
+					symbol : 'none',
+					name : 'A相',
+					type : 'line',
+					itemStyle : {
+						normal : {
+							color : 'rgb(255,187,29)',
+							areaStyle : {
+								color : 'transparent'
+							},
+							lineStyle : {
+								color : 'rgb(255,187,29)',
+								width : 1
+							}
+						}
+					},
+					data : a
+				},{
+					symbol : 'none',
+					name : 'B相',
+					type : 'line',
+					itemStyle : {
+						normal : {
+							color : 'rgb(0,190,113)',
+							areaStyle : {
+								color : 'transparent'
+							},
+							lineStyle : {
+								color : 'rgb(0,190,113)',
+								width : 1
+							}
+						}
+					},
+					data : b
+				},{
+					symbol : 'none',
+					name : 'C相',
+					type : 'line',
+					itemStyle : {
+						normal : {
+							color : 'rgb(255,24,55)',
+							areaStyle : {
+								color : 'transparent'
+							},
+							lineStyle : {
+								color : 'rgb(255,24,55)',
+								width : 1
+							}
+						}
+					},
+					data : c
+				}]
+		};
+		myChart.setOption(option);
+	}
+	
+	
+	
+});
+	
+</script>
+		

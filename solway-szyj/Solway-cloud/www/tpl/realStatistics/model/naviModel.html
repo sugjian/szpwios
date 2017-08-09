@@ -1,0 +1,616 @@
+<link rel="stylesheet" href="theme/default/css/realStatistics/naviModel.css">
+<div ng-controller="naviModelCtrl" >
+	<div class="content">
+		<div class="search-con clearfix">
+			<div class="pull-left select-left">
+				<select id = "areas" onchange="changeRegion(this)">
+				</select>
+			</div>
+			<div class="pull-left search-center">
+				<div class="input-con">
+					<input type="text" placeholder="输入名称搜索" ng-model="searchName"><a ng-click="search()"></a>
+				</div>
+			</div>
+			<div class="search-right pull-right" ng-click="toggleShow()"><i class="fa fa-globe fa-3x" aria-hidden="true" ng-show="stationList"></i><i class="fa fa-bars fa-3x" aria-hidden="true" ng-hide="stationList"></i></div>
+		</div>
+		<div id="map" style="width:100%;" ng-show="showMap"></div>
+		<div ng-show="stationList == true" class="station-list">
+			<div ng-show="regionsRepeat.length>0">
+				<div ng-repeat="region in regionsRepeat"  class="list-item" ng-show="region.isShow == true">
+					<p class="region"  ng-class="{'alarm-color':region.isAlarm == true}">{{region.name}}</p>
+					<div ng-repeat="station in region.substations" ng-click="showInfo(station.sysId,station.id)">
+						<p class="station" ng-class="{'border-none':$index == region.substations.length-1,'alarm-color':station.isAlarm == true}" ng-show="station.isShow == true">{{station.name}}</p>
+					</div>
+				</div>
+			</div>
+			<div ng-show="regionsRepeat.length<=0" class="no-data">
+				<div><img src="theme/default/img/realStatistics/no-alert.png"></div>
+				<p>抱歉，未搜索到相关变电站</p>
+			</div>
+		</div>
+		<div data-ng-include="'tpl/blocks/confirm.html'"></div>
+	</div>
+</div>
+<toaster-container toaster-options="{'position-class': 'toast-top-right', 'close-button':true}"></toaster-container>
+<script>
+	var allPointsMap = {};
+	var allPointsMapByJW = {};
+	var allPoints = [];
+	//所有电站汇总/区域汇总
+	var substations = [],regions = [];
+	var stationList = false;
+	
+	var windowH = $(window).height();
+	var windowW= $(window).width();
+	
+	$(".overflow-auto").height(windowH-150);
+	$("#map").height(windowH-210);
+	var map = new BMap.Map("map");
+	
+	$(".station-list").height(windowH-220);
+	
+	//map.enableScrollWheelZoom(true);
+	app.controller('naviModelCtrl',function($scope, $http, $state,$rootScope,toaster) {
+		$scope.substationsStatus = {};
+		$rootScope.refreshShow = true;
+		$scope.stationList = false;
+		//menu切换，地图与列表轮流显示
+		$scope.toggleShow = function(){
+			if($scope.stationList){
+				$scope.stationList = false;
+				stationList = false;
+				//切换时如果搜索条件相同，则不需要执行
+				/*console.log($scope.oldRegionMap +"===" + $("#areas").val());
+				console.log($scope.oldSearchNameMap +"==" + $scope.searchName);
+				if($scope.oldRegionMap != $("#areas").val() || $scope.oldSearchNameMap != $scope.searchName){
+					$scope.oldSearchNameMap  = $scope.searchName;
+					$scope.oldRegionMap =  $("#areas").val();
+					
+					if($scope.searchName){
+						var qPoints = searchStationMap($scope.searchName , $("#areas").val());
+						if(qPoints.length == 0){
+							$(".confirm-ctrl").show();
+			            	$scope.$broadcast('childConfirm', '','single','抱歉，未搜索到相关变电站位置。');
+							return ;
+						}else{
+							reSetMapCenter(qPoints);
+							showSearchResult(qPoints);
+						}
+					}else{
+						if($scope.oldRegionMap == "all"){
+							reSetMapCenter(allPoints);
+						}else{
+							var points = [];
+							for(var i=0;i<substations.length;i++){
+								if(substations[i].parentId == $scope.oldRegionMap){
+									var sai = substations[i].systemId + "_" + substations[i].id;
+									points.push(allPointsMap[sai]);
+									$('[stationId='+ sai +']').addClass('power-mark-map-show');
+								}
+							}
+							reSetMapCenter(points);
+						}
+					}
+					
+				}*/
+			}else{
+				
+				$scope.stationList = true;
+				stationList = true;
+				//切换时如果搜索条件相同，则不需要执行
+				/*console.log($scope.oldRegionList != $("#areas").val());
+				console.log($scope.oldSearchNameList != $scope.searchName);
+				if($scope.oldRegionList != $("#areas").val() || $scope.oldSearchNameList != $scope.searchName){
+					$scope.oldSearchNameList  = $scope.searchName;
+					$scope.oldRegionList =  $("#areas").val();
+					getStationListData();
+				}*/
+				
+			}
+		}
+		
+		function getStationListData(){
+			var powerSupplys = JSON.parse(storage["powerSupplys"]);
+			$scope.showMap = true;
+			$scope.regionsRepeat = [];
+			if(powerSupplys && powerSupplys.length>0){
+				//总览信息(求得变电站总数)
+            	for(var i = 0;i<powerSupplys.length;i++){
+					var res = overViewData[powerSupplys[i].systemId].regions;
+					if(res && res.length > 0){
+						for(var j = 0;j<res.length;j++){
+							var re1 = {};
+							re1["id"] = res[j].id;
+							re1["name"] = res[j].name;
+							
+							if($("#areas").val() != 'all' && res[j].id != $("#areas").val()){
+								re1["isShow"] = false;
+								re1["substations"] = [];
+								continue;
+							}
+							
+							 var sts = overViewData[powerSupplys[i].systemId].regionsMap[res[j].id].substations;
+							 var stList = [];
+							 for(var k = 0;k<sts.length;k++){
+								 var st = {};
+								 st["id"] = sts[k].id;
+								 st["name"] = sts[k].name;
+								 st["sysId"] = powerSupplys[i].systemId;
+								 if($scope.searchName){
+									 if(sts[k].name && sts[k].name.indexOf($scope.searchName) >= 0){
+										 st["isShow"] = true;
+									 }else{
+										 continue;
+									 }
+								 }else{
+									 st["isShow"] = true;
+								 }
+								 var sid = powerSupplys[i].systemId +"_" + sts[k].id;
+								 if($scope.substationsStatus[sid]){
+									 st["isAlarm"] = true;
+								 }else{
+									 st["isAlarm"] = false;
+								 }
+								 
+								 stList.push(st); 
+							 }
+							 re1["substations"] = stList;
+							 if(stList.length != 0){
+								 re1["isShow"] = true;
+								 $scope.regionsRepeat.push(re1);
+							 }
+							 
+							
+						}
+					}
+				}
+			}
+			
+		}
+		//监听刷新事件
+		$scope.$on('loadData', function(event, data) {
+			allPointsMap = {};
+			allPointsMapByJW = {};
+			allPoints = [];
+			//所有电站汇总/区域汇总
+			substations = [];
+			regions = [];
+			map.clearOverlays();
+			
+			$("#areas").val("all");
+			$scope.oldRegionList = "all";
+			$scope.oldRegionMap = "all";
+			$scope.searchName= "";
+			$scope.oldSearchNameList= "";
+			$scope.oldSearchNameMap= "";
+			$scope.init();
+			$scope.getAlarmData();
+		});
+		
+		//地图初始化，获取所有电站
+		$scope.init = function(isRegion) {  
+			var alarmResults = [];
+			var overviewFlag = 0,alarmFlag = 0; //标志当前请求成功的序号
+			var powerSupplys = JSON.parse(storage["powerSupplys"]);
+			$scope.showMap = true;
+			if(powerSupplys && powerSupplys.length>0){
+				//总览信息(求得变电站总数)
+            	for(var i = 0;i<powerSupplys.length;i++){
+					var msg= overViewData[powerSupplys[i].systemId].all;
+					var overVIewd= overViewData[powerSupplys[i].systemId];
+					if(msg.code == '0' && msg.data && overVIewd.substations){
+						substations = substations.concat(overVIewd.substations);//总变电站
+						regions = regions.concat(msg.data.regions);//总节点
+					}
+				}
+				//标志位达到最后一个请求结束后，计算总变电站数
+				$scope.substations = substations;
+				$scope.regions = regions;
+				//console.log($scope.regions)
+				if($scope.regions && $scope.regions.length>0){
+					$("#areas").html('');
+					$("#areas").append('<option value="all">全部区域</option>');
+					for(var j = 0;j<$scope.regions.length;j++){
+						$("#areas").append("<option value='"+$scope.regions[j].id+"'>"+$scope.regions[j].name+"</option>");
+					}
+				}
+				
+				if($scope.regions && $scope.regions.length>0 && $scope.substations && $scope.substations.length>0){
+					for(var k = 0;k<$scope.regions.length;k++){
+						$scope.regions[k]["substations"] = [];
+						for(var l = 0;l<$scope.substations.length;l++){
+							if($scope.regions[k].id == $scope.substations[l].parentId){
+								$scope.regions[k]["substations"] =  $scope.regions[k]["substations"].concat($scope.substations[l]);
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		$scope.init();
+		
+		$scope.initMap = function(substations){
+			//console.log(substations)
+			var averageLong = 0;
+			var averageLat = 0;
+			var totalLong = 0;
+			var totalLat = 0;
+			
+			var lts = [];
+			
+			for(var i = 0;i<substations.length;i++){
+				totalLong += Number(substations[i].longitude);
+				totalLat += Number(substations[i].latitude);
+				lts.push(substations[i].longitude);
+			}
+			var centerLt = getLTCenter(lts);
+			
+			averageLong = (totalLong/substations.length).toFixed(5);
+			averageLat = (totalLat/substations.length).toFixed(5);
+			
+			//var point = new BMap.Point(averageLong,averageLat);
+			//map.centerAndZoom(point,8);
+			map.enableScrollWheelZoom();
+			for (var i = 0; i <substations.length; i++) {
+                 var point = new BMap.Point(substations[i].longitude,substations[i].latitude);
+                 allPoints.push(point);
+                 var systeIdAndStId = +substations[i].systemId + "_" + +substations[i].id;
+                 allPointsMap[systeIdAndStId] = point;
+                 //console.log(substations[i].longitude+"_"+substations[i].latitude);
+                 allPointsMapByJW[substations[i].longitude+"_"+substations[i].latitude] = systeIdAndStId;
+                 
+                 var img = 'normal-circle-img';
+                 var bk = 'normal-circle-b';
+                 var palarm = "theme/default/img/realStatistics/posi-normal.png";
+                 if($scope.substationsStatus[systeIdAndStId]){
+                	  img = 'warn-circle-img';
+                      bk = 'warn-circle-b';
+                      palarm = "theme/default/img/realStatistics/posi-alarm.png";
+                 }
+                 var opts;
+                 var label;
+                 if(centerLt && parseFloat(substations[i].longitude) > centerLt){
+                	//右边显示
+                	 var offset = -(substations[i].name.length * 12 + 69);
+                	 opts = {
+                             position : point,    // 指定文本标注所在的地理位置
+                             offset   : new BMap.Size(offset, -35)    //设置文本偏移量
+                      };
+                	 label = new BMap.Label("<a class='label-map' id='"+systeIdAndStId+"'>" +
+                             "<div class='label-text " + bk +"'>" +
+                             "<div class='label-breadcrumbs-left' ></div>" +
+                             "<div class='power-mark-map-right' id='stationId"+systeIdAndStId+"'></div>" +
+                             "<span class='laberl-name-1'>" + substations[i].name + "</span>" +
+                             "<div class='label-circle " + img +"'></div>" +
+                             "</div></a>", opts);
+                 }else{
+                	 opts = {
+                         position : point,    // 指定文本标注所在的地理位置
+                         offset   : new BMap.Size(-14, -35)    //设置文本偏移量
+                     };
+                	 label = new BMap.Label("<a class='label-map' id='"+systeIdAndStId+"'>" +
+                             "<div class='label-text " + bk +"'>" +
+                             "<div class='label-circle " + img +"'></div>" +
+                             "<div class='power-mark-map'  id='stationId"+systeIdAndStId+"'></div>" +
+                             "<span class='laberl-name-1'>"+ substations[i].name+"</span>" +
+                             "<div class='label-breadcrumbs' ></div>" +
+                             "</div></a>", opts);
+                	 
+                 }
+                 label.addEventListener("click", showInfo);
+                 //创建点
+				 var myIcon = new BMap.Icon(palarm, new BMap.Size(12,12));
+             	 var marker2 = new BMap.Marker(point,{icon:myIcon});  // 创建标注
+             	 map.addOverlay(marker2);  
+                 //label.setTitle(systeIdAndStId);
+                  /*var myCompOverlay = new ComplexCustomOverlay(new BMap.Point(substations[i].longitude,substations[i].latitude), substations[i].name,systeIdAndStId);
+
+                  map.addOverlay(myCompOverlay);*/
+                  
+                  var opt = {
+                        fontSize : "12px",
+                        border: "none",
+                        background: "none"
+                    }
+                  label.setStyle(opt);
+                  map.addOverlay(label);
+			}
+			//getAlarmData();
+			//初始化进来需要执行2遍
+			reSetMapCenter(allPoints);
+			reSetMapCenter(allPoints);
+			//下面该句话勿删，否则有时出现地图图标无法加载的情况
+			console.log(map.getOverlays().length);
+		}
+		//得到列表中经度的中心点
+		function getLTCenter(longitude){
+			longitude = longitude || [];
+			if(longitude.length > 0){
+				var maxlt=-1000,minlt=1000;
+				for(var i=0;i<longitude.length;i++){
+					var ltfl = parseFloat(longitude[i]);
+					if(ltfl > maxlt){
+						maxlt = ltfl;
+					}
+					if(ltfl < minlt){
+						minlt = ltfl;
+					}
+				}
+				return (maxlt + minlt) / 2;
+			}else{
+				return null;
+			}
+			
+		}
+		
+		//点击搜索按钮
+		$scope.search = function(){
+			var areaId = $("#areas").val();
+			/*if(areaId == "" || areaId == null){
+				alert("请选择区域");
+				return ;
+			}*/
+			
+			if($scope.stationList){
+				$scope.oldSearchNameList = $scope.searchName;
+				getStationListData();
+			}else{
+				if($scope.searchName == "" || $scope.searchName == null || $scope.searchName == ""){
+					$(".confirm-ctrl").show();
+	            	$scope.$broadcast('childConfirm', '','single','请输入变电站名称');
+					return ;
+				}
+				
+				$scope.oldSearchNameMap = $scope.searchName;
+				var qPoints = searchStationMap($scope.searchName , areaId);
+				if(qPoints.length == 0){
+					$(".confirm-ctrl").show();
+	            	$scope.$broadcast('childConfirm', '','single','抱歉，未搜索到相关变电站位置。');
+					return ;
+				}else{
+					reSetMapCenter(qPoints);
+					showSearchResult(qPoints);
+				}
+				
+			}
+			
+			
+			
+		}
+		
+		//显示查询结果到menu列表显示方式中
+		function showSearchResult(list){
+			console.log(list);
+		}
+		//查询电站
+		function searchStationMap(searchName, region){
+			var points = [];
+			$(".power-mark-map").removeClass('power-mark-map-show');
+			$(".power-mark-map-right").removeClass('power-mark-map-show');
+			
+			/*if($scope.searchName == "" || $scope.searchName == null){
+				reSetMapCenter(allPoints);
+				return ;
+			}*/
+			
+			for(var i=0;i<substations.length;i++){
+				if($scope.searchName){
+					if(substations[i].name.indexOf(searchName) != -1){
+						if(region == "all" || substations[i].parentId == region){
+							var sai = substations[i].systemId + "_" + substations[i].id;
+							points.push(allPointsMap[sai]);
+							//$('[stationId='+ sai +']').addClass('power-mark-map-show');
+							$("#stationId"+sai).addClass('power-mark-map-show');
+						}
+					}
+				}else{
+					if(region == "all" || substations[i].parentId == region){
+						var sai = substations[i].systemId + "_" + substations[i].id;
+						points.push(allPointsMap[sai]);
+						//$('[stationId='+ sai +']').addClass('power-mark-map-show');
+						$("#stationId"+sai).addClass('power-mark-map-show');
+					}
+				}
+				
+			}
+			
+			return points;
+		}
+		
+		//map.addEventListener("click", showInfo);
+		function showInfo(e){
+			//if(e.overlay){
+			if(e.target){
+				var systeIdAndStId = e.target.point.lng + "_" + e.target.point.lat;
+				//var systeIdAndStId = e.target.M.lng + "_" + e.target.M.lat;
+				var ssid = allPointsMapByJW[systeIdAndStId].split("_");
+				if(ssid.length > 1){
+					$state.go("app.monitorSubstation",{sysId:ssid[0],bdzId:ssid[1]});
+				}
+			}
+		}
+		
+		//从列表中点进详情
+		$scope.showInfo = function(sysId,bdzId){
+			$state.go("app.monitorSubstation",{sysId:sysId,bdzId:bdzId});
+		}
+		var dataIsSuccess = true;
+		//获取故障信息
+		$scope.getAlarmData = function(){
+			
+			$scope.substationsStatus = {};
+			 var powerSupplys = JSON.parse(storage["powerSupplys"]);
+			 if(powerSupplys && powerSupplys.length>0){
+				//报警信息
+				var num=0;
+				for(var i = 0;i<powerSupplys.length;i++){
+					(function(i){
+						var date = new Date();
+						var currentD = date.getDate();
+						var systemId = powerSupplys[i].systemId;
+						//console.log(systemId)
+						$http({
+							method : "GET",
+							url : powerSupplys[i].address+"api/v1/alarm/search_alarmlist",
+							params : {
+								'userId':powerSupplys[i].userId,
+								'gdjId':powerSupplys[i].gdjId,
+								'startTime':new Date(date.setDate(currentD-30)).format('yyyy-MM-dd HH:mm:ss'),
+								'alarmType':'100,101',
+								'status':0
+							},
+							timeout : 20000
+						}).success(function(msg) {
+							if(msg && msg.code == '0'){//将有报警的数据拼接到一个数组
+								for(var k=0;k<msg.data.length;k++){
+									var bdzId = overViewData[systemId].nodesMap[msg.data[k].dcuId].bdzId;
+									$scope.substationsStatus[systemId +"_" + bdzId] = "1";
+									/*var sysbdz = systemId +"_" + bdzId;
+									$("#"+sysbdz).find(".label-text").removeClass("normal-circle-b").addClass("warn-circle-b");
+									$("#"+sysbdz).find(".label-circle").removeClass("normal-circle-img").addClass("warn-circle-img");
+									angular.forEach(allPointsMap, function(data,index){
+										var sId = index.split("_")[0];
+										var bdz = index.split("_")[1];
+										if(systemId == sId && bdzId == bdz){
+											var point = new BMap.Point(data.lng,data.lat);
+											var myIcon = new BMap.Icon("theme/default/img/realStatistics/posi-alarm.png", new BMap.Size(12,12));
+							             	var marker2 = new BMap.Marker(point,{icon:myIcon});  // 创建标注
+							             	map.addOverlay(marker2);              // 
+										}else{
+											var point = new BMap.Point(data.lng,data.lat);
+											var myIcon = new BMap.Icon("theme/default/img/realStatistics/posi-normal.png", new BMap.Size(12,12));
+							             	var marker2 = new BMap.Marker(point,{icon:myIcon});  // 创建标注
+							             	map.addOverlay(marker2);    
+										}
+									});*/
+								}
+							}else{
+								dataIsSuccess = false;
+							}
+							num++;
+							if(num == powerSupplys.length){
+								if(!dataIsSuccess){
+									 toaster.pop('error', '', '数据获取失败!');
+								 }
+								$scope.initMap($scope.substations);
+								getStationListData();
+								endLoad();
+							}
+						}).error(function(msg) {
+							dataIsSuccess = false;
+							num++;
+							if(num == powerSupplys.length){
+								if(!dataIsSuccess){
+									 toaster.pop('error', '', '数据获取失败!');
+								 }
+								$scope.initMap($scope.substations);
+								getStationListData();
+								endLoad();
+							}
+						});
+					})(i);
+				}
+
+		 	}
+		}
+		
+		
+		$scope.getAlarmData();
+	});
+	
+	function goUrl(systeIdAndStId){
+		var ssid = systeIdAndStId.split("_");
+		//console.log(ssid);
+		window.location.href = "#/app/monitorSubstation/";
+		//$state.go("app.monitorSubstation",{sysid:ssid[0],sid:ssid[1]});
+	}
+	
+	//地图调整到最佳视野
+	function reSetMapCenter(points){
+		points = points || [];
+		map.setViewport(points);
+        if(points.length < 2){
+           // map.setZoom(14);
+        }
+	}
+	function changeRegion(t){
+		var region = $("#areas").val();
+		
+		if(region == "all"){
+			reSetMapCenter(allPoints);
+		}else{
+			var points = [];
+			for(var i=0;i<substations.length;i++){
+				if(substations[i].parentId == region){
+					var sai = substations[i].systemId + "_" + substations[i].id;
+					points.push(allPointsMap[sai]);
+					$('[stationId='+ sai +']').addClass('power-mark-map-show');
+				}
+			}
+			reSetMapCenter(points);
+		}
+		
+		if(stationList){
+			//$scope.oldRegionList = region;
+			//getStationListData();
+		}else{
+			//$scope.oldRegionMap = region;
+			
+		}
+		
+	}
+	
+	// 复杂的自定义覆盖物
+    function ComplexCustomOverlay(point, text, mouseoverText){
+      this._point = point;
+      this._text = text;
+      this._overText = mouseoverText;
+    };
+    ComplexCustomOverlay.prototype = new BMap.Overlay();
+    
+    ComplexCustomOverlay.prototype.initialize = function(map){
+      this._map = map;
+      var div = this._div = document.createElement("div");
+      div.style.position = "absolute";
+      div.style.zIndex = BMap.Overlay.getZIndex(this._point.lat);
+      div.style.height = "50px";
+      div.style.width = "200px";
+      /*div.style.backgroundColor = "#EE5D5B";
+      div.style.border = "1px solid #BC3B3A";
+      div.style.color = "white";
+      div.style.height = "18px";
+      div.style.padding = "2px";
+      div.style.lineHeight = "18px";
+      div.style.whiteSpace = "nowrap";
+      div.style.MozUserSelect = "none";
+      div.style.fontSize = "12px"
+      var span = this._span = document.createElement("span");
+      div.appendChild(span);
+      span.appendChild(document.createTextNode(this._text));  */
+      var img = 'normal-circle-img';
+      var bk = 'normal-circle-b';
+      div.innerHTML ="<a class='label-map' href='#/app/monitorSubstation/"+this._overText+"'>" +
+      "<div class='label-text " + bk +"'>" +
+      "<div class='label-circle " + img + "'></div>" +
+      "<span class='laberl-name-1'>"+ this._text+"</span>" +
+      "<div class='label-breadcrumbs' ></div>" +
+      "</div></a>";
+      
+      
+      var that = this;
+
+      map.getPanes().labelPane.appendChild(div);
+      
+      return div;
+    }
+    ComplexCustomOverlay.prototype.draw = function(){
+      var map = this._map;
+      var pixel = map.pointToOverlayPixel(this._point);
+      this._div.style.left = pixel.x  + "px";
+      this._div.style.top  = pixel.y - 30 + "px";
+    }
+    
+	
+</script>
+		

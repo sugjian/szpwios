@@ -1,0 +1,259 @@
+<div class="col-xs-12 no-padder"  ng-controller="staMonCtrl" >
+<div class="navbar-header bg-black app-header navbar ng-scope"  id="distUserNav">
+	<ul class="nav col-xs-12 no-padder nav-top"  >
+          <li class="col-xs-1 no-padder">
+         	 <a	 data-dismiss="modal" ng-click="closeStatModal()" ><img src="./theme/default/img/icon/top-back@2x.png" class="v-middle m-t-xs img_goBack"></a>
+          </li>
+          <li class="col-xs-10 no-padder text-center">
+          	<a  data-dismiss="modal" ng-click="closeStatModal()" class="text-1-8x">
+          		<span ng-bind="todayTimeForTitle"></span>发电量分析
+          	</a>
+           </li>
+          <li class="col-xs-1 no-padder">
+          	
+          </li>
+        </ul>
+</div>
+<div class="col-xs-12 no-padder"style="margin-top:50px;">
+	<div class="col-xs-12 wrapper-xs points" >
+			<div class="col-xs-4  no-padder text-center">
+				<i class="fa fa-circle" style="color: #ffc700"></i> <span
+					class="col-9 m-r-xs text-1-1x">应发电量<small>(kWh)</small></span> 
+			</div>
+			<div class="col-xs-4 no-padder text-center">
+				<span class="pull-right"> <i class="fa fa-circle"
+					style="color: #ff9a00"></i> <span class="col-9 text-1-1x">实发电量(kWh)</span>
+				</span>
+			</div>
+	</div>
+	<div class="col-xs-12 no-padder ">
+		<div class="col-xs-12 no-padder rollDiv">
+			<div class="col-xs-12 text-center m-t-xs"id="loadFlags">
+			 	</div>
+			<div id="kwhTotalMReport" style="height:500px;width:405px;"></div>
+		</div>
+	</div>
+
+</div>
+</div>
+<script>
+	if(isAndroid){//判断安卓，修改顶部样式
+		$("#distUserNav").addClass("m-t-none");
+	}
+	$(".rollDiv").css("height",$(window).height()-150)
+	var myChart;
+	app.controller('staMonCtrl',function($scope, $http, $state,$rootScope) {
+			//得到当前月时间
+			$scope.analData=new Date().Format("yyyy/MM")
+
+			//标题的时间
+			$scope.todayTimeForTitle=new Date().Format("yyyy年MM月")
+			//向后台发送时间请求
+			$scope.todayTimeForJson=new Date().Format("yyyy/MM")
+			//切换时间
+			$scope.changeData=function(nowData,obj){
+				myChart.clear();
+				$.showLoading(loadFlags)
+				$("#"+obj+"span").parent().siblings().children().removeClass("active animated fadeInLeft")
+				$("#"+obj+"span").addClass("active");
+				$scope.getstaDayPowerData(nowData + "/01")
+				
+			}
+			
+			$scope.getstaDayPowerData=function(nowData){
+
+				$http({
+					method : "POST",
+					url : ctx+"MobileHmDeviceMonitor/getMonthChartGeneratingPower.htm",
+					params : {
+						'userId':1,
+						'dateString':nowData,
+						'powerStationId':JSON.parse(storage["powerStationId"])
+					}
+					})
+					.success(function (msg) {
+						
+						if(msg.echarts_xaxisTime==null){
+							powerAnalyze([],[],[])
+							$.hideLoading(loadFlags)
+						}else{					
+							$("#kwhTotalMReport").height((msg.echarts_xaxisTime.length)*40+30)
+							$("#kwhTotalMReport").width($(window).width())
+							powerAnalyze((msg.echarts_xaxisTime).reverse(),
+									(msg.echarts_realGeneratingPower).reverse(),
+									(msg.echarts_predictGeneratingPower).reverse(),$http, $scope)
+						}
+						}).error(function(msg){
+					});
+			
+			}
+			$scope.getstaDayPowerData($scope.analData)
+	});
+	function powerAnalyze(echarts_xaxisTime,echarts_realGeneratingPower,echarts_predictGeneratingPower,$http, $scope){
+		 myChart = echarts.init(document.getElementById('kwhTotalMReport'));
+		$.hideLoading(loadFlags)
+		window.addEventListener("resize", function() {
+			myChart.resize();
+		});
+		option = {
+			  	 tooltip : {
+			        trigger: 'axis',
+			  	 	  formatter: function (params,ticket,callback) {
+			            var res ="";
+			            for (var i = 0, l = params.length; i < l; i++) {
+			            	res += params[i].seriesName+" : "+params[i].value +"<br/>" ;
+			            }
+			            return res;
+			      }, 
+			      axisPointer:{
+						 type: 'line',
+						    lineStyle: {
+						        color: '#bbb',
+						        width: 1,
+						        type: 'solid'
+						    }
+					 }
+			    },
+			    grid : {
+					borderWidth : 1,
+					x : '30px',
+					x2 : '30px',
+					y : "30px",
+					y2 : "30px",
+					borderColor:'rgba(144, 168, 252,0.1)'
+				},
+				noDataLoadingOption:{
+			        text : '暂无数据',
+			        effect :function(params,callback){
+			        	return "暂无数据"
+			        }
+			    },
+				calculable : false,
+				yAxis : [ {
+					font : {
+						color : '#fff'
+					},
+					position : 'left',//X 轴显示的方位
+					type : 'category',
+					 axisTick : {
+							show : false
+						},
+					axisLabel : {
+					   	formatter:function (value){
+							return new Date(value).format("dd"); 
+						},
+						textStyle : {
+							align : 'center',
+							color : 'rgba(144, 168, 252,0.4)',
+							fontSize : 13
+						}
+					},
+					axisLine : {
+						lineStyle : {
+							color : 'rgba(144, 168, 252,0.1)'
+						}
+					},
+					splitLine : {
+						
+						show : true,
+						lineStyle : {
+							color : 'rgba(144, 168, 252,0.1)',
+							width : 1
+						}
+					},
+					data : echarts_xaxisTime
+				},{
+					show:false,
+					font : {
+						color : '#fff'
+					},
+					position : 'left',//X 轴显示的方位
+					type : 'category',
+					 axisTick : {
+							show : false
+						},
+					axisLabel : {
+					   
+						textStyle : {
+							align : 'center',
+							color : 'rgba(144, 168, 252,0.4)',
+							fontSize : 13
+						}
+					},
+					axisLine : {
+						lineStyle : {
+							color : 'transparent'
+						}
+					},
+					splitLine : {
+						
+						show : true,
+						lineStyle : {
+							color : 'rgba(144, 168, 252,0.1)',
+							width : 1
+						}
+					},
+					data : echarts_xaxisTime
+				} ],
+				xAxis : [{
+					axisLabel : {
+						textStyle : {
+							color : 'rgba(144, 168, 252,0.4)',
+							fontSize : 12
+						}
+					},
+					
+					nameLocation:'start',
+					font : {
+						color : '#666'
+					},
+					position : 'top',//X 轴显示的方位
+					axisLine : {
+						lineStyle : {
+							color : 'rgba(144, 168, 252,0.1)',
+							width : 1
+						}
+					},
+					splitLine : {
+						show : true,
+						lineStyle : {
+							color : 'rgba(144, 168, 252,0.1)',
+							width : 1
+						}
+					},
+					type : 'value'
+				}],
+				series : [
+				  {
+					name : '实发电量' ,
+					type : 'bar',
+					barWidth : 20,
+					itemStyle : {
+						normal : {
+							color : function(params) {
+								return '#ff9a00'
+							}
+						}
+					},
+					data : echarts_realGeneratingPower
+				},{
+					name : '应发电量',
+					z:1,
+					type : 'bar',
+					z:1,
+					yAxisIndex : 1,
+					barWidth : 20,
+					itemStyle : {
+						normal : {
+							color : function(params) {
+								return '#ffc700'
+							}
+						}
+					},
+					data : echarts_predictGeneratingPower
+				}]
+			}
+			myChart.setOption(option);
+	}
+</script>
+		

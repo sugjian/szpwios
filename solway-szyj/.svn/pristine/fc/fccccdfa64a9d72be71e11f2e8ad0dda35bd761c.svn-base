@@ -1,0 +1,93 @@
+<div class="col-xs-12 no-padder"  ng-controller="getFaultList" >
+	<div class="navbar-header bg-black app-header navbar ng-scope"  id="distUserNav">
+		<ul class="nav col-xs-12 no-padder nav-top"  >
+          <li class="col-xs-1 no-padder">
+         	 <a	 data-dismiss="modal" ng-click="closeStatModal()" ><img src="./theme/default/img/icon/top-back@2x.png" class="v-middle m-t-xs img_goBack"></a>
+          </li>
+          <li class="col-xs-10 no-padder text-center">
+          	<a class="text-1-8x">
+          		故障列表
+          	</a>
+           </li>
+          <li class="col-xs-1 no-padder">
+          	
+          </li>
+        </ul>
+	</div>
+<div class="col-xs-12 no-padder rollDiv"style="margin-top:50px;" id="powerList">
+	<center id="nodata" class="m-t-md hidden">暂无数据</center>
+	<div class="col-xs-12 no-padder bg-writer m-t-sm " ng-repeat="one in faultList">
+		<div class="col-xs-12 wrapper-sm wrapper-l-r-md text-1-4x b-b-5" ng-bind="one.name|dataNullFilter">
+			<span class="pull-right">
+				<span ng-bind="one.faultNum"></span>
+			</span>
+		</div>
+		<div class="col-xs-12 no-padder b-b-5" >
+			<div class="col-xs-6 wrapper-sm  wrapper-l-r-md col-d b-r-5">
+				<span class="text-1-2x  m-r-xs">损失小时</span>
+				<span class="white text-1-6x" ng-bind="one.lostHours"></span>
+				<span class="white text-1-4x">h</span>
+			</div>
+			<div class="col-xs-6 wrapper-sm  wrapper-l-r-md col-d">
+				<span class="text-1-2x m-r-xs">损失电量</span>
+				<span class="white text-1-6x" ng-bind="one.lostGeneratingPower[0]|dataNullFilter"></span>
+				<span class="white text-1-4x" ng-bind="one.lostGeneratingPower[1]|dataNullFilter"></span>
+			</div>
+		</div>
+		<div class="col-xs-6 wrapper-sm  wrapper-l-r-md  col-d b-r-5">
+			<span class="text-1-3x m-r-xs">M T T R </span>
+			<span class="white text-1-6x" ng-bind="one.mttr">-</span>
+			<span class="white text-1-4x">h</span>
+		</div>
+		<div class="col-xs-6 wrapper-sm  wrapper-l-r-md col-d ">
+			<span class="text-1-3x m-r-xs">M T B F</span>
+			<span class="white text-1-6x" ng-bind="one.mtbf">-</span>
+			<span class="white text-1-4x" >h</span>
+		</div>
+	</div>
+</div>
+</div>
+<script>
+	if(isAndroid){//判断安卓，修改顶部样式
+		$("#distUserNav").addClass("m-t-none");
+	}
+	$(".rollDiv").css("height",$(window).height()-50)
+
+	app.controller('getFaultList',function($scope, $http, $state,$rootScope) {
+		//$scope.mapTimeDay   当前时间
+		$scope.powerStationId=JSON.parse(storage["powerStationId"]);//获取电站id 列表
+			var statFaultType=storage["statFaultType"];
+			var statData;
+			if(statFaultType=="D"){
+				statData=new Date($scope.mapTimeDay).Format("yyyy/MM/dd/")
+			}else if(statFaultType=="M"){
+				statData=$scope.mapTimeMonth
+			}else if(statFaultType=="Y"){
+				statData=$scope.mapTimeYear
+			}else if(statFaultType=="A"){
+				statData=""
+			}
+			//请求组的信息
+			$http({
+				method : "POST",
+				url : ctx+"MobileHmDeviceMonitor/getDayListDeviceFault.htm",
+				params : {
+					'dateString':statData,
+					'powerStationId':$scope.powerStationId,
+					'idsType':"station",
+					'dateType':statFaultType
+					}
+				})
+			.success(function (msg) {
+				if(msg.faultList==null|| msg.faultList.length<=0){
+					$("#nodata").removeClass("hidden")
+					return
+				}
+				$scope.faultList=msg.faultList;
+			}).error(function(msg){
+				$("#nodata").show();
+				return
+			});
+	});
+</script>
+		

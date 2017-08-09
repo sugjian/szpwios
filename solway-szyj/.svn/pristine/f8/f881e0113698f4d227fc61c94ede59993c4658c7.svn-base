@@ -1,0 +1,189 @@
+<!-- 指派自己和他人处理 -->
+<!-- 日期插件 -->
+<script>
+	function cllarverifyhandle01(){
+		var respman=$("#respman").val();
+		var expectedtime=$("#expectedtime").val();
+		var taskcontent=$("#taskcontent").val();
+		
+		if(respman){
+		   $("#respmanverify").html("");	
+		}
+		
+		if(expectedtime){
+		   $("#expectedverify").html("");
+		}
+		
+		if(taskcontent){
+		   $("#taskcontentverify").html("");
+		}
+	}
+</script>
+<link rel="stylesheet" type="text/css" href="theme/default/css/datePicker.css">
+    <script type="text/javascript" src="js/datePicker.js"></script>
+<div class="modal  fade col-xs-12 no-padder halfModal" id="handle01" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+   <div class="modal-dialog col-xs-12 no-padder ">
+      <div class="modal-content col-xs-12 no-padder">
+          <div class="modal-header n-b col-3 col-xs-12 no-padder">
+            <button type="button" class="close close-img m-b-n-sm main-green" data-dismiss="modal" aria-hidden="true">
+                  <img src="theme/default/img/icon/close.png">
+            </button>
+         </div>
+         <div class="modal-body col-3 col-xs-12 no-padder">
+          <div  class="col-0">
+				<div class="col-xs-12  bg-writer m-b-xs padder-v"style="padding-bottom: 60px;">
+					<form class="bs-example form-horizontal" >
+								<div class="form-group" id="respmanDiv">
+									<label class="col-xs-4 control-label pull-left m-t-xs text-1-4x">受理人</label>
+									<div class="col-xs-7 no-padder select">
+						            <ui-select ng-model="managerd01.selected" theme="bootstrap" ng-change="managerChange01()">
+							            <ui-select-match placeholder="请输入关键字..." ng-model="managerd01.selected.realName" >{{$select.selected.realName}}</ui-select-match>
+							            <ui-select-choices  repeat="item in manager01 | filter: $select.search">
+							              <div ng-bind-html="item.realName | highlight: $select.search"></div>
+							            </ui-select-choices>
+						         	 </ui-select>
+						         	 <div  id="respmanverify" class="col-xs-12 control-label m-t-sm black-1 no-padder"></div>
+						         	 <input type="hidden" onMouseOut="cllarverifyhandle01()" id="respman" name="respman" class="form-control formData"/>
+									
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-xs-4 control-label pull-left m-t-xs text-1-4x">期望完成时间</label>
+									<div class="col-xs-7 no-padder" >
+										<div type="text" id="expectedtime"style="background-color: #f7f7f7"  class="col-6 form-control" onchange="cllarverifyhandle01()"></div>
+										<div id="expectedverify" class="col-xs-12 control-label m-t-sm black-1 no-padder"></div>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-xs-4 control-label pull-left m-t-xs text-1-4x">故障再次提醒</label>
+									<div class="col-xs-7 no-padder bg-f7f7f7">
+										<select class="form-control col-6" >
+											<option class="timeActive"><a onclick="choseRemindHour01(0,this);" class="b-a" id="remindTimeCheck01">不提醒</a></option>
+											<option><a onclick="choseRemindHour01(1,this);" class="b-a">一小时后</a></option>
+											<option><a onclick="choseRemindHour01(3,this);" class="b-a">三小时后</a></option>
+											<option><a onclick="choseRemindHour01(6,this);" class="b-a">六小时后</a></option>
+											<option><a onclick="choseRemindHour01(9,this);" class="b-a">九小时后</a></option>
+										</select>
+									</div>
+									<input type="hidden" id="remindTime01" name="remindTime01" value="0"/>
+								</div>
+								<div class="form-group">
+									<label class="col-xs-4 control-label pull-left text-1-4x">任务描述</label>
+									<div class="col-xs-7 no-padder">
+										<textarea rows="3" cols="20" id="taskcontent" maxlength="50"
+											name="taskcontent" class="col-xs-12 padder-v-xsm bg-f7f7f7 text-1-2x" onMouseOut="cllarverifyhandle01()"></textarea>
+										<div id="taskcontentverify" class="col-xs-12 control-label m-t-sm black-1 no-padder"></div>
+										
+									</div>
+								</div>
+								<!-- <div class="form-group">
+									<div class="col-xs-12 text-center" >
+										<button type="button" 
+											class="btn m-b-xs w-xs taskBtn">
+											<strong>保 存</strong>
+										</button>
+										<button type="button" data-dismiss="modal" aria-hidden="true"
+											class="btn m-b-xs w-xs btn-default" style="margin-left:5px">
+											取 消
+										</button>
+									</div>
+								</div> -->
+							</form>
+				</div>
+				<div class="navbar  navbar-fixed-bottom" ui-view="footer" ng-click="saveHandle01Form()" >
+					<button class="col-xs-12 pull-in btn  btn-success padder-v">完成</button>
+				</div> 
+			</div>
+     	 </div><!-- /.modal-content -->
+		</div><!-- /.modal -->
+	</div>
+
+<!-- 模态框 -->
+<script>
+	$('#expectedtime').html("请选择时间") 
+	$('#expectedtime').datePicker({
+        beginyear: new Date().getFullYear(),
+        theme: 'datetime',
+        callBack: function() {
+        	$('#expectedtime').html($('#expectedtime').val())
+           // alert("--!当前值:" + $('#expectedtime').val());
+        }
+    });
+	function choseRemindHour01(hour,obj){
+		$(obj).parent().siblings().removeClass('timeActive');
+		$(obj).parent().addClass('timeActive');
+		$("#remindTime01").val(hour);
+	}
+    function countTime(opt) {
+        var now = new Date().getTime();
+        var defaultOpt = {
+            st: now, //开始时间,时间戳
+            et: now, //结束时间,时间戳
+            sdom: null,
+            mdom: null,
+            hdom: null,
+            ddom: null,
+            Mdom: null,
+            ydom: null
+        };
+        this.opt = $.extend({}, defaultOpt, opt);
+        this.h = 0;
+        this.m = 0;
+        this.s = 0;
+        this.d = 0;
+        this.M = 0;
+        this.y = 0;
+        this.init = function() {
+            if (now >= this.st) {
+                this.interCount();
+            } else {
+                this.interCount();
+            }
+        };
+        this.interCount = function() {
+            var _this = this;
+            var bTime = _this.bTime();
+            if (bTime > 0) {
+                _this.interSwitch = setInterval(function() {
+                    bTime--;
+                    if (bTime < 0) {
+                        clearInterval(_this.interSwitch);
+                    } else {
+                        _this.renderTime(bTime);
+                    }
+                }, 1000);
+            } else {
+
+            }
+        };
+        this.bTime = function() { //距离的时间(单位s)
+            return Math.round(this.opt.et / 1000 - now / 1000);
+        };
+        this.renderTime = function(t) {
+            this.s = t % 60;
+            this.m = Math.floor(t / 60) % 60;
+            this.h = (Math.floor(t / 3600) % 60) % 24;
+            this.d = Math.floor(t / 86400) % 30;
+            this.M = Math.floor(t / 2592000) % 12;
+            this.y = Math.floor(t / 31104000);
+            this.opt.ydom.innerHTML = this.y < 10 ? "0" + this.y : this.y;
+            this.opt.Mdom.innerHTML = this.M < 10 ? "0" + this.M : this.M;
+            this.opt.ddom.innerHTML = this.d < 10 ? "0" + this.d : this.d;
+            this.opt.hdom.innerHTML = this.h < 10 ? "0" + this.h : this.h;
+            this.opt.mdom.innerHTML = this.m < 10 ? "0" + this.m : this.m;
+            this.opt.sdom.innerHTML = this.s < 10 ? "0" + this.s : this.s;
+
+        }
+
+    };
+    var two = new countTime({
+        et: new Date('2015-4-7 8:30').getTime(),
+        ydom: document.getElementById('y'),
+        Mdom: document.getElementById('M'),
+        ddom: document.getElementById('d'),
+        hdom: document.getElementById('h'),
+        mdom: document.getElementById('m'),
+        sdom: document.getElementById('s')
+    });
+    two.init();
+    </script>

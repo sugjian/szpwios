@@ -1,0 +1,33 @@
+ <style>
+ 	body{color:black;}
+	.nav-bottom-active{
+	    background-color: #1b262d;
+    	border-bottom: 1px solid #06bebd;
+    	color: #fff;
+    } 
+    .real-tab li{
+    	display:block;width:50%;height:50px;line-height:50px;background:rgb(51,64,74);
+    }
+    .real-tab li.active{background:rgb(28,127,132)}
+    .real-tab li a{	font-size:15px;}
+    .app-content-body {margin-top:0}
+    .overflow-auto{overflow:auto;}
+</style>   
+<div class="" ng-controller="realStaAllCtrl">
+	<div class="real-tab">
+		<ul class="clearfix text-center bg-black" >
+			<li  ng-class="{'active':isActive == 'overview'}"  class="pull-left" >
+				<a  class="wrapper" ng-click="changeTab('overview')">
+					<span class="text-1-2x">总览</span>
+				</a>
+			</li>
+			<li ng-class="{'active':isActive == 'navi'}" class="pull-right">
+				<a  class="wrapper" ng-click="changeTab('navi')">
+					<span class="text-1-2x">导航</span>
+				</a>
+			</li>
+		</ul>
+	</div>
+	 <div ng-include="realView" id="realView">
+</div>
+<script src="js/controllers/realStat/realStatisticsAll.js"></script>

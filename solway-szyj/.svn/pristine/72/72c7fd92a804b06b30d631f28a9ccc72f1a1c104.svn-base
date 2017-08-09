@@ -1,0 +1,277 @@
+
+<div class="navbar-header bg-black app-header navbar ng-scope"  id="distUserNav">
+	<ul class="nav col-xs-12 no-padder nav-top"  >
+          <li class="col-xs-1 no-padder">
+          </li>
+          <li class="col-xs-10 no-padder text-center">
+          	<a href="" class="text-1-8x">
+          		2015年3月发电量分析
+          	</a>
+           </li>
+          <li class="col-xs-1 no-padder">
+          	
+          </li>
+        </ul>
+</div>
+<div class="col-xs-12 no-padder" ng-controller="staMonCtrl" style="margin-top:50px;">
+	<div class="col-xs-12 no-padder m-t-xs">
+			<span class="pull-right">
+				<span class="m-r-xs"><i class="fa fa-circle m-r-xs" style="color:#fe9700"></i>实时发电量</span>
+				<span class="m-r-xs"><i class="fa fa-circle m-r-xs" style="color:#ffc400"></i>应发电量</span>
+			</span>
+				<div id="kwhTotalMReport" style="height:500px;width:405px;"></div>
+				</div>
+	<ul class="nav col-xs-12 no-padder nav-bottom" >
+		  <li class="text-center"  ng-repeat="data in analData">
+		  	<span class="text-1-8x span" id="{{$index}}span" ng-class="{'active':data.titleData==timeFlag}" ng-click="changeData(data.titleData,$index)">
+		  	 <span ng-bind="data.titleData"></span>月
+		  	</span>
+		   </li>
+	</ul>
+</div>
+<script>
+if(isAndroid){//判断安卓，修改顶部样式
+	$("#distUserNav").addClass("m-t-none");
+}
+	$("#kwhTotalMReport").css("height",$(window).height()-100)
+
+	app.controller('staMonCtrl',function($scope, $http, $state,$rootScope) {
+		//获得当前界面的日期
+			
+			console.log($scope.mapTimeDay)
+			$scope.changeDataFormat=function(mapTimeMonth){
+				if(mapTimeMonth<=0){
+					mapTimeMonth=mapTimeMonth+12
+					$scope.mapTimeMonthY=$scope.mapTimeMonthY-1
+					$scope.mapTimeMonth1=12
+				}else{
+					mapTimeMonth=mapTimeMonth;
+				}
+				$scope.mapTimeMonth1=mapTimeMonth;
+				return mapTimeMonth;
+			}
+
+			//切换时间
+			$scope.changeData=function(newDate,obj){
+				console.log(newData)
+				$("#"+obj+"span").parent().siblings().children().removeClass("active")
+				$("#"+obj+"span").addClass("active")
+				/*nowDate=newDate
+				$scope.analDayData=[];
+				for(var i=newDate-1;i>newDate-3;i--){
+					$scope.analDayData.push(i)
+				}
+				$scope.analDayData.push(newDate)
+				for(var i=newDate+1;i<newDate+3;i++){
+					$scope.analDayData.push(i)
+				}
+				console.log($scope.analDayData)
+				//console.log($scope.anaDayData[0])
+				$scope.analData=[
+					{"titleData":$scope.changeDataFormat($scope.anaDayData[0])},
+					{"titleData":$scope.changeDataFormat($scope.anaDayData[1])},
+					{"titleData":$scope.changeDataFormat($scope.anaDayData[2])},
+					{"titleData":$scope.changeDataFormat($scope.anaDayData[3])},
+					{"titleData":$scope.changeDataFormat($scope.anaDayData[4])}
+				]
+				console.log($scope.analData)*/
+			}
+			//获得当前月时间
+			$scope.timeFlag=new Date().getMonth()+1//获得当前月份，用来计算		
+			
+			$scope.getstaDayPowerData=function(){
+					$scope.analData=[
+						{"titleData":$scope.changeDataFormat(new Date().getMonth()-1)},
+						{"titleData":$scope.changeDataFormat(new Date().getMonth())},
+						{"titleData":$scope.changeDataFormat(new Date().getMonth()+1)},
+						{"titleData":$scope.changeDataFormat(new Date().getMonth()+2)},
+						{"titleData":$scope.changeDataFormat(new Date().getMonth()+3)},
+					]
+				$http.get(
+						ctx+"/PowerStationMonitor/getPowerStationActPwrLineData.htm",
+						{
+							params : {
+								id : $scope.powerStationId
+							}
+						}).success(function(response) {
+							$scope.lastTime = response.lastTime;
+							getPowerV(response,$http, $scope);
+						}).error(function(response) {
+				});
+			
+			}
+			$scope.getstaDayPowerData();
+			
+			$scope.showKwhChart=function(){
+			$http.get("${ctx }/Report/getStationMonthKwhChart.htm",{
+				params : {
+					stid:$scope.stid,
+					month:$("#changeTimeIdM").html()
+				}
+			})
+			.success(function(result) {
+				powerAnalyze(result.data)
+			}).error(function(response) {
+				
+			});
+		}
+		$scope.showKwhChart();
+	});
+	
+function powerAnalyze(powerAnalyVstr) {
+		var myChart = echarts.init(document.getElementById('kwhTotalMReport'));
+		window.addEventListener("resize", function() {
+			myChart.resize();
+		});
+		option = {
+		  	tooltip : {
+		        trigger: 'axis',
+		  	 	  formatter: function (params,ticket,callback) {
+		            var res ="";
+		            for (var i = 0, l = params.length; i < l; i++) {
+		            	res += params[i].seriesName+" : "+params[i].value +"<br/>" ;
+		            }
+		            return res;
+		      },
+		      axisPointer:{
+					 type: 'line',
+					    lineStyle: {
+					        color: '#bbb',
+					        width: 1,
+					        type: 'solid'
+					    }
+				 }
+		    },
+			grid : {
+				borderWidth : '0px',
+				x : '40px',
+				x2 : '30px',
+				y : "50px",
+				y2 : "20px"
+			},
+			calculable : false,
+			xAxis : [ {
+				type : 'category',
+				 axisTick : {
+						show : false
+					},
+				axisLabel : {
+					interval:59,
+					textStyle : {
+						color : '#bbb',
+						fontSize : 12
+					}
+				},
+				axisLine : {
+					lineStyle : {
+						color : '#bbb',
+						width : 1
+					}
+				},
+				splitLine : {
+					show : false
+				},
+				data : powerAnalyVstr.day
+			} ],
+			yAxis : [ {
+				name:powerAnalyVstr.unit1,
+				type : 'value',
+				axisLine : {
+					lineStyle : {
+						width : 1,
+						color : '#bbb'
+					}
+				},
+				axisLabel : {
+					axisLabel : 10,
+					textStyle : {
+						color : '#bbb',
+						fontSize : 13
+					}
+				},
+				splitLine : {
+					show : false
+				},
+			} , {
+	            name : powerAnalyVstr.unit2,
+	            type : 'value',
+	            axisLine : {
+					lineStyle : {
+						width : 1,
+						color : '#bbb'
+					}
+				},
+				splitLine : {
+					show : false
+				},
+				axisLabel : {
+					axisLabel : 10,
+					textStyle : {
+						color : '#bbb',
+						fontSize : 13
+					}
+				},
+	        }],
+			series : [
+			  {
+				name : '实发电量' ,
+				type : 'bar',
+				barWidth : 10,
+				itemStyle : {
+					normal : {
+						color : function(params) {
+							return '#fe9700'
+						}
+					}
+				},
+				stack : '总量',
+				data : powerAnalyVstr.real_kwh
+			},{
+				name : '应发电量',
+				z:1,
+				type : 'bar',
+				itemStyle : {
+					normal : {
+						color : function(params) {
+							return '#ffc400'
+						}
+					}
+				},
+				stack : '总量',
+				data : powerAnalyVstr.shd_kwh
+			},{
+				name : '计划发电量',
+				type : 'line',
+				symbol: 'none', 
+				yAxisIndex:1,
+				itemStyle : {
+					normal : {
+						color : function(params) {
+							return '#5fc6be'
+						}
+					}
+				},
+				data : powerAnalyVstr.plan_kwh
+			},{
+				name : '计划完成率',
+				type : 'line',
+				yAxisIndex:1,
+				symbol: 'none', 
+				itemStyle : {
+					normal : {
+						color : function(params) {
+							return '#6b008e'
+						},lineStyle:{
+							type:"dotted"
+						}
+					}
+					
+				},
+				
+				data : powerAnalyVstr.plan_r
+			}  ]
+		};
+		myChart.setOption(option);
+}
+</script>
+		

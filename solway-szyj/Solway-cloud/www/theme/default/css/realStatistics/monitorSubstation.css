@@ -1,0 +1,33 @@
+@CHARSET "UTF-8";
+body{color:black;}
+.select{height:45px;line-height:45px;background:rgb(51,64,74);    text-align: center}
+.select select{    color: white;-webkit-appearance:none;appearance:none;margin:0;background:rgb(51,64,74) url("../../img/realStatistics/select-down.png") no-repeat;height: 45px;display: inline-block;
+background-position:right center;font-size: 14px;background-size: 8px;padding-right:10px;   }
+#areas{ margin-right:20px;}
+#bdzs{ }
+.select  option{text-align:center;}
+.survey{height:30px;line-height:30px;font-size:12px;padding-left: 12px;border-bottom:1px solid rgb(62,70,75)}
+.survey span{display:inline-block;height:30px;}
+.survey span img{width:80%;}
+.line-state{line-height:75px;    padding: 0 35px;    font-size: 14px;}
+.line-state >.pull-left span{color:rgb(29,209,130); }
+.line-state >.pull-right span{color:rgb(255,65,14); }
+.line-state >.pull-left-red span{color:rgb(255,65,14); }
+.line-state img{
+	vertical-align: text-top;
+    width: 13px;
+}
+.overflow-auto{overflow:auto;}
+.overview-load{text-align:center;}
+.overview-load > div {
+    background-color: rgb(255,59,42);
+}
+.line-detail{    border-bottom: 1px solid rgb(62,70,75);
+    line-height: 40px;
+    padding: 0 15px;}
+.line-detail img{width: 20px;} 
+.line-detail >.pull-left{font-size:12px;}
+.line-detail span{display:inline-block;width: 40px;text-align: center;}
+.bg-black .nav > li > a:hover, .bg-black .nav > li > a:focus{
+    background:transparent;
+}

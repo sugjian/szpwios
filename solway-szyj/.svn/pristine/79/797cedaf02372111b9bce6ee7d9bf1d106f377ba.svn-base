@@ -1,0 +1,222 @@
+<!-- 日期插件 -->
+	<link rel="stylesheet" type="text/css" href="theme/default/css/datePicker.css">
+    <script type="text/javascript" src="js/require/iscroll.js"></script>
+    <script type="text/javascript" src="js/datePicker.js"></script>
+<div class="modal  fade col-xs-12 no-padder halfModal" id="assignTaskModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+   <div class="modal-dialog col-xs-12 no-padder ">
+      <div class="modal-content col-xs-12 no-padder">
+          <div class="modal-header n-b col-3 col-xs-12 ">
+            <button type="button" class="close m-b-n-sm main-green" data-dismiss="modal" aria-hidden="true">
+                  <i class="fa fa-times"></i>
+            </button>
+         </div>
+         <div class="modal-body col-3 col-xs-12 no-padder">
+          <div ng-controller="assignTaskCtrl" class="col-0">
+				<div class="col-xs-12  bg-writer m-b-xs padder-v"style="padding-bottom: 60px;">
+					<form class="col-xs-12 no-padder m-t-md">
+						<div class="form-group col-xs-12 no-padder">
+							<label class="col-xs-4 no-padder control-label m-t-xs text-1-5x default-col ">故障处理人</label>
+							<div class="col-xs-8 no-padder">
+								<ui-select ng-model="managerd.selected" theme="bootstrap" ng-change="removeClass('nameWran')">
+								<ui-select-match placeholder="请选择..."
+									ng-model="managerd.selected.realName">{{$select.selected.realName}}</ui-select-match>
+								<ui-select-choices
+									repeat="item in manager | filter: $select.search">
+								<div ng-bind-html="item.realName | highlight: $select.search"></div>
+								</ui-select-choices> </ui-select>
+								<span class="warn m-t-xs hidden" id="nameWran">故障处理人不能为空</span>
+							</div>
+						</div>
+						<span class="col-xs-12 text-center m-t-n-sm m-b-xs hidden" ><span style="color: red;">请选择故障处理人</span></span>
+						<div class="form-group col-xs-12 no-padder">
+							<label class="col-xs-4  no-padder control-label m-t-xs text-1-5x default-col  ">期望完成时间</label>
+								<div class="col-xs-8 no-padder bg-f7f7f7">
+									<div class="form-control col-6 " id="assignExpectedtime" ng-click="removeClass('timeWran')"> </div>
+									<span class="warn m-t-xs hidden" id="timeWran">完成时间不能为空</span>
+								</div>
+						</div>
+						<div class="col-xs-12 no-padder default-col text-1-5x  m-b-xs">任务描述</div>
+							<div class="col-xs-12 no-padder">
+								<textarea id="finishContent" maxlength="50"class="col-xs-12 padder-v-xsm bg-f7f7f7 text-1-2x" rows="5"placeholder="请输入任务说明" ng-click="removeClass('reasonWran')"></textarea>
+								<span class="warn m-t-xs hidden" id="reasonWran">任务说明不能为空</span>
+							</div>
+					</form>
+				</div>
+				<div class="navbar  navbar-fixed-bottom" ui-view="footer" ng-click="handFaultAlarm();">
+					<button class="col-xs-12 pull-in btn  btn-success padder-v">完成</button>
+				</div> 
+			</div>
+     	 </div><!-- /.modal-content -->
+		</div><!-- /.modal -->
+	</div>
+
+<!-- 模态框 -->
+<script>
+	$('#assignExpectedtime').html("请选择时间") 
+	$('#assignExpectedtime').datePicker({
+        beginyear: new Date().getFullYear(),
+        theme: 'datetime',
+        callBack: function() {
+        	$('#assignExpectedtime').html($('#assignExpectedtime').val())
+           // alert("--!当前值:" + $('#expectedtime').val());
+        }
+    });
+
+	app.controller('assignTaskCtrl', function($scope, $http, $stateParams,toaster,$state) {
+		$scope.managerd = {};
+		$scope.managerd.selected={userId:null,realName:"请选择..."};
+		$scope.manager = null;
+		$http({method:"POST",url:ctx+"FaultAlarm/selectById.htm",
+			params:{id:$stateParams.faultId}})
+	    .success(function (result) {
+	    	 $scope.faultData = result;
+	    	 $http({method:"POST",url:ctx+"/AdminUser/selectAll.htm",params:{sid:$scope.faultData.pstationid}})
+	 		.success(function (result) {
+	 	    	 $scope.manager = result;
+	 		});
+		}); 
+		
+		$http({method:"POST",url:ctx+"/FaultHand/getFaultNohandReason.htm",params:{}})
+		.success(function (result) {
+	    	 $scope.noHandReasonList = result;
+	    	 if(result!=null&&result.length>0){
+	    		 $scope.handclosereasonId = result[0].id;
+	    	 }
+		});
+		$scope.remindTime = 0;
+		$scope.handType = 0;
+		$scope.reasonType = 0;
+		$scope.changeHandType=function(type){
+			$scope.handType = type;
+		}
+		$scope.changeRemindTime = function(time){
+			$scope.remindTime = time;
+		}
+		$scope.changeReasonType = function(type){
+			$scope.reasonType = type;
+		}
+		$scope.changeHandclosereasonId = function(id){
+			$scope.handclosereasonId = id;
+			$scope.changeReasonType(0);
+		}
+		$scope.removeClass=function(warnId){
+			$("#"+warnId).addClass('hidden')
+		}
+		$scope.goBackNoteList=function(){
+			$state.go("noteList",{li_index:$stateParams.li_index});//不处理状态 跳转到 历史
+		}
+		$scope.handFaultAlarm = function(){
+			console.log("111")
+						$('#taskBtn').addClass("hidden");
+						$("#assignTaskModal").modal("hide")
+						return false
+		    			if($scope.handType==0){
+		    				var userInfo=$scope.managerd.selected.userId;
+		    				var expectedtime=$("#assignExpectedtime").html();
+		    				var finishContent=$("#finishContent").html()
+		    				if(userInfo==null){
+		    					$("#nameWran").removeClass("hidden")
+		    					return false;
+		    				}
+		    				if(expectedtime==null||expectedtime==""){
+		    					$("#timeWran").removeClass("hidden")
+		    					return false;
+		    				}
+		    				if(finishContent){
+		    					$("#reasonWran").removeClass("hidden")
+		    					return false;
+		    				} 
+		    				$http({method:"POST",url:ctx+"/FaultHand/faultHand.htm"
+		    					,params:{
+		    						"faultid":$stateParams.faultId,
+		    						"respman":userInfo,
+		    						"expectedtime":$("#assignExpectedtime").html(),
+		    						"remindtime":$scope.remindTime,
+		    						"taskcontent":encodeURIComponent($("#finishContent").val())
+		    					}})
+		    				.success(function (result) {
+		    					toaster.pop('success', '', result.message);
+		    					$state.go("noteList",{li_index:$stateParams.li_index});
+		    				}).error(function(response){
+		    					toaster.pop('error', '',"保存失败,请稍后重试!");
+		    					
+		    				});
+		    			}
+			
+				}
+	});
+</script>
+ <script type="text/javascript" charset="utf-8">
+    function countTime(opt) {
+        var now = new Date().getTime();
+        var defaultOpt = {
+            st: now, //开始时间,时间戳
+            et: now, //结束时间,时间戳
+            sdom: null,
+            mdom: null,
+            hdom: null,
+            ddom: null,
+            Mdom: null,
+            ydom: null
+        };
+        this.opt = $.extend({}, defaultOpt, opt);
+        this.h = 0;
+        this.m = 0;
+        this.s = 0;
+        this.d = 0;
+        this.M = 0;
+        this.y = 0;
+        this.init = function() {
+            if (now >= this.st) {
+                this.interCount();
+            } else {
+                this.interCount();
+            }
+        };
+        this.interCount = function() {
+            var _this = this;
+            var bTime = _this.bTime();
+            if (bTime > 0) {
+                _this.interSwitch = setInterval(function() {
+                    bTime--;
+                    if (bTime < 0) {
+                        clearInterval(_this.interSwitch);
+                    } else {
+                        _this.renderTime(bTime);
+                    }
+                }, 1000);
+            } else {
+
+            }
+        };
+        this.bTime = function() { //距离的时间(单位s)
+            return Math.round(this.opt.et / 1000 - now / 1000);
+        };
+        this.renderTime = function(t) {
+            this.s = t % 60;
+            this.m = Math.floor(t / 60) % 60;
+            this.h = (Math.floor(t / 3600) % 60) % 24;
+            this.d = Math.floor(t / 86400) % 30;
+            this.M = Math.floor(t / 2592000) % 12;
+            this.y = Math.floor(t / 31104000);
+            this.opt.ydom.innerHTML = this.y < 10 ? "0" + this.y : this.y;
+            this.opt.Mdom.innerHTML = this.M < 10 ? "0" + this.M : this.M;
+            this.opt.ddom.innerHTML = this.d < 10 ? "0" + this.d : this.d;
+            this.opt.hdom.innerHTML = this.h < 10 ? "0" + this.h : this.h;
+            this.opt.mdom.innerHTML = this.m < 10 ? "0" + this.m : this.m;
+            this.opt.sdom.innerHTML = this.s < 10 ? "0" + this.s : this.s;
+
+        }
+
+    };
+    var two = new countTime({
+        et: new Date('2015-4-7 8:30').getTime(),
+        ydom: document.getElementById('y'),
+        Mdom: document.getElementById('M'),
+        ddom: document.getElementById('d'),
+        hdom: document.getElementById('h'),
+        mdom: document.getElementById('m'),
+        sdom: document.getElementById('s')
+    });
+    two.init();
+    </script>

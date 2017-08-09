@@ -1,0 +1,165 @@
+<div class="col-xs-12 no-padder"  ng-controller="staTodayCtrl" >
+	<div class="navbar-header bg-black app-header navbar ng-scope"  id="distUserNav">
+		<ul class="nav col-xs-12 no-padder nav-top"  >
+          <li class="col-xs-1 no-padder">
+         	 <a	 data-dismiss="modal" ng-click="closeStatModal()" ><img src="./theme/default/img/icon/top-back@2x.png" class="v-middle m-t-xs img_goBack"></a>
+          </li>
+          <li class="col-xs-10 no-padder text-center">
+          	<a class="text-1-8x">
+          		气象
+          	</a>
+           </li>
+          <li class="col-xs-1 no-padder">
+          	
+          </li>
+        </ul>
+	</div>
+	<div class="col-xs-12 no-padder" style="margin-top:50px;" id="powerList">
+		<center class="wrapper-md col-xs-12" style="background: rgba(233, 182, 35,.5);">
+			<div class="col-xs-12 text-1-8x">
+				<span ng-bind="week"></span>
+				<span ng-bind="todayTime" class="m-l-xs m-r-xs"></span>
+				<span ng-show="data.weaterTag=='A'">晴</span>
+				<span ng-show="data.weaterTag=='B'">阴</span>
+				<span ng-show="data.weaterTag=='C'">雨</span>
+				<span ng-show="data.weaterTag=='D'">雪</span>
+				<span ng-show="data.weaterTag=='E'">霾</span>
+				<span ng-show="data.weaterTag=='X'">其他</span>
+			</div>
+			<div class="col-xs-12" style="margin:-70px 0px ;">
+				<!-- 木有图标？ -->
+				<i class="iconfont" style="font-size:200px;" ng-show="data.weaterTag=='A'">&#xe614;</i>
+				<i class="iconfont" style="font-size:200px;" ng-show="data.weaterTag=='B'">
+					<img src="./theme/default/img/icon/weather/y.png" style="width:100px;">
+				</i>
+				<i class="iconfont" style="font-size:200px;" ng-show="data.weaterTag=='C'">&#xe60d;</i>
+				<i class="iconfont" style="font-size:200px;" ng-show="data.weaterTag=='D'">&#xe610;</i>
+				<i class="iconfont" style="font-size:200px;" ng-show="data.weaterTag=='E'">&#xe60e;</i>
+				<i class="iconfont" style="font-size:200px;" ng-show="data.weaterTag=='X'">
+					<img src="./theme/default/img/icon/weather/other.png" style="width:100px;">
+				</i>
+			</div>
+		</center>
+		<div class="col-xs-12 wrapper bg-writer">
+			<div class="col-xs-12" >
+					<div class="col-xs-4 text-center">
+						<span class="col-d text-1-4x">
+						<span ng-class="{'hidden':!dailyJt}">实时</span><span ng-class="{'hidden':dailyJt}">最大</span>功率</span>
+					</div>
+					<div class="col-xs-4 text-center">
+						<span class="col-d text-1-4x">装机</span>
+					</div>
+					<div class="col-xs-4 text-center">
+						<span class="col-d text-1-4x">出力</span>
+					</div>
+			</div>
+			<div class="col-xs-12" >
+					<div class="col-xs-4 text-center">
+						<span class="text-1-4x"  ng-bind="data.power[0]">-</span>
+						<span class="text-1-4x"  ng-bind="data.power[1]">kW</span>
+					</div>
+					<div class="col-xs-4 text-center">
+						<span class="text-1-4x"  ng-bind="data.installedCapacity[0]">-</span>
+						<span class="text-1-4x"  ng-bind="data.installedCapacity[1]">kW</span>
+					</div>
+					<div class="col-xs-4 text-center">
+						<span class="text-1-4x"  ng-bind="data.outputPowerRatio">-</span>
+						<span class="text-1-4x" >%</span>
+					</div>
+			</div>
+		</div>
+		<div id="data" ng-if="data.weatherInstrument!=null">
+			<div class="col-xs-12 b-b-5 m-t m-b no-padder">
+				<div class="col-xs-12 no-padder m-t-xs m-b-xs">
+					<div class="col-xs-4 text-center text-1-4x no-padder col-d">辐射总量</div>
+					<div class="col-xs-5 text-center text-1-8x no-padder">
+						<span ng-bind="data.weatherInstrument.grossRadiationIntensity[0]">-</span>
+						<small ng-bind="data.weatherInstrument.grossRadiationIntensity[1]">kWh/㎡</small>
+					</div>
+					<div class="col-xs-3 text-center text-1-3x no-padder">
+						<i class="fa fa-star" ng-show="data.weatherInstrument.grossRadiationIntensityStar>=1"></i>
+						<i class="fa fa-star" ng-show="data.weatherInstrument.grossRadiationIntensityStar>=2"></i>
+						<i class="fa fa-star" ng-show="data.weatherInstrument.grossRadiationIntensityStar>=3"></i>
+						<i class="fa fa-star" ng-show="data.weatherInstrument.grossRadiationIntensityStar>=4"></i>
+						<i class="fa fa-star" ng-show="data.weatherInstrument.grossRadiationIntensityStar>=5"></i>
+					</div>
+				</div>
+				<div class="col-xs-12 no-padder m-b">
+					<div class="col-xs-4 text-1-4x text-center no-padder col-d">
+					<span ng-class="{'hidden':dailyJt}">最大</span>光照强度</div>
+					<div class="col-xs-5 text-center text-1-8x no-padder">
+						<span ng-bind="data.weatherInstrument.luminousIntensity[0]">-</span>
+						<small ng-bind="data.weatherInstrument.luminousIntensity[1]">kWh/㎡</small>
+					</div>
+					<div class="col-xs-3 text-1-3x text-center no-padder" ng-show="data.weatherInstrument.luminousWay=='P'">
+						水平光照
+					</div>
+					<div class="col-xs-3 text-1-3x text-center no-padder" ng-show="data.weatherInstrument.luminousWay!='P'">
+						斜面光照
+					</div>
+				</div>
+			</div>
+			<div class="col-xs-12 m-t-sm">
+				<div class="col-xs-4 text-center wrapper-md">
+					<span class="col-d text-1-3x"><span ng-class="{'hidden':dailyJt}">平<br>均<br></span>风<br>  速</span>
+					<p class="m-t" style="height: 26px;"><img src="./theme/default/img/icon/weather/fs.png" ></p>
+					<p class="text-1-6x"><span ng-bind="data.weatherInstrument.windSpeed">-</span> m/s</p>
+				</div>
+				<div class="col-xs-4 text-center wrapper-md">
+					<span class="col-d text-1-3x"><span ng-class="{'hidden':dailyJt}">平<br>均<br></span>温<br>  度</span>
+					<p class="m-t" style="height: 26px;"><img src="./theme/default/img/icon/weather/wd.png" ></p>
+					<p class="text-1-6x"><span ng-bind="data.weatherInstrument.temperature">-</span> ℃</p>
+				</div>
+				<div class="col-xs-4 text-center wrapper-md">
+					<span class="col-d text-1-3x"><span ng-class="{'hidden':dailyJt}">平<br>均<br></span>湿<br>  度</span>
+					<p class="m-t" style="height: 26px;"><img src="./theme/default/img/icon/weather/sd.png"style="height: 26px;" ></p>
+					<p class="text-1-6x"><span ng-bind="data.weatherInstrument.humidity">-</span> mm</p>
+				</div>
+			</div>
+		</div>
+		<div class="text-center" id="nodata" ng-if="data.weatherInstrument==null">
+			<p class="m-t"><img src="./theme/default/img/icon/weather/nodata.png" height="115" width="94" style="margin: 50px 70px 50px 50px;"></p>
+			<!-- <button type="button" class="btn btn-success btn-green-sm m-r-md" style="width: 130px;padding: 6px 0px 6px 0px;">去添加气象仪</button> -->
+			<button type="button" class="btn btn-success btn-green-sm m-r-md" style="width: 130px;padding: 6px 0px 6px 0px;background: transparent;" ng-click="showRim()" >引用周边气象信息</button>
+		</div>
+	</div>
+
+</div>
+<script>
+	if(isAndroid){//判断安卓，修改顶部样式
+		$("#distUserNav").addClass("m-t-none");
+	}
+	$("#powerList").css("height",$(window).height()-50)
+	
+	app.controller('staTodayCtrl',function($scope, $http, $state,$rootScope) {
+		//$scope.mapTimeDay   当前时间
+		var dayNames = new Array("星期日","星期一","星期二","星期三","星期四","星期五","星期六");  
+		weekdays = new Date();  
+		$scope.week=dayNames[weekdays.getDay()];
+		
+		//打开周边
+		$scope.showRim=function(){
+			$rootScope.statDataPage2="./tpl/statistics/modal/statDayModal/showRim.html"
+			$scope.openStatModal2();
+		}
+		//当前日
+		$scope.todayTime=new Date($scope.mapTimeDay).Format("yyyy年MM月dd日")
+			$http({
+				method : "POST",
+				url : ctx+"MobileHmDeviceMonitor/getStationWeater.htm",
+				params : {
+					'powerStationId':JSON.parse(storage["powerStationId"]),
+					'dateString':new Date($scope.mapTimeDay).Format("yyyy-MM-dd")
+					}
+				})
+			.success(function (msg) {
+				//debugger
+				//msg.weatherInstrument = null;// TODO DELETE
+				$scope.data=msg;
+			}).error(function(msg){
+				return
+			});
+	});
+	
+</script>
+		

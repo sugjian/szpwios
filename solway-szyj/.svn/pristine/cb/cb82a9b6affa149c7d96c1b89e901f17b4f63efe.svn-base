@@ -1,0 +1,89 @@
+<!-- navbar header -->
+<style>
+.search-input-div .search{
+	position: absolute;
+    z-index: 10;
+    color: #06bebd;
+    left: 10px;
+    font-size: 18px;
+    top: 7px;
+}
+.search-input-div .search-input{
+	 padding-left: 30px;
+    border-radius: 500px 0px 0px 500px!important;
+    background: rgba(255, 255, 255,.3);
+    color: #fff;
+}
+.search-input-div .input-group-btn{
+    border-left: 1px solid transparent;
+}
+.search-input-div .input-group-btn button{
+background: rgba(255, 255, 255,.3);
+    color: #fff;
+    }
+</style>
+<div class="hbox hbox-auto-xs hbox-auto-sm"
+	ng-init="app.settings.asideFolded = false;app.settings.asideDock = false;">
+	<div ng-controller="noteListSearchCtrl">
+		<div class="navbar-header bg-black app-header navbar ng-scope"
+			id="distNoteNav" style="border-bottom: 1px solid #16212a;">
+			<ul class="nav col-xs-12 no-padder nav-top">
+				<li class="col-xs-4" ui-sref-active="active">
+				<a ng-click="goBackNoteList()">
+					<img src="theme/default/img/icon/top-back@2x.png" class="v-middle m-t-xs img_goBack">
+				</a>
+				</li>
+				<li class="col-xs-4 no-padder text-center">
+					<span class="col-xs-12  no-padder text-2x m-t-sm" ng-init="falultTab.activeTab=1">
+						<a class="col-xs-12 no-padder"  href="javascript:;" class="text-1-2x">我的消息</a>
+					</span>
+				</li>
+				<!-- 搜索 -->
+				<li class="col-xs-4 ">
+				</li>
+			</ul> 
+		</div>
+		<!-- / navbar header -->
+		<ul class="nav col-xs-12 no-padder">
+				<li class="col-xs-10 text-center">
+					<div class="form-group m-t">
+		            <div class="input-group search-input-div">
+		           		<i class="fa fa-search search"></i></button>
+		              <input id="noteSearch" type="text" class="form-control input-sm bg-light no-border rounded padder search-input" placeholder="搜索" >
+		              <span class="input-group-btn">
+		                <button ng-click="remove()"  class="btn btn-sm bg-light rounded">
+		               	 <i class="glyphicon glyphicon-remove"></i>
+		                </button>
+		              </span>
+		            </div>
+		          </div>
+				</li>
+				<!-- 搜索 -->
+				<li class="col-xs-2 no-padder">
+					<div class="text-1-6x white m-t" ng-click="search()">确认</div>
+				</li>
+			</ul> 
+		
+	</div>
+</div>
+
+<script>
+	if (isAndroid) {//判断安卓，修改顶部样式
+		$("#distNoteNav").addClass("m-t-none");
+	}
+	app.controller('noteListSearchCtrl',function($scope, $http, $state, $stateParams) {
+		$scope.remove=function(){
+			$("#noteSearch").val("")
+		}
+		$scope.goBackNoteList=function(){
+			$state.go("noteList");
+		}
+		$scope.search=function(){
+			var keyWord=$("#noteSearch").val();
+			$state.go("noteList", {
+				keyWord : keyWord
+			});
+		}
+	})
+		
+</script>

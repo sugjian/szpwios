@@ -1,0 +1,147 @@
+<div class="col-xs-12 no-padder"  ng-controller="staOnlineOneCtrl" >
+	<div class="navbar-header bg-black app-header navbar ng-scope"  id="distUserNav">
+		<ul class="nav col-xs-12 no-padder nav-top"  >
+          <li class="col-xs-1 no-padder">
+         	 <a	 data-dismiss="modal" ng-click="closeStatModal()" ><img src="./theme/default/img/icon/top-back@2x.png" class="v-middle m-t-xs img_goBack"></a>
+          </li>
+          <li class="col-xs-10 no-padder text-center">
+          	<a class="text-1-8x">
+          		故障
+          	</a>
+           </li>
+          <li class="col-xs-1 no-padder">
+          	
+          </li>
+        </ul>
+	</div>
+<div class="col-xs-12 no-padder rollDiv"style="margin-top:50px;">
+	<div class="col-xs-12 no-padder ">
+		<div class="col-xs-12 no-padder rollDiv">
+			<div class="col-xs-12 text-center m-t-xs"id="loadFlags">
+			 	</div>
+			 <div class="col-xs-12 text-center">
+			 	<div id="staOnlineOne" style="height:300px;"></div>
+			 </div>
+			<div class="col-xs-12 wrapper-xs m-t-n-md m-b-md" >
+				<div class="col-xs-4"> </div>
+				<div class="col-xs-4 text-2x no-padder text-center">
+					故障率
+				</div>
+			</div>
+			<div class="col-xs-12 no-padder" style=" background-image: url('./theme/default/img/bg_red.jpg');height:303px;padding: 20px;">
+			<div class="col-xs-12  b-b-5 ">
+				<center class="col-xs-12 m-t-sm">
+					<span ng-bind="msg.deviceFaultNum|dataNullFilter" class="text-3x"></span>
+					<p class="text-1-6x opa-7 ">故障台次</p>
+				</center>
+				<div class="col-xs-6 text-center wrapper">
+					<p class="text-1-6x opa-7 ">损失小时</p>
+					<span class="text-3x"><span ng-bind="msg.lostHours|dataNullFilter"></span>h</span>
+				</div>
+				<div class="col-xs-6 text-center wrapper">
+					<p class="text-1-6x opa-7 ">损失电量</p>
+					<span class="text-3x">
+						<span  ng-bind="lostGeneratingPower[0]|dataNullFilter"></span>
+						<span  ng-bind="lostGeneratingPower[1]|dataNullFilter"></span>
+					</span>
+				</div>
+			</div>
+			<div class="col-xs-12">
+				<div class="col-xs-6 text-center wrapper-sm">
+					<p class="text-1-6x opa-7 ">M T T R </p>
+					<span class="text-3x">
+						<span ng-bind="msg.mttr|dataNullFilter">3.23423</span>
+						<span>h</span>
+					</span>
+				</div> 
+				<div class="col-xs-6 text-center wrapper-sm">
+					<p class="text-1-6x opa-7 ">M T B F </p>
+					<span class="text-3x">
+						<span ng-bind="msg.mtbf|dataNullFilter"></span>h
+					</span>
+				</div>
+			</div>
+		</div>
+		</div>
+	</div>
+</div>
+</div>
+<script>
+	if(isAndroid){//判断安卓，修改顶部样式
+		$("#distUserNav").addClass("m-t-none");
+	}
+	$(".rollDiv").css("height",$(window).height()-50)
+	$("#staOnlineOne").css("height",$(window).height()-400)
+
+	app.controller('staOnlineOneCtrl',function($scope, $http, $state,$rootScope) {
+		//$scope.mapTimeDay   当前时间
+		var statFaultType=storage["statFaultType"];
+		var statData;
+		if(statFaultType=="D"){
+			statData=new Date($scope.mapTimeDay).Format("yyyy/MM/dd/")
+		}else if(statFaultType=="M"){
+			statData=$scope.mapTimeMonth
+		}else if(statFaultType=="Y"){
+			statData=$scope.mapTimeYear
+		}else if(statFaultType=="A"){
+			statData=""
+		}
+		$scope.powerStationId=JSON.parse(storage["powerStationId"]);//获取电站id 列表
+			console.log(statData)
+			//请求电站的信息
+			$http({
+				method : "POST",
+				url : ctx+"MobileHmDeviceMonitor/getDayChartDeviceFault.htm",
+				params : {
+					'dateString':statData,
+					'powerStationId':$scope.powerStationId,
+					'idsType':"station_one",
+					'dateType':statFaultType
+					}  
+				})
+			.success(function (msg) {
+				$scope.msg=msg;
+				powerAnalyze(msg.deviceFaultPercent)
+			}).error(function(msg){
+				return
+			});
+	});
+	function powerAnalyze(deviceFaultPercent){
+		myChart = echarts.init(document.getElementById('staOnlineOne'));
+		$.hideLoading(loadFlags)
+		window.addEventListener("resize", function() {
+			myChart.resize();
+		});
+		option = {
+			 	color : ['#cb314b','#1d2939'],
+			    calculable : false,
+			    series : [
+			        {
+			            type:'pie',
+			            radius : '70%',
+			            center: ['50%', '50%'],
+			          itemStyle : {
+			                normal : {
+			                    label : {
+			                        position : 'inner',
+			                        textStyle:{
+			                        	  color:'#fff',
+			                         	   fontSize:18
+			                          },
+			                    },
+			                    labelLine : {
+			                        show : false
+			                    }
+			                }
+			            },
+			            data:[
+			                {value:deviceFaultPercent, name:deviceFaultPercent+"%", selected:true},
+			                {value:100-deviceFaultPercent, name:''}
+			            ]
+			        }
+			    ]
+			};
+			myChart.setOption(option);
+	}
+</script>
+		

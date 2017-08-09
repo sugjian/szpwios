@@ -1,0 +1,127 @@
+<div ng-controller="searchPageCtrl" style="background:rgb(28,42,53)">
+	<div class="select-con clearfix"   style="overflow:auto;color:white;">
+		<div class="pull-left condition">
+			<div>供电局</div>
+			<div>变电站</div>
+			<div>电力线</div>
+			<div>节点</div>
+		</div>
+		<div class="pull-right condition-sel">
+			<div><select id="gdjs"></select></div>
+			<div><select id="bdzs"></select></div>
+			<div><select id="lines"></select></div>
+			<div><select id="nodes"></select></div>
+		</div>
+		<div style="padding-bottom: 50px;"><input type="button" value="查询" ng-click="search()" style="display:block;"></div>
+	</div>
+</div>
+<script>
+app.controller('searchPageCtrl', function($scope,$state,$http) {
+	var windowH = $(window).height();
+	var windowW= $(window).width();
+	$(".select-con").height(windowH-150);
+	$scope.$on("toSearchPage",function(e,data){
+		if(data){
+			$scope.time = data[0];
+			$scope.type = data[1];
+		}
+	});
+	
+	$("#gdjs").change(function(){
+		$("#bdzs").empty();
+		$("#lines").empty();
+		$("#nodes").empty();
+		$scope.sysId = $("#gdjs").val();
+		if($scope.sysId){
+			$scope.substations = $scope.overViewData[$scope.sysId].substationsMap;
+			angular.forEach($scope.substations,function(data,index){
+				$("#bdzs").append("<option value='"+index+"'>"+data.name+"</option>");
+			});
+			if($scope.bdzIdSP){
+				$("#bdzs").val($scope.bdzIdSP);
+			}
+		}
+		$("#bdzs").trigger("change");
+	});
+	
+	$("#bdzs").change(function(){
+		$("#lines").empty();
+		$("#nodes").empty();
+		$scope.bdzId = $("#bdzs").val();
+		if($scope.bdzId){
+			$scope.powerLines = $scope.substations[$scope.bdzId].powerLines;
+			for(var i = 0;i<$scope.powerLines.length;i++){
+				$("#lines").append("<option value='"+$scope.powerLines[i].id+"'>"+$scope.powerLines[i].name+"</option>");
+			}
+			if($scope.lineIdSP){
+				$("#lines").val($scope.lineIdSP);
+			}
+		}
+		$("#lines").trigger("change");
+	});
+	
+	$("#lines").change(function(){
+		$("#nodes").empty();
+		$scope.linesId = $("#lines").val();
+		$scope.powerLinesMap = $scope.overViewData[$scope.sysId].powerLinesMap;
+		if($scope.linesId){
+			angular.forEach($scope.powerLinesMap,function(data,index){
+				if(index == $scope.linesId){
+					$scope.nodes = $scope.powerLinesMap[index].nodes;
+				}
+			});
+			if($scope.nodes && $scope.nodes.length>0){
+				for(var i =0 ;i<$scope.nodes.length;i++){
+					if($scope.nodes[i].type == 3){
+						$("#nodes").append("<option value='"+$scope.nodes[i].deviceId+"'>"+$scope.nodes[i].name+"</option>");
+					}
+					if($scope.nodeIdSP){
+						$("#nodes").val($scope.nodeIdSP);
+					}
+				}
+			}
+		}
+	});
+	
+	//只能查询到前一天数据 mod 2017-05-11
+	var nowDate = new Date();
+	nowDate.setDate(nowDate.getDate()-1);
+	
+	init();
+	function init(){
+		$scope.overViewData = overViewData;
+		if($scope.overViewData){
+			angular.forEach($scope.overViewData,function(data,index){
+				$("#gdjs").append("<option value='"+index+"'>"+data.name+"</option>");
+			});
+			if($scope.gdjIdSP){
+				$("#gdjs").val($scope.gdjIdSP);
+			}
+			$("#gdjs").trigger("change");
+			
+		}else{alert("加载数据失败")}
+		$scope.time = nowDate.Format("yyyy-MM-dd");
+		$scope.type = "day";
+	}
+	
+	$scope.search = function(){
+		var powerSupplysMap = JSON.parse(storage["powerSupplysMap"]);
+		$scope.address = powerSupplysMap[$scope.sysId].address;
+		if($scope.time == null || $scope.time == undefined){
+			alert("请选择时间");
+			return false;
+		}
+		
+		var dcu_id = $("#nodes").val();
+		if(dcu_id == null || dcu_id == undefined){
+			alert("请选择节点");
+			return false;
+		}
+		var nodeData = [dcu_id,$scope.type,$scope.time,$scope.address,$scope.sysId,$scope.bdzId,$scope.linesId]
+		$scope.$emit("includes",nodeData);
+	}
+	
+	
+});
+
+</script>

@@ -1,0 +1,163 @@
+<!-- navbar header -->
+<div class="col-xs-12 no-padder" ng-controller="resNoteCtrl">
+<div class="navbar-header bg-black app-header navbar ng-scope" id="distPassNav">
+	<ul class="nav col-xs-12 no-padder nav-top" >
+           <li class="col-xs-3 no-padder" ui-sref-active="active">
+          	<a ui-sref="userList" class="text-1-6x">
+          		取消
+          	</a>
+           </li>
+          <li class="col-xs-6 no-padder text-center">
+          	<a href="" class="text-1-8x">
+          		消息接收设置
+          	</a>
+           </li> 
+          <li class="col-xs-3 no-padder">
+         	 <a class="text-1-6x pull-right" ng-click="finishNoteSet()">完成</a>	 	
+          </li>
+        </ul>
+</div>
+<!-- / navbar header -->
+	<div class="col-xs-12 no-padder m-t text-1-5x " >         
+		<div class="col-xs-12  list-div  padder-no m-b-1 bg-writer">
+			<span class="col-xs-3 ">提醒时间区间</span> 
+			 <div class="col-xs-9">
+              	<span class="pull-right">
+              		<select name="begin" class="no-bg" id="begin">
+	              		 <option value="01:00">1:00</option>
+	              		 <option value="02:00">2:00</option>
+	              		 <option value="03:00">3:00</option>
+	              		 <option value="04:00">4:00</option>
+	              		 <option value="05:00">5:00</option>
+			              <option value="06:00">6:00</option>
+			              <option value="07:00">7:00</option>
+			              <option value="08:00">8:00</option>
+			              <option value="09:00">9:00</option>
+			              <option value="10:00">10:00</option>
+			              <option value="11:00">11:00</option>
+			              <option value="12:00">12:00</option>
+			              <option value="13:00">13:00</option>
+			              <option value="14:00">14:00</option>
+			              <option value="15:00">15:00</option>
+			              <option value="16:00">16:00</option>
+			              <option value="17:00">17:00</option>
+			              <option value="18:00">18:00</option>
+			              <option value="19:00">19:00</option>
+			              <option value="20:00">20:00</option>
+			              <option value="21:00">21:00</option>
+			              <option value="22:00">22:00</option>
+			              <option value="23:00">23:00</option>
+			              <option value="24:00">24:00</option>
+			          </select> - 
+              		<select name="end" class="no-bg" id="end">
+	              		 <option value="01:00">1:00</option>
+	              		 <option value="02:00">2:00</option>
+	              		 <option value="03:00">3:00</option>
+	              		 <option value="04:00">4:00</option>
+	              		 <option value="05:00">5:00</option>
+			              <option value="06:00">6:00</option>
+			              <option value="07:00">7:00</option>
+			              <option value="08:00">8:00</option>
+			              <option value="09:00">9:00</option>
+			              <option value="10:00">10:00</option>
+			              <option value="11:00">11:00</option>
+			              <option value="12:00">12:00</option>
+			              <option value="13:00">13:00</option>
+			              <option value="14:00">14:00</option>
+			              <option value="15:00">15:00</option>
+			              <option value="16:00">16:00</option>
+			              <option value="17:00">17:00</option>
+			              <option value="18:00">18:00</option>
+			              <option value="19:00">19:00</option>
+			              <option value="20:00">20:00</option>
+			              <option value="21:00">21:00</option>
+			              <option value="22:00">22:00</option>
+			              <option value="23:00">23:00</option>
+			              <option value="24:00">24:00</option>
+			          </select>
+              	</span>
+	          </div>
+		</div>
+		<div class="col-xs-12  list-div  padder-no m-b-1 bg-writer"> 
+             <span class="col-xs-3 ">接收不提醒</span>
+             <div class="col-xs-9">
+				<span class="pull-right"> 
+		            <label class="i-switch i-switch-lg" style="top:10px;">
+		              <input type="checkbox" id="checkboxFlag" ng-click="changeInput()" checked >
+		              <i></i>
+		            </label>
+				</span>
+             </div>
+           </div>
+          <div class="col-xs-12 list-div m-t-sm padder-no bg-writer hidden"> 
+             <span class=" col-xs-3 ">接收消息类型</span>
+             <div class="col-xs-9">
+				<span class="pull-right">
+					<select name="account" class="form-control m-t-xs form-control-no-bg">
+			              <option value="option 1">option 1</option>
+			              <option value="option 2">option 2</option>
+			              <option value="option 3">option 3</option>
+			              <option value="option 4">option 4</option>
+			          </select>
+				</span>
+             </div>
+           </div>
+	</div>
+</div>
+<script>
+if(isAndroid){//判断安卓，修改顶部样式
+	$("#distPassNav").addClass("m-t-none");
+}
+app.controller('resNoteCtrl',function($scope, $http,$state,$stateParams) {
+	
+		var checked;
+		$scope.getSetInfo=function(){
+			$http({
+				method : "POST",
+				url : ctx+"MobileAdminUser/getUserSettingPush.htm",
+				}).success(function (msg) {
+					var beginTime=new Date(msg.startTime).format("hh:mm")
+					
+					$("#begin").val(new Date(msg.startTime).format("hh:mm"))
+					$("#end").val(new Date(msg.endTime).format("hh:mm"))
+					if(msg.sendPush){
+						$("#checkboxFlag").attr("checked",true);
+						checked=true
+					}else{
+						$("#checkboxFlag").attr("checked",false);
+						checked=false
+					}
+				}).error(function(msg){
+					
+				});
+		}
+		$scope.getSetInfo()
+		$scope.changeInput=function(val){
+			if($("#checkboxFlag").attr("checked")=="checked"){
+				$("#checkboxFlag").attr("checked",false);
+				checked=false
+			}else{
+				$("#checkboxFlag").attr("checked",true);
+				checked=true
+			}
+			console.log($("#checkboxFlag").attr("checked")+"现在的状态")
+		}
+		$scope.finishNoteSet=function(){
+			console.log(checked)
+				$http({
+				method : "POST",
+				url : ctx+"MobileAdminUser/setUserSettingPush.htm",
+				params:{
+					"sendPush":checked,
+					"startTimeStr":$("#begin").val(),
+					"endTimeStr":$("#end").val()
+				}
+				}).success(function (msg) {
+					if(msg){
+						$state.go("userList");
+					}
+				}).error(function(msg){
+				});
+		}
+});
+</script>

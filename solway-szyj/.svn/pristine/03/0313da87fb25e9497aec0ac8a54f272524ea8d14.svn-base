@@ -1,0 +1,68 @@
+<!-- footer -->
+<div class="navbar col-xs-12 no-padder  navbar-fixed-bottom" ng-controller="footCtrl">
+	<ul class="nav col-xs-12 no-padder text-center bg-black"
+		style="height: 50px;background-color: rgba(41, 55, 66,.9);border-top: 1px solid #2e3c46;">
+		<li class="col-xs-3 no-padder" ui-sref-active="active" ng-click="removeSSJK()" >
+		<a ui-sref="app.realStatistics">
+			<img src="./theme/default/img/icon/foot-antenna1@2x.png" class="v-middle"  style="width:20px;height: 20px"/>
+			<div class="text-1-2x">实时监控</div>
+		</a>
+		</li>
+		<li class="col-xs-3 no-padder" ng-click="showSSJK()" id="ssjkTab">
+			<a>
+				<img src="./theme/default/img/icon/foot-antenna1@2x.png" class="v-middle"  style="width:20px;height: 20px"/>
+				<div class="text-1-2x">历史统计</div>
+			</a>
+		</li>
+		<li class="col-xs-3 no-padder" ui-sref-active="active" ng-click="removeSSJK()">
+			<a ui-sref="noteList">
+				<img src="./theme/default/img/icon/top-ringer@2x.png" class="v-middle"  style="width:14px;height: 20px"/>
+				<span class="badge badge-sm up bg-danger pull-right-xs" id="noticeCount1"></span>
+				<div class="text-1-2x">消息中心</div>
+			</a>
+		</li>
+		 <li class="col-xs-3 col-sm-4 no-padder"  ui-sref-active="active" ng-click="removeSSJK()">
+         	<a ui-sref="userList">
+        	  	<img src="./theme/default/img/icon/top-user@2x.png" class="v-middle"  style="width:16px;height: 20px">
+        	  	<div class="text-1-2x">个人中心</div>
+			</a>
+          </li>
+	</ul>
+</div>
+<script type="text/javascript">
+app.controller('footCtrl',function($scope, $http,$stateParams,$rootScope,$state) {
+	//$("#ssjkTab").addClass("nav-bottom-active")
+	$scope.url=storage["pageUrl"];
+	var timeTicket;
+	$scope.showSSJK=function(){
+		$("#ssjkTab").addClass("active")
+		window.location.href = "./index.html#/app/statistics";
+	}
+	$scope.removeSSJK=function(){
+		$("#ssjkTab").removeClass("active")
+	}
+	$scope.getNoteCount=function(){
+		$.ajax({
+			url: ctx + "/BaseMessage/getNoReadBaseMessageCount.htm",
+			type: "POST",
+			data : {
+				'searchKey':'',
+				isRorS:true
+  			},success: function(msg) {
+				if((msg+"").indexOf('<title>')>=0){
+       				return false;
+       			}
+       			if(msg>0){
+       				$("#noticeCount1").html(msg);
+       			}else{
+       				$("#noticeCount1").html("");
+       			}
+			}
+		});
+	}
+	timeTicket = setInterval(function (){
+		$scope.getNoteCount();
+	},5000);
+	$scope.getNoteCount();
+});
+</script>

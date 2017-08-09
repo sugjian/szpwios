@@ -1,0 +1,146 @@
+<div class="col-xs-12 no-padder"  ng-controller="rimCtrl" >
+	<div class="navbar-header bg-black app-header navbar ng-scope m-t-none"  id="distUserNav">
+	<ul class="nav col-xs-12 no-padder nav-top" >
+          <li class="col-xs-1 no-padder">
+         	 <a	 data-dismiss="modal" ng-click="closeStatModal2()" ><img src="./theme/default/img/icon/top-back@2x.png" class="v-middle m-t-xs img_goBack"></a>
+          </li>
+          <li class="col-xs-10 no-padder text-center">
+          	<a class="text-1-8x">
+          		周边气象信息
+          	</a>
+           </li>
+          <li class="col-xs-1 no-padder">
+          	
+          </li>
+        </ul>
+	</div>
+	<div class="col-xs-12 no-padder rollDiv" style="margin-top:50px;" >
+		<div class="col-xs-12 wrapper" style="background-color: rgba(255, 255, 255, 0.1);margin-bottom: 2px;"
+			 ng-repeat="a in data.list" ng-click="showPorISelecter(a.psId,a.aerographId,a.distance[0],a.distance[1])">
+			<div class="col-xs-5 m-t-sm">
+				<p class="text-2-4x text-left">
+					<span ng-bind="a.distance[0]">-</span>
+					<span ng-bind="a.distance[1]">m</span>
+				</p>
+			</div>
+			<div class="col-xs-4 pull-right" style="padding: 0px">
+				<p class="text-1-2x m-sm text-right">
+					<span ng-bind="a.planeLuminousIntensity[0]">-</span>
+					<span ng-bind="a.planeLuminousIntensity[1]">W/㎡</span>
+				</p>
+				<p class="text-1-2x m-sm text-right">
+					<span ng-bind="a.inclineLuminousIntensity[0]">-</span>
+					<span ng-bind="a.inclineLuminousIntensity[1]">W/㎡</span>
+				</p>
+			</div>
+			<div class="col-xs-3 pull-right" style="padding: 0px">
+				<p class="text-1-2x col-d m-sm text-right">水平光照</p>
+				<p class="text-1-2x col-d m-sm text-right">斜面光照</p>
+			</div>
+		</div>
+	</div>
+<!-- 模态框（Modal） -->
+<div class="modal modal-center  fade" id="poriSelecterModal" tabindex="-1" role="dialog"
+   aria-labelledby="myModalLabel" aria-hidden="true">
+   <div class="modal-dialog-delete" style="margin:50px;">
+      <div class="modal-content" 
+      	style="border-radius:12px;background-color: rgba(255, 255, 255, 0.9);">
+         <div class="modal-body col-3 text-center">
+           	<p class="text-1-6x" ng-bind="datalistDistance">0m</p>
+           	<p>选择光照方向</p>
+         </div>
+	<div class="modal-footer no-padder">
+		
+<!-- FROM 
+<form action="${ctx }/CfgWeather/update.htm" method="post" id="weatherForm">
+    private Integer id;
+    private Integer pstationid;
+    private String pstationStr;
+    private String isborrow;
+    private String isborrowStr;
+    private Integer borrowpstationid;
+    private String borrowpstationidStr; 
+    private String borrowdeviceid;
+    private String borrowdeviceidStr; 
+    private String weatherdetail;
+    private String weatherdetailStr;
+</form>
+<!-- FROM -->
+
+		<div class="col-xs-12 no-padder text-center">
+			<input ng-model="datalistPsId" type="hidden">
+			<input ng-model="datalistAerographId" type="hidden">
+			<button type="button" class="btn btn-confirm col-xs-12 no-padder btn-confirm-yes"  
+				style="margin: 10px 0px 10px 0px;background-color: transparent;" ng-click="chosePorISelecter('P')">水平光照</button>
+			<button type="button" class="btn btn-confirm col-xs-12 no-padder btn-confirm-yes"  
+				style="margin: 10px 0px 10px 0px;background-color: transparent;" ng-click="chosePorISelecter('I')">斜面光照</button>
+		</div>
+	</div>
+	<div class="modal-footer no-padder">
+		<div class="col-xs-12 no-padder text-center">
+			<button type="button" class="btn btn-confirm col-xs-12 no-padder" 
+				style="background-color: transparent;" ng-click="hidePorISelecter()">取消</button>
+		</div>
+	</div>
+         </div>
+      </div><!-- /.modal-content -->
+</div><!-- /.modal -->
+</div>
+<!-- 模态框 -->
+</div>
+
+<script>
+	if(isAndroid){//判断安卓，修改顶部样式
+		$("#distUserNav").addClass("m-t-none");
+	}
+	$(".rollDiv").css("height",$(window).height()-50)
+
+	
+	app.controller('rimCtrl',function($scope, $http, $state,$rootScope) {
+
+		$http({
+			method : "POST",
+			url : ctx+"MobileHmDeviceMonitor/getStationWeaterAround.htm",
+			params : {
+				'powerStationId':JSON.parse(storage["powerStationId"])
+				}
+			})
+		.success(function (msg) {
+			if(msg==null){
+				//无数据
+				return
+			}
+			$scope.data=msg;
+		}).error(function(msg){
+			return
+		});
+
+		$scope.showPorISelecter=function(psId,aerographId,val,unit){
+			//debugger
+			$scope.datalistDistance = val+" "+unit;
+			$scope.datalistPsId = psId;
+			$scope.datalistAerographId = aerographId;
+			$('#poriSelecterModal').modal({backdrop: 'static', keyboard: false});
+		}
+		$scope.hidePorISelecter=function(){
+			$('#poriSelecterModal').modal("hide");
+		}
+		
+		$scope.chosePorISelecter=function(type){
+			//debugger
+			if(type=='P'){
+				
+			}
+			
+			if(type=='I'){
+			
+			}
+			
+			$('#poriSelecterModal').modal("hide");
+			$scope.showWeatherPower();
+			$("a")[10].click();//TODO DELETE showWeatherPower()
+		}
+		
+	});	
+</script>
+		

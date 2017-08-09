@@ -1,0 +1,38 @@
+
+<div class="navbar-header bg-black app-header navbar ng-scope"id="distUserNav">
+	<ul class="nav col-xs-12 no-padder nav-top"  >
+          <li class="col-xs-3 no-padder" ui-sref-active="active">
+          	<a ui-sref="userList">
+          		<img src="./theme/default/img/icon/top-back@2x.png" class="v-middle m-t-xs img_goBack">
+          	</a>
+           </li>
+          <li class="col-xs-6 no-padder text-center">
+          	<a href="" class="text-1-8x">
+          		关于新能云
+          	</a>
+           </li>
+          <li class="col-xs-3 no-padder">
+          	
+          </li>
+        </ul>
+</div>
+<center class="padder col-sm-12"  style="margin-top: 50px">
+		<img src="theme/default/img/login.png" style="zoom: 0.5" class="logoImg">
+		<p class="text-1-4x">
+			新能云®</p>
+<p class="text-1-4x">基于大数据的新能源电站智能运营管理平台</p>
+<p class="text-1-4x">
+利用大数据技术，以软件免费共享的模式，实现电站发电设备状态可控在控、故障处理准确及时、人员操作安全规范、统计分析深入全面、运行维护智能高效、经营效益不断提高。
+		</p>
+		
+	</center>
+	<center style="padding-top:300px;">
+		<span style="color: #666;" id="appVersionEgg">build 2.1.1</span>
+	</center>
+
+<script>
+	if(isAndroid){//判断安卓，修改顶部样式
+		$("#distUserNav").addClass("m-t-none");
+	}
+</script>
+

@@ -1,0 +1,285 @@
+<link rel="stylesheet" href="theme/default/css/login.css" type="text/css" />
+<style>
+	body {
+		background-color: transparent;
+	}
+	.app {
+		background-color: transparent !important;
+	}
+</style>
+<script type="text/javascript">
+	initLogin = 1;
+
+	$(function() {
+		//版本彩蛋
+		var appVersionEgg_bool = true;
+		var appVersionEgg_Html = $("#appVersionEgg").html();
+		$("#appVersionEgg").on("click", function() {
+			if (appVersionEgg_bool) {
+				$("#appVersionEgg").html("[" + svnRevision + "]" + ctx)
+			} else {
+				$("#appVersionEgg").html(appVersionEgg_Html)
+			}
+			appVersionEgg_bool = !appVersionEgg_bool
+		});
+	})
+	
+	//启动登录按钮登录状态样式
+	function addBtnClass() {
+		$(".login-btn").button('loading').delay(1000).queue(function() {});
+	}
+
+	function dologin() {
+		$("#login_username").val('demo');
+		$("#login_pass").val('123456');
+		$("#loginBtn").trigger('click');
+	}
+	app.controller('loginCtrl',
+		function($scope, $http, $stateParams, $rootScope, $state) {
+		
+			//忘记密码
+			$scope.forgetPwd = function() {
+					$state.go("forgetPwd")
+				}
+			//注册
+			$scope.goRegist= function() {
+					$state.go("regist")
+				}
+			//登录方法
+			$scope.login = function() {
+				addBtnClass()
+				var username = $("#login_username").val();
+				var password = $("#login_pass").val();
+				var code = $("#login_code").val();
+
+				if (username == "" || null == username) {
+					$("#loginMessage").html("用户名不能为空");
+					$(".login-btn").button('reset');
+					return false;
+				}
+				if (null == password || password == "") {
+					$("#loginMessage").html("密码不能为空");
+					$(".login-btn").button('reset');
+					return false;
+				}
+				$.ajax({
+					url: ctx + "/Login/doLogin.htm",
+					type: "POST",
+					timeout: 5000,
+					data: {
+						"userName": username,
+						"password": password,
+						"code": code,
+						"deviceToken": deviceToken
+					},
+					success: function(msg) { 
+						console.log(msg)
+						if (msg.status == 2) {
+							$("#loginMessage").html("用户名或密码有误!");
+							$("#loginMessage").show();
+							$("#userImage").attr("src", "images/login/userRed.png");
+							$("#passwordImage").attr("src", "images/login/passwordRed.png");
+							$(".login-btn").button('reset');
+						} else if (msg.status == 3) {
+							$("#loginMessage").html("验证码有误!");
+							$("#loginMessage").show();
+							$("#codeImage").attr("src", "/images/login/codeRed.png");
+							$(".login-btn").button('reset');
+						} else if (msg.status == 4) {
+							$("#loginMessage").html("用户已被锁定，请联系管理员!");
+							$("#loginMessage").show();
+							$(".login-btn").button('reset');
+						} else if (msg.status == 5) {
+							$("#loginMessage").html("用户已被注销，请联系管理员!");
+							$("#loginMessage").show();
+							$(".login-btn").button('reset');
+						}else if(msg.status==6){
+							 $("#loginMessage").html("用户已在其它地方登录!");
+							 $("#loginMessage").show();
+							 $(".login-btn").button('reset');
+						 }else if (msg.status == 1) {//登录成功
+							 storage["stationName"]=""
+							//权限切换（获得权限列表）
+							$scope.currentRole;
+							$.ajax({
+								type: "post",
+								url: ctx + "/UserAuthHandle/getRoleList.htm",
+								async: false,
+								timeout: 5000,
+								success: function(result) {
+									$scope.currentRole=result.currentRole;
+									var currentRoles=[];//放电站列表ID
+									var currentRoles=result.rolelist;
+									storage["currentRoles"]=JSON.stringify(currentRoles);//将权限列表放到缓冲中
+									
+									console.log("我是获取权限列表")
+									console.log(result)
+									if(!(result.result)){
+										storage["roleId"]=''//角色ID
+										
+										storage["allStationId"]=''//全部ID
+										storage["powerStationId"]=''//电站列表ID
+										storage["powerStationInfos"]=''//电站列表信息
+										//跳转到首页
+										window.location.href = "./index.html#/app/realStatistics";
+										storage["pageUrl"] = "app.realStatistics";
+										return false;
+									}
+									//请求当前权限下的电站列表
+									$.ajax({
+										type: "post",
+										url: ctx + "/UserAuthHandle/changeRoleForMobile.htm",
+										async: false,
+										timeout: 5000,
+										data: {
+											"roleId": $scope.currentRole
+										},
+										success: function(result) {
+											console.log(result);
+											//循环遍历 获取电站列表的id
+											var powerStationIds=[];//放电站列表ID
+											
+											var powerStationInfos=[];//放电站信息
+											
+											var powerStationInfos=result.stlist;
+											if(result.stlist){
+												for(var i=0;i<result.stlist.length;i++){
+													if(result.stlist[i].level=='0'){//获得第一层级的列表
+														var stlistIds=result.stlist[i].stids.split(",")
+														for(var j=0;j<stlistIds.length;j++){
+															powerStationIds.push(stlistIds[j])
+														}
+													}
+												}
+											}
+											
+											var powerStationIdsStr = JSON.stringify(powerStationIds);
+											var powerStationInfos = JSON.stringify(powerStationInfos);
+											
+											storage["roleId"]=$scope.currentRole//角色ID
+											
+											storage["allStationId"]=JSON.stringify(powerStationIds)//全部ID
+											storage["powerStationId"]=powerStationIdsStr//电站列表ID
+											storage["powerStationInfos"]=powerStationInfos//电站列表信息
+											//跳转到首页
+											window.location.href = "./index.html#/app/realStatistics";
+											storage["pageUrl"] = "app.realStatistics";
+											},
+										error: function(json) {
+											$("#loginMessage").html("连接超时，请重试!");
+											$("#loginMessage").show();
+											$(".login-btn").button('reset');
+										}
+								});
+									},
+								error: function(json) {
+									$("#loginMessage").html("连接超时，请重试!");
+									$("#loginMessage").show();
+									$(".login-btn").button('reset');
+								}
+							});
+							
+							//将用户名和密码防到缓存中
+							if (document.getElementById("isAutoLoginId").checked) {
+								//存储到loaclStage
+								storage["deviceToken"] = deviceToken;
+								storage["email"] = username;
+								storage["password"] = password;
+								storage["isstorePwd"] = "yes";
+								storage["isautologin"] = "yes";
+							} else {
+								storage["email"] = username;
+								storage["isautologin"] = "no";
+							}
+						}
+					},
+					error: function(response) {
+						$("#loginMessage").html("连接超时，请重试!");
+						$("#loginMessage").show();
+						$(".login-btn").button('reset');
+					}
+				});
+
+			}
+
+			//自动登陆
+			//读取 localStage 本地存储，填充用户名密码,如果自动登录有值直接跳转；
+			//相反，跳转到本页面,等待登陆处理
+			var getEmail = storage["email"];
+			var getPwd = storage["password"];
+			var getisstroepwd = storage["isstorePwd"];
+			var getisautologin = storage["isautologin"];
+			if ("yes" == getisstroepwd) {
+				if ("yes" == getisautologin) {
+					if ((("" != getEmail) || (null != getEmail)) && (("" != getPwd) || (null != getPwd))) {
+						//lacoste  已经保存 登陆信息 直接登陆
+						deviceToken = storage["deviceToken"];
+						$("#login_username").val(getEmail);
+						$("#login_pass").val(getPwd);
+						$scope.login();
+					}
+				} else {
+					$("#login_username").val(getEmail);
+					$("#login_pass").val(getPwd);
+					document.getElementById("isRemberPwdId").checked = true;
+				}
+			}
+		});
+</script>
+</head>
+
+<body>
+	<img src="theme/default/img/bg.jpg" class="bg-img" />
+	<center class="padder col-sm-12" ng-controller="loginCtrl" style="margin-top: -20px">
+		<img src="theme/default/img/login.png" style="zoom: 0.5" class="logoImg">
+		<form class="col-xs-12">
+			<div class="col-xs-12 form-group login-input">
+				<div class="input-group">
+					<div class="input-group-addon">
+						<span>
+							<img alt="" src="./theme/default/img/icon/person.png" style="zoom: 0.5;">
+						</span>
+					</div>
+					<input type="text" class="form-control" id="login_username" placeholder="用户名">
+				</div>
+			</div>
+			<div class="col-xs-12 form-group login-input">
+				<div class="input-group">
+					<div class="input-group-addon">
+						<span>
+							<img alt="" src="./theme/default/img/icon/key.png" style="zoom: 0.5;">
+						</span>
+					</div>
+					<input type="password" class="form-control" id="login_pass" placeholder="用户密码">
+				</div>
+			</div>
+			<p id="loginMessage" style="font-size: 14px; font-family: '黑体'; color: red; text-align: center; display: none;"></p>
+			<div class="col-xs-12">
+				<buttom id="loginBtn" class="col-xs-12 no-padder btn login-btn" ng-click="login()" data-loading-text="登录中...">登录</buttom>
+			</div>
+		</form>
+		<div class="col-xs-12 footTilte">
+			<span class="col-xs-6"><a class="pull-left" ng-click="forgetPwd();">忘记密码？</a></span>
+			<span class="col-xs-6">
+				<a ng-click="goRegist()" class="pull-right">注册新用户</a>
+				<a onclick="dologin('demo')" class="hidden">演示电站</a>
+			</span>
+			<span class="col-xs-6 hidden">
+				<a class="pull-left">
+					<input type="checkbox" name="isRemberPwdId" id="isRemberPwdId" class="m-r-xs" />记住密码</a>
+			</span>
+			<!-- <p class="keeplogin">
+                <input type="checkbox" name="isRemberPwdId" id="isRemberPwdId"/> <label for="loginkeeping">记住密码 </label>
+              </p>
+              <p class="keeplogin">
+                <input type="checkbox" name="isAutoLoginId" id="isAutoLoginId"/> <label for="autologin">自动登录 </label>
+              </p> -->
+			<span class="col-xs-6 hidden">
+				<a class="pull-right">
+					<input type="checkbox" name="isAutoLoginId" id="isAutoLoginId" class="m-r-xs" checked />自动登录</a>
+			</span>
+		</div>
+	</center>
+	<center style="padding-top:300px;">
+		<span style="color: #666;" id="appVersionEgg">build 2.1.1</span>
+	</center>

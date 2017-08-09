@@ -1,0 +1,66 @@
+<style>
+	.app {
+	    background-color: rgb(40,54,64) !important;
+	}
+</style>
+<div class="navbar-header bg-black app-header navbar ng-scope"id="distUserNav">
+	<ul class="nav col-xs-12 no-padder nav-top"  >
+          <li class="col-xs-3 no-padder" ui-sref-active="active">
+          	<a ui-sref="userList">
+          		<img src="./theme/default/img/icon/top-back@2x.png" class="v-middle m-t-xs img_goBack">
+          	</a>
+           </li>
+          <li class="col-xs-6 no-padder text-center">
+          	<a href="" class="text-1-8x">
+          		关于APP
+          	</a>
+           </li>
+          <li class="col-xs-3 no-padder">
+          	
+          </li>
+        </ul>
+</div>
+<center class="padder col-sm-12"  style="margin-top: 50px;margin: 80px 0px;">
+		<!--<img src="theme/default/img/login.png" style="zoom: 0.5" class="logoImg">-->
+		<p class="text-1-4x">
+			</p>
+<p class="text-1-4x">智能配网监测系统</p>
+<p class="text-1-4x">智能配电网监测系统APP使运维人员能够随时掌握设备的运行状态，真正实现设备或线路的实时监测与实时运维。</p>
+		
+	</center>
+	<center style="padding-top:125px;">
+		<span style="color: #666;" id="appVersionEgg"></span><br/>
+		<!-- <span style="color: #666;" id="androidXZ"></span>-->
+		<span style="color: #666;" id="iosXZ"></span> 
+	</center>
+
+<script>
+	if(isAndroid){//判断安卓，修改顶部样式
+		$("#distUserNav").addClass("m-t-none");
+	}
+	if(oldVersion){
+        $("#appVersionEgg").html("Version " + oldVersion);
+    }
+	if(newVersion){
+		if(oldVersion && newVersion!="-1" && oldVersion!=newVersion){
+			$("#iosXZ").html("请您升级最新版本,<a href='https://itunes.apple.com/cn/app/zhi-neng-pei-wang-jian-ce/id1179719096?mt=8'>下载地址</a>");
+		}
+	}else{
+		$.ajax({
+			type: "GET",
+			url: ctx + "solway/getAndroidNewVersion",
+			timeout: 5000,
+			success: function(result) {
+				console.log(result)
+				newVersion = result.version;
+				if(oldVersion && newVersion && oldVersion!=newVersion){
+					$("#iosXZ").html("请您升级最新版本,<a href="+ result.url +">下载地址</a>");
+				}
+			},
+			error: function(result) {
+			}
+		});
+		
+	}
+</script>
+
